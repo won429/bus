@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Bus Realtime - Debug Ultimate</title>
+    <title>Bus Realtime - Doc Ver.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -119,9 +119,8 @@
                 <p class="text-xs text-red-500 mb-3 leading-relaxed break-all" id="error-desc">
                     내용
                 </p>
-                <!-- 프록시 서버 데모 버튼 -->
-                <a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" class="block w-full bg-red-100 text-red-600 text-center py-2 rounded-xl text-xs font-bold hover:bg-red-200 transition-colors mb-2">
-                    혹시 프록시 권한이 없나요? (승인)
+                <a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" class="block w-full bg-red-500 text-white text-center py-3 rounded-xl text-xs font-bold hover:bg-red-600 transition-colors shadow-sm">
+                    지금 바로 연결 권한 얻기 (필수)
                 </a>
             </div>
 
@@ -166,7 +165,7 @@
             </div>
             
             <div class="mb-4">
-                <label class="block text-xs font-bold text-gray-500 mb-2">공공데이터포털 인증키</label>
+                <label class="block text-xs font-bold text-gray-500 mb-2">공공데이터포털 인증키 (일반인증키 Decoding)</label>
                 <input type="text" id="api-key-input" placeholder="인증키 붙여넣기" class="w-full bg-gray-100 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
 
@@ -207,9 +206,9 @@
 
         const defaultStationConfig = {
             andong: [
-                { name: "국립안동대학교", sub: "솔뫼입구", nodeId: "540008", tags: [] },
-                { name: "CGV", sub: "옥동", nodeId: "540209", tags: [] },
-                { name: "안동터미널", sub: "환승센터", nodeId: "540026", tags: [] }
+                { name: "국립안동대학교", sub: "솔뫼입구", nodeId: "GMB540008", tags: [] },
+                { name: "CGV", sub: "옥동", nodeId: "GMB540209", tags: [] },
+                { name: "안동터미널", sub: "환승센터", nodeId: "GMB540026", tags: [] }
             ],
             gumi: [
                 { name: "구미역", sub: "시내", nodeId: "GMB90", tags: [] },
@@ -217,10 +216,10 @@
                 { name: "인동정류장", sub: "옥계방면", nodeId: "GMB92", tags: [] }
             ],
             chilgok: [
-                { name: "왜관역", sub: "칠곡군청", nodeId: "12718", tags: [] },
-                { name: "왜관남부", sub: "대구방면", nodeId: "12355", tags: [] },
-                { name: "중리부영아파트", sub: "석적", nodeId: "12420", tags: [] },
-                { name: "중리부영아파트", sub: "구미방면", nodeId: "12417", tags: [] }
+                { name: "왜관역", sub: "칠곡군청", nodeId: "GMB12718", tags: [] },
+                { name: "왜관남부", sub: "대구방면", nodeId: "GMB12355", tags: [] },
+                { name: "중리부영아파트", sub: "석적", nodeId: "GMB12420", tags: [] },
+                { name: "중리부영아파트", sub: "구미방면", nodeId: "GMB12417", tags: [] }
             ]
         };
 
@@ -230,7 +229,7 @@
         let currentRegion = 'andong';
         let apiKey = MY_KEY || localStorage.getItem('toss_bus_api_key') || '';
         let keyType = localStorage.getItem('toss_bus_key_type') || 'decoding'; 
-        let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v7')) || JSON.parse(JSON.stringify(defaultStationConfig));
+        let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v9')) || JSON.parse(JSON.stringify(defaultStationConfig));
 
         document.addEventListener('DOMContentLoaded', () => {
             if(apiKey) {
@@ -246,13 +245,17 @@
             return keyType === 'encoding' ? apiKey : encodeURIComponent(apiKey);
         }
 
-        // 1. API 호출 (디버깅 강화)
+        // 1. API 호출 (문서 주소 적용: getSttnAcctoArvlPrearngeInfoList)
         async function fetchBusArrival(cityCode, nodeId) {
             if (!apiKey || !nodeId) return null;
             
+            // nodeId에서 GMB 등 문자 제거하고 숫자만 추출
+            const cleanNodeId = nodeId.replace(/[^0-9]/g, ''); 
             const serviceKey = getEncodedKey();
             const proxy = 'https://cors-anywhere.herokuapp.com/';
-            const url = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPregearrInfo?serviceKey=${serviceKey}&cityCode=${cityCode}&nodeId=${nodeId}&numOfRows=100&pageNo=1&_type=json`;
+            
+            // ⭐️ 문서 기반 주소 변경: PregearrInfo -> PrearngeInfoList
+            const url = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList?serviceKey=${serviceKey}&cityCode=${cityCode}&nodeId=${cleanNodeId}&numOfRows=100&pageNo=1&_type=json`;
 
             try {
                 const response = await fetch(proxy + url);
@@ -260,20 +263,14 @@
                 
                 const text = await response.text();
                 
-                // XML 에러 응답 정밀 분석
-                if (text.includes('SERVICE_KEY_IS_NOT_REGISTERED_ERROR')) return "키 등록 안됨 (1시간 대기)";
-                if (text.includes('SERVICE_KEY_ERROR')) return "키 오류 (Encoding/Decoding)";
-                if (text.includes('LIMITED')) return "트래픽 초과";
-                if (text.includes('30')) return "키 등록 안됨 (SERVICE_KEY_IS_NOT_REGISTERED_ERROR)"; // 공공데이터 에러코드 30
+                if (text.includes('<OpenAPI_ServiceResponse>')) {
+                    if (text.includes('SERVICE_KEY_IS_NOT_REGISTERED_ERROR')) return "KEY_NOT_REGISTERED";
+                    if (text.includes('SERVICE_KEY_ERROR')) return "KEY_ERROR";
+                    return "API_NOT_FOUND (Check URL)";
+                }
 
                 let data;
-                try { 
-                    data = JSON.parse(text); 
-                } catch(e) { 
-                    // JSON 파싱 실패면 XML 에러일 확률 100%
-                    console.error("XML Response:", text);
-                    return `응답 형식 오류: ${text.substring(0, 50)}...`; 
-                }
+                try { data = JSON.parse(text); } catch(e) { return "PARSE_ERROR (Data Format)"; }
 
                 if (data.response?.header?.resultCode !== '00') {
                     return data.response?.header?.resultMsg || "API_ERROR";
@@ -283,7 +280,7 @@
                 return Array.isArray(items) ? items : (items ? [items] : []);
             } catch (error) { 
                 console.error("Fetch Crash:", error);
-                return "네트워크/CORS 오류"; 
+                return "NETWORK_ERROR"; 
             }
         }
 
@@ -322,12 +319,24 @@
                 const station = targets[i];
                 if (!station.nodeId) continue;
 
+                // 디버깅용 URL 생성
+                const cleanNodeId = station.nodeId.replace(/[^0-9]/g, '');
+                const serviceKey = getEncodedKey();
+                const debugUrl = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList?serviceKey=${serviceKey}&cityCode=${cityCode}&nodeId=${cleanNodeId}&numOfRows=10&pageNo=1&_type=json`;
+
                 const result = await fetchBusArrival(cityCode, station.nodeId);
                 let busItemsHtml = '';
                 
                 if (typeof result === 'string') {
                     lastErrorMsg = result;
-                    busItemsHtml = `<div class="p-4 text-center text-xs text-red-400 bg-red-50 rounded-xl">${result}</div>`;
+                    busItemsHtml = `
+                        <div class="p-4 bg-red-50 rounded-xl">
+                            <p class="text-xs text-red-500 font-bold mb-1">오류: ${result}</p>
+                            <a href="${debugUrl}" target="_blank" class="block w-full bg-white border border-red-200 text-red-500 text-center py-2 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors">
+                                [새창으로 결과 보기]
+                            </a>
+                            <p class="text-[10px] text-gray-400 mt-1 text-center">결과를 확인해서 알려주세요.</p>
+                        </div>`;
                 } else if (result.length > 0) {
                     let filtered = result;
                     filtered.sort((a, b) => a.arrtime - b.arrtime);
@@ -380,24 +389,12 @@
             if (lastErrorMsg) {
                 errorPanel.classList.remove('hidden');
                 errorTitle.innerText = "오류 발생";
-                errorDesc.innerText = lastErrorMsg;
+                if(lastErrorMsg === "CORS_ERROR") errorDesc.innerText = "보안 권한 승인이 필요합니다.";
+                else errorDesc.innerText = lastErrorMsg;
             }
         }
 
-        // 3. 테스트 기능들
-        function testDirectConnection() {
-            const inputKey = document.getElementById('api-key-input').value.trim();
-            if(!inputKey) { alert("키를 입력하세요"); return; }
-            
-            const selectedType = document.querySelector('input[name="key-type"]:checked').value;
-            const testKey = selectedType === 'encoding' ? inputKey : encodeURIComponent(inputKey);
-            
-            // 안동대학교 정류장 테스트 URL (브라우저에서 직접 열기)
-            const url = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPregearrInfo?serviceKey=${testKey}&cityCode=37010&nodeId=540008&numOfRows=1&pageNo=1&_type=json`;
-            
-            window.open(url, '_blank');
-        }
-
+        // 3. 연결 테스트 기능
         async function testConnection() {
             const inputKey = document.getElementById('api-key-input').value.trim();
             const resultBox = document.getElementById('test-result');
@@ -411,13 +408,26 @@
             apiKey = inputKey;
             keyType = selectedType;
 
-            const result = await fetchBusArrival('37010', '540008'); // 안동대
+            const result = await fetchBusArrival('37010', '540008'); 
 
             if (Array.isArray(result)) {
                 resultBox.innerHTML = '<span class="text-green-600 font-bold">✅ 연결 성공!</span><br>모든 설정이 정상입니다.';
             } else {
                 resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ ${result}</span>`;
             }
+        }
+
+        function testDirectConnection() {
+            const inputKey = document.getElementById('api-key-input').value.trim();
+            if(!inputKey) { alert("키를 입력하세요"); return; }
+            
+            const selectedType = document.querySelector('input[name="key-type"]:checked').value;
+            const testKey = selectedType === 'encoding' ? inputKey : encodeURIComponent(inputKey);
+            
+            // 안동대학교 정류장 테스트 URL (문서 기준 주소)
+            const url = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList?serviceKey=${testKey}&cityCode=37010&nodeId=540008&numOfRows=1&pageNo=1&_type=json`;
+            
+            window.open(url, '_blank');
         }
 
         // 4. 검색
@@ -489,7 +499,7 @@
                 nodeId: nodeId,
                 tags: [] 
             });
-            localStorage.setItem('my_station_config_v7', JSON.stringify(stationConfig));
+            localStorage.setItem('my_station_config_v9', JSON.stringify(stationConfig));
             alert(`'${name}' 정류장이 추가되었습니다.`);
             closeSearchModal();
             renderList();
@@ -498,7 +508,7 @@
         function removeStation(region, index) {
             if(confirm("정말 삭제하시겠습니까?")) {
                 stationConfig[region].splice(index, 1);
-                localStorage.setItem('my_station_config_v7', JSON.stringify(stationConfig));
+                localStorage.setItem('my_station_config_v9', JSON.stringify(stationConfig));
                 renderList();
             }
         }
@@ -531,7 +541,7 @@
         }
         function resetData() {
             if(confirm("모든 데이터를 초기화하시겠습니까?")) {
-                localStorage.removeItem('my_station_config_v7');
+                localStorage.removeItem('my_station_config_v9');
                 stationConfig = JSON.parse(JSON.stringify(defaultStationConfig));
                 renderList();
                 alert("초기화되었습니다.");
@@ -543,4 +553,4 @@
         mainContent.addEventListener('scroll', () => { island.classList.toggle('island-active', mainContent.scrollTop > 20); });
     </script>
 </body>
-</html>ㄴ
+</html>
