@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Bus Realtime - Debugger</title>
+    <title>Bus Realtime - Final Complete</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -171,11 +171,11 @@
             <div class="flex gap-4 mb-6">
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="radio" name="key-type" value="decoding" checked class="w-4 h-4 text-blue-500">
-                    <span class="text-sm text-gray-600">Decoding (일반)</span>
+                    <span class="text-sm text-gray-600">Decoding</span>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="radio" name="key-type" value="encoding" class="w-4 h-4 text-blue-500">
-                    <span class="text-sm text-gray-600">Encoding (URL용)</span>
+                    <span class="text-sm text-gray-600">Encoding</span>
                 </label>
             </div>
 
@@ -202,23 +202,11 @@
     <script>
         const MY_KEY = ""; 
 
+        // ⚠️ 초기 데이터는 사용자가 직접 검색해서 추가하도록 유도 (ID 불일치 방지)
         const defaultStationConfig = {
-            andong: [
-                { name: "국립안동대학교", sub: "솔뫼입구", nodeId: "GMB540008", tags: [] },
-                { name: "CGV", sub: "옥동", nodeId: "GMB540209", tags: [] },
-                { name: "안동터미널", sub: "환승센터", nodeId: "GMB540026", tags: [] }
-            ],
-            gumi: [
-                { name: "구미역", sub: "시내", nodeId: "GMB90", tags: [] },
-                { name: "공단본부", sub: "인동방면", nodeId: "GMB91", tags: [] },
-                { name: "인동정류장", sub: "옥계방면", nodeId: "GMB92", tags: [] }
-            ],
-            chilgok: [
-                { name: "왜관역", sub: "칠곡군청", nodeId: "GMB12718", tags: [] },
-                { name: "왜관남부", sub: "대구방면", nodeId: "GMB12355", tags: [] },
-                { name: "중리부영아파트", sub: "석적", nodeId: "GMB12420", tags: [] },
-                { name: "중리부영아파트", sub: "구미방면", nodeId: "GMB12417", tags: [] }
-            ]
+            andong: [], // 비워둠
+            gumi: [],
+            chilgok: []
         };
 
         const CITY_CODES = { 'andong': '37010', 'gumi': '37030', 'chilgok': '37380' };
@@ -227,7 +215,7 @@
         let currentRegion = 'andong';
         let apiKey = MY_KEY || localStorage.getItem('toss_bus_api_key') || '';
         let keyType = localStorage.getItem('toss_bus_key_type') || 'decoding'; 
-        let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v13')) || JSON.parse(JSON.stringify(defaultStationConfig));
+        let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v16')) || JSON.parse(JSON.stringify(defaultStationConfig));
 
         document.addEventListener('DOMContentLoaded', () => {
             if(apiKey) {
@@ -245,21 +233,16 @@
 
         // [핵심] JSON/XML 하이브리드 파싱
         function parseHybrid(text) {
-            // 1. JSON 시도
             try {
                 const json = JSON.parse(text);
                 return { type: 'json', data: json };
-            } catch(e) { /* XML이거나 에러 */ }
+            } catch(e) { }
 
-            // 2. XML 에러 메시지 감지
             if (text.includes('<OpenAPI_ServiceResponse>')) {
                 if (text.includes('SERVICE_KEY_IS_NOT_REGISTERED_ERROR')) return { type: 'error', msg: 'KEY_NOT_REGISTERED' };
                 if (text.includes('SERVICE_KEY_ERROR')) return { type: 'error', msg: 'KEY_ERROR' };
-                if (text.includes('LIMITED')) return { type: 'error', msg: 'LIMIT_EXCEEDED' };
                 return { type: 'error', msg: 'SERVER_ERROR (XML)' };
             }
-            
-            // 3. 알 수 없는 형식
             return { type: 'error', msg: 'UNKNOWN_FORMAT' };
         }
 
@@ -270,7 +253,6 @@
             const cleanNodeId = nodeId.replace(/[^0-9]/g, ''); 
             const serviceKey = getEncodedKey();
             const proxy = 'https://cors-anywhere.herokuapp.com/';
-            // 문서 기준 정확한 주소
             const url = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList?serviceKey=${serviceKey}&cityCode=${cityCode}&nodeId=${cleanNodeId}&numOfRows=100&pageNo=1&_type=json`;
 
             try {
@@ -287,8 +269,10 @@
                     return data.response?.header?.resultMsg || "API_ERROR";
                 }
 
-                const items = data.response.body.items.item;
-                return Array.isArray(items) ? items : (items ? [items] : []);
+                const items = data.response.body.items?.item;
+                if (!items) return [];
+                return Array.isArray(items) ? items : [items];
+
             } catch (error) { 
                 console.error("Fetch Crash:", error);
                 return "NETWORK_ERROR"; 
@@ -319,7 +303,7 @@
             const targets = stationConfig[currentRegion];
 
             if (!targets || targets.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 text-gray-400">등록된 정류장이 없습니다.<br>상단 '+ 정류장 추가' 버튼을 눌러보세요.</div>`;
+                container.innerHTML = `<div class="text-center py-10 text-gray-400">등록된 정류장이 없습니다.<br>상단 '+ 정류장 추가' 버튼을 눌러 검색해보세요!</div>`;
                 spinner.classList.add('hidden');
                 return;
             }
@@ -344,7 +328,7 @@
                         <div class="p-4 bg-red-50 rounded-xl">
                             <p class="text-xs text-red-500 font-bold mb-1">오류: ${result}</p>
                             <a href="${debugUrl}" target="_blank" class="block w-full bg-white border border-red-200 text-red-500 text-center py-2 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors">
-                                [원본 데이터 보기]
+                                [내 눈으로 원본 데이터 확인하기]
                             </a>
                         </div>`;
                 } else if (result.length > 0) {
@@ -371,12 +355,12 @@
                         </div>`;
                     });
                 } else {
-                    // 데이터가 0건일 때 (막차 끊김 등)
                     busItemsHtml = `
-                        <div class="p-4 bg-gray-50 rounded-xl text-center">
-                            <p class="text-xs text-gray-400 mb-1">도착 예정 정보 없음</p>
-                            <a href="${debugUrl}" target="_blank" class="text-[10px] text-blue-400 underline">
-                                [원본 데이터 보기]
+                        <div class="p-4 bg-gray-50/50 rounded-xl text-center border border-gray-100">
+                            <i class="fa-solid fa-moon text-gray-300 text-lg mb-1"></i>
+                            <p class="text-xs text-gray-500 font-bold">도착 예정 버스 없음</p>
+                            <a href="${debugUrl}" target="_blank" class="text-[9px] text-blue-400 underline mt-1 block">
+                                [원본 데이터 확인하기]
                             </a>
                         </div>`;
                 }
@@ -396,7 +380,6 @@
                                 <p class="text-xs text-sub text-[10px]">ID: ${station.nodeId}</p>
                             </div>
                         </div>
-                        <a href="${debugUrl}" target="_blank" class="text-[10px] text-gray-300 hover:text-blue-500 border border-gray-200 px-1.5 py-0.5 rounded">API</a>
                     </div>
                     <div class="space-y-2">${busItemsHtml}</div>
                 </div>`;
@@ -427,6 +410,7 @@
             apiKey = inputKey;
             keyType = selectedType;
 
+            // 테스트용 정류장: 국립안동대학교 (540008)
             const result = await fetchBusArrival('37010', '540008'); 
 
             if (Array.isArray(result)) {
@@ -520,7 +504,7 @@
                 nodeId: nodeId,
                 tags: [] 
             });
-            localStorage.setItem('my_station_config_v13', JSON.stringify(stationConfig));
+            localStorage.setItem('my_station_config_v16', JSON.stringify(stationConfig));
             alert(`'${name}' 정류장이 추가되었습니다.`);
             closeSearchModal();
             renderList();
@@ -529,7 +513,7 @@
         function removeStation(region, index) {
             if(confirm("정말 삭제하시겠습니까?")) {
                 stationConfig[region].splice(index, 1);
-                localStorage.setItem('my_station_config_v13', JSON.stringify(stationConfig));
+                localStorage.setItem('my_station_config_v16', JSON.stringify(stationConfig));
                 renderList();
             }
         }
@@ -562,7 +546,7 @@
         }
         function resetData() {
             if(confirm("모든 데이터를 초기화하시겠습니까?")) {
-                localStorage.removeItem('my_station_config_v13');
+                localStorage.removeItem('my_station_config_v16');
                 stationConfig = JSON.parse(JSON.stringify(defaultStationConfig));
                 renderList();
                 alert("초기화되었습니다.");
