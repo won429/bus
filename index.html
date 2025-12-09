@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Realtime Bus - Final JSON</title>
+    <title>Bus Realtime - Debugger</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -227,7 +227,7 @@
         let currentRegion = 'andong';
         let apiKey = MY_KEY || localStorage.getItem('toss_bus_api_key') || '';
         let keyType = localStorage.getItem('toss_bus_key_type') || 'decoding'; 
-        let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v12')) || JSON.parse(JSON.stringify(defaultStationConfig));
+        let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v13')) || JSON.parse(JSON.stringify(defaultStationConfig));
 
         document.addEventListener('DOMContentLoaded', () => {
             if(apiKey) {
@@ -243,33 +243,46 @@
             return keyType === 'encoding' ? apiKey : encodeURIComponent(apiKey);
         }
 
-        // 1. API 호출 (JSON Only & 문서 기준 주소 사용)
+        // [핵심] JSON/XML 하이브리드 파싱
+        function parseHybrid(text) {
+            // 1. JSON 시도
+            try {
+                const json = JSON.parse(text);
+                return { type: 'json', data: json };
+            } catch(e) { /* XML이거나 에러 */ }
+
+            // 2. XML 에러 메시지 감지
+            if (text.includes('<OpenAPI_ServiceResponse>')) {
+                if (text.includes('SERVICE_KEY_IS_NOT_REGISTERED_ERROR')) return { type: 'error', msg: 'KEY_NOT_REGISTERED' };
+                if (text.includes('SERVICE_KEY_ERROR')) return { type: 'error', msg: 'KEY_ERROR' };
+                if (text.includes('LIMITED')) return { type: 'error', msg: 'LIMIT_EXCEEDED' };
+                return { type: 'error', msg: 'SERVER_ERROR (XML)' };
+            }
+            
+            // 3. 알 수 없는 형식
+            return { type: 'error', msg: 'UNKNOWN_FORMAT' };
+        }
+
+        // 1. API 호출
         async function fetchBusArrival(cityCode, nodeId) {
             if (!apiKey || !nodeId) return null;
             
             const cleanNodeId = nodeId.replace(/[^0-9]/g, ''); 
             const serviceKey = getEncodedKey();
             const proxy = 'https://cors-anywhere.herokuapp.com/';
-            // ⭐️ 문서 기준 주소: getSttnAcctoArvlPrearngeInfoList
+            // 문서 기준 정확한 주소
             const url = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList?serviceKey=${serviceKey}&cityCode=${cityCode}&nodeId=${cleanNodeId}&numOfRows=100&pageNo=1&_type=json`;
 
             try {
                 const response = await fetch(proxy + url);
                 if (response.status === 403) return "CORS_ERROR";
                 
-                // JSON 모드이지만 에러 메시지는 XML일 수 있음 (공공데이터 종특)
                 const text = await response.text();
-                
-                if (text.includes('<OpenAPI_ServiceResponse>')) {
-                    if (text.includes('SERVICE_KEY_IS_NOT_REGISTERED_ERROR')) return "KEY_NOT_REGISTERED";
-                    if (text.includes('SERVICE_KEY_ERROR')) return "KEY_ERROR";
-                    return "SERVER_ERROR (XML Msg)";
-                }
+                const result = parseHybrid(text);
 
-                // JSON 파싱 시도
-                let data;
-                try { data = JSON.parse(text); } catch(e) { return "PARSE_ERROR (Not JSON)"; }
+                if (result.type === 'error') return result.msg;
 
+                const data = result.data;
                 if (data.response?.header?.resultCode !== '00') {
                     return data.response?.header?.resultMsg || "API_ERROR";
                 }
@@ -317,7 +330,7 @@
                 const station = targets[i];
                 if (!station.nodeId) continue;
 
-                // 디버깅용 URL (새창열기용)
+                // 디버깅용 URL
                 const cleanNodeId = station.nodeId.replace(/[^0-9]/g, '');
                 const serviceKey = getEncodedKey();
                 const debugUrl = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList?serviceKey=${serviceKey}&cityCode=${cityCode}&nodeId=${cleanNodeId}&numOfRows=10&pageNo=1&_type=json`;
@@ -331,7 +344,7 @@
                         <div class="p-4 bg-red-50 rounded-xl">
                             <p class="text-xs text-red-500 font-bold mb-1">오류: ${result}</p>
                             <a href="${debugUrl}" target="_blank" class="block w-full bg-white border border-red-200 text-red-500 text-center py-2 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors">
-                                [새창으로 결과 보기]
+                                [원본 데이터 보기]
                             </a>
                         </div>`;
                 } else if (result.length > 0) {
@@ -358,7 +371,14 @@
                         </div>`;
                     });
                 } else {
-                    busItemsHtml = `<div class="p-4 text-center text-xs text-gray-400">도착 예정 정보 없음 (운행종료?)</div>`;
+                    // 데이터가 0건일 때 (막차 끊김 등)
+                    busItemsHtml = `
+                        <div class="p-4 bg-gray-50 rounded-xl text-center">
+                            <p class="text-xs text-gray-400 mb-1">도착 예정 정보 없음</p>
+                            <a href="${debugUrl}" target="_blank" class="text-[10px] text-blue-400 underline">
+                                [원본 데이터 보기]
+                            </a>
+                        </div>`;
                 }
 
                 const card = `
@@ -373,9 +393,10 @@
                             </div>
                             <div>
                                 <h4 class="text-base font-bold text-main">${station.name}</h4>
-                                <p class="text-xs text-sub">${station.sub || '정류장'}</p>
+                                <p class="text-xs text-sub text-[10px]">ID: ${station.nodeId}</p>
                             </div>
                         </div>
+                        <a href="${debugUrl}" target="_blank" class="text-[10px] text-gray-300 hover:text-blue-500 border border-gray-200 px-1.5 py-0.5 rounded">API</a>
                     </div>
                     <div class="space-y-2">${busItemsHtml}</div>
                 </div>`;
@@ -453,15 +474,14 @@
             try {
                 const response = await fetch(proxy + url);
                 const text = await response.text();
-                
-                if (text.includes('SERVICE_KEY')) {
-                    resultArea.innerHTML = '<p class="text-center mt-4 text-red-400 text-xs">키 오류: 설정에서 키 타입을 변경해보세요.</p>';
+                const result = parseHybrid(text);
+
+                if (result.type === 'error') {
+                    resultArea.innerHTML = `<p class="text-center mt-4 text-red-400 text-xs">오류: ${result.msg}</p>`;
                     return;
                 }
 
-                let data;
-                try { data = JSON.parse(text); } catch(e) { throw new Error("JSON Parse Error"); }
-
+                const data = result.data;
                 if (data.response?.header?.resultCode !== '00') {
                     resultArea.innerHTML = `<p class="text-center mt-4 text-red-400 text-xs">오류: ${data.response.header.resultMsg}</p>`;
                     return;
@@ -500,7 +520,7 @@
                 nodeId: nodeId,
                 tags: [] 
             });
-            localStorage.setItem('my_station_config_v12', JSON.stringify(stationConfig));
+            localStorage.setItem('my_station_config_v13', JSON.stringify(stationConfig));
             alert(`'${name}' 정류장이 추가되었습니다.`);
             closeSearchModal();
             renderList();
@@ -509,7 +529,7 @@
         function removeStation(region, index) {
             if(confirm("정말 삭제하시겠습니까?")) {
                 stationConfig[region].splice(index, 1);
-                localStorage.setItem('my_station_config_v12', JSON.stringify(stationConfig));
+                localStorage.setItem('my_station_config_v13', JSON.stringify(stationConfig));
                 renderList();
             }
         }
@@ -542,7 +562,7 @@
         }
         function resetData() {
             if(confirm("모든 데이터를 초기화하시겠습니까?")) {
-                localStorage.removeItem('my_station_config_v12');
+                localStorage.removeItem('my_station_config_v13');
                 stationConfig = JSON.parse(JSON.stringify(defaultStationConfig));
                 renderList();
                 alert("초기화되었습니다.");
