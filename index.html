@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Bus Realtime - Final Complete</title>
+    <title>Bus Realtime - Fixed Scrolling</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -46,9 +46,6 @@
         .island-active .header-title { width: 0; opacity: 0; margin: 0; overflow: hidden; transform: scale(0.8); }
         .island-active .icon-container { width: 100%; justify-content: center; gap: 24px !important; }
         .island-active .icon-bg { background-color: transparent !important; width: auto !important; height: auto !important; box-shadow: none !important; color: white !important; }
-        
-        @keyframes pulse-custom { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-        .animate-pulse-custom { animation: pulse-custom 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         
         .delete-btn { opacity: 0; transition: opacity 0.2s; }
         .toss-card:hover .delete-btn { opacity: 1; }
@@ -134,21 +131,25 @@
         </div>
     </main>
 
-    <!-- 검색 모달 -->
+    <!-- 검색 모달 (스크롤 개선) -->
     <div id="search-modal" class="hidden fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-5">
         <div class="bg-white w-full max-w-sm h-[80vh] sm:h-auto sm:rounded-[32px] rounded-t-[32px] p-6 shadow-2xl scale-100 transition-all flex flex-col">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4 flex-none">
                 <div>
                     <h3 class="text-xl font-bold text-main">정류장 추가</h3>
+                    <!-- 현재 지역 표시 (이 지역만 검색됨) -->
                     <p class="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md inline-block mt-1" id="search-modal-region">안동시에서 검색</p>
                 </div>
                 <button onclick="closeSearchModal()" class="text-gray-400 hover:text-gray-600 bg-gray-100 w-8 h-8 rounded-full"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <div class="flex gap-2 mb-4">
-                <input type="text" id="add-station-input" placeholder="정류장 이름 (예: 안동대)" class="flex-1 bg-gray-100 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" onkeypress="if(event.keyCode==13) doSearchStation()">
+            
+            <div class="flex gap-2 mb-4 flex-none">
+                <input type="text" id="add-station-input" placeholder="정류장 이름 (예: 구미역)" class="flex-1 bg-gray-100 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" onkeypress="if(event.keyCode==13) doSearchStation()">
                 <button onclick="doSearchStation()" class="bg-blue-500 text-white rounded-2xl px-4 py-3 text-sm font-bold whitespace-nowrap">검색</button>
             </div>
-            <div id="add-station-results" class="flex-1 overflow-y-auto space-y-2 min-h-[200px] mb-4">
+
+            <!-- 스크롤 영역 (h-full 및 overflow-y-auto 적용) -->
+            <div id="add-station-results" class="flex-1 overflow-y-auto space-y-2 min-h-0 border-t border-gray-100 pt-2">
                 <p class="text-center text-gray-400 mt-10 text-sm">정류장 이름을 검색해보세요.</p>
             </div>
         </div>
@@ -167,7 +168,6 @@
                 <input type="text" id="api-key-input" placeholder="인증키 붙여넣기" class="w-full bg-gray-100 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
 
-            <!-- 키 타입 선택 (중요!) -->
             <div class="flex gap-4 mb-6">
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="radio" name="key-type" value="decoding" checked class="w-4 h-4 text-blue-500">
@@ -190,7 +190,6 @@
 
             <button onclick="saveSettings()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-blue-500/20 transition-all active:scale-95">저장하기</button>
             
-            <!-- 테스트 결과 표시 -->
             <div id="test-result" class="mt-4 p-3 bg-gray-50 rounded-xl text-xs text-gray-500 hidden break-all"></div>
 
             <div class="mt-4 text-center border-t border-gray-100 pt-4">
@@ -202,9 +201,9 @@
     <script>
         const MY_KEY = ""; 
 
-        // ⚠️ 초기 데이터는 사용자가 직접 검색해서 추가하도록 유도 (ID 불일치 방지)
+        // 초기 데이터 (ID 불일치 방지를 위해 가이드용으로 비워둠)
         const defaultStationConfig = {
-            andong: [], // 비워둠
+            andong: [], 
             gumi: [],
             chilgok: []
         };
@@ -215,7 +214,8 @@
         let currentRegion = 'andong';
         let apiKey = MY_KEY || localStorage.getItem('toss_bus_api_key') || '';
         let keyType = localStorage.getItem('toss_bus_key_type') || 'decoding'; 
-        let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v16')) || JSON.parse(JSON.stringify(defaultStationConfig));
+        // 버전 업데이트 v17
+        let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v17')) || JSON.parse(JSON.stringify(defaultStationConfig));
 
         document.addEventListener('DOMContentLoaded', () => {
             if(apiKey) {
@@ -231,7 +231,6 @@
             return keyType === 'encoding' ? apiKey : encodeURIComponent(apiKey);
         }
 
-        // [핵심] JSON/XML 하이브리드 파싱
         function parseHybrid(text) {
             try {
                 const json = JSON.parse(text);
@@ -246,10 +245,9 @@
             return { type: 'error', msg: 'UNKNOWN_FORMAT' };
         }
 
-        // 1. API 호출
+        // 1. 버스 도착 정보 API (도착정보조회 서비스)
         async function fetchBusArrival(cityCode, nodeId) {
             if (!apiKey || !nodeId) return null;
-            
             const cleanNodeId = nodeId.replace(/[^0-9]/g, ''); 
             const serviceKey = getEncodedKey();
             const proxy = 'https://cors-anywhere.herokuapp.com/';
@@ -258,35 +256,43 @@
             try {
                 const response = await fetch(proxy + url);
                 if (response.status === 403) return "CORS_ERROR";
-                
                 const text = await response.text();
                 const result = parseHybrid(text);
-
                 if (result.type === 'error') return result.msg;
-
                 const data = result.data;
-                if (data.response?.header?.resultCode !== '00') {
-                    return data.response?.header?.resultMsg || "API_ERROR";
-                }
-
+                if (data.response?.header?.resultCode !== '00') return data.response?.header?.resultMsg || "API_ERROR";
                 const items = data.response.body.items?.item;
                 if (!items) return [];
                 return Array.isArray(items) ? items : [items];
-
-            } catch (error) { 
-                console.error("Fetch Crash:", error);
-                return "NETWORK_ERROR"; 
-            }
+            } catch (error) { return "NETWORK_ERROR"; }
         }
 
-        // 2. 화면 렌더링
+        // 2. 버스 정류소 검색 API (정류소정보조회 서비스)
+        // 중요: numOfRows를 100으로 늘려 최대한 많이 가져옴
+        async function searchStationAPI(keyword) {
+            const serviceKey = getEncodedKey();
+            const proxy = 'https://cors-anywhere.herokuapp.com/';
+            // 지역 코드 강제 적용 (CITY_CODES[currentRegion])
+            const url = `http://apis.data.go.kr/1613000/BusSttnInfoInqireService/getSttnNoList?serviceKey=${serviceKey}&cityCode=${CITY_CODES[currentRegion]}&nodeNm=${encodeURIComponent(keyword)}&numOfRows=100&_type=json`;
+
+            try {
+                const response = await fetch(proxy + url);
+                const text = await response.text();
+                const result = parseHybrid(text);
+                if (result.type === 'error') return { error: result.msg };
+                const data = result.data;
+                if (data.response?.header?.resultCode !== '00') return { error: data.response.header.resultMsg };
+                const items = data.response.body.items?.item;
+                if (!items) return [];
+                return Array.isArray(items) ? items : [items];
+            } catch (e) { return { error: "NETWORK_ERROR" }; }
+        }
+
         async function renderList() {
             const container = document.getElementById('dynamic-list-container');
             const spinner = document.getElementById('loading-spinner');
             const empty = document.getElementById('empty-state');
             const errorPanel = document.getElementById('error-diagnosis');
-            const errorTitle = document.getElementById('error-title');
-            const errorDesc = document.getElementById('error-desc');
             
             container.innerHTML = '';
             empty.classList.add('hidden');
@@ -312,24 +318,19 @@
 
             for (let i = 0; i < targets.length; i++) {
                 const station = targets[i];
-                if (!station.nodeId) continue;
-
-                // 디버깅용 URL
-                const cleanNodeId = station.nodeId.replace(/[^0-9]/g, '');
-                const serviceKey = getEncodedKey();
-                const debugUrl = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList?serviceKey=${serviceKey}&cityCode=${cityCode}&nodeId=${cleanNodeId}&numOfRows=10&pageNo=1&_type=json`;
-
                 const result = await fetchBusArrival(cityCode, station.nodeId);
                 let busItemsHtml = '';
                 
                 if (typeof result === 'string') {
                     lastErrorMsg = result;
+                    const cleanNodeId = station.nodeId.replace(/[^0-9]/g, '');
+                    const serviceKey = getEncodedKey();
+                    const debugUrl = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList?serviceKey=${serviceKey}&cityCode=${cityCode}&nodeId=${cleanNodeId}&numOfRows=10&pageNo=1&_type=json`;
+
                     busItemsHtml = `
                         <div class="p-4 bg-red-50 rounded-xl">
                             <p class="text-xs text-red-500 font-bold mb-1">오류: ${result}</p>
-                            <a href="${debugUrl}" target="_blank" class="block w-full bg-white border border-red-200 text-red-500 text-center py-2 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors">
-                                [내 눈으로 원본 데이터 확인하기]
-                            </a>
+                            <a href="${debugUrl}" target="_blank" class="text-[10px] text-gray-400 underline">[내 눈으로 원본 데이터 확인하기]</a>
                         </div>`;
                 } else if (result.length > 0) {
                     let filtered = result;
@@ -358,10 +359,7 @@
                     busItemsHtml = `
                         <div class="p-4 bg-gray-50/50 rounded-xl text-center border border-gray-100">
                             <i class="fa-solid fa-moon text-gray-300 text-lg mb-1"></i>
-                            <p class="text-xs text-gray-500 font-bold">도착 예정 버스 없음</p>
-                            <a href="${debugUrl}" target="_blank" class="text-[9px] text-blue-400 underline mt-1 block">
-                                [원본 데이터 확인하기]
-                            </a>
+                            <p class="text-xs text-gray-500 font-bold">도착 예정 버스 없음 (막차/배차간격)</p>
                         </div>`;
                 }
 
@@ -389,6 +387,8 @@
             spinner.classList.add('hidden');
 
             if (lastErrorMsg) {
+                const errorTitle = document.getElementById('error-title');
+                const errorDesc = document.getElementById('error-desc');
                 errorPanel.classList.remove('hidden');
                 errorTitle.innerText = "오류 발생";
                 if(lastErrorMsg === "CORS_ERROR") errorDesc.innerText = "보안 권한 승인이 필요합니다. (빨간 버튼 클릭)";
@@ -396,42 +396,7 @@
             }
         }
 
-        // 3. 연결 테스트 기능
-        async function testConnection() {
-            const inputKey = document.getElementById('api-key-input').value.trim();
-            const resultBox = document.getElementById('test-result');
-            const selectedType = document.querySelector('input[name="key-type"]:checked').value;
-            
-            if(!inputKey) { alert("키를 입력하세요"); return; }
-            
-            resultBox.classList.remove('hidden');
-            resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 테스트 중...';
-            
-            apiKey = inputKey;
-            keyType = selectedType;
-
-            // 테스트용 정류장: 국립안동대학교 (540008)
-            const result = await fetchBusArrival('37010', '540008'); 
-
-            if (Array.isArray(result)) {
-                resultBox.innerHTML = '<span class="text-green-600 font-bold">✅ 연결 성공!</span><br>모든 설정이 정상입니다.';
-            } else {
-                resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ ${result}</span>`;
-            }
-        }
-
-        function testDirectConnection() {
-            const inputKey = document.getElementById('api-key-input').value.trim();
-            if(!inputKey) { alert("키를 입력하세요"); return; }
-            
-            const selectedType = document.querySelector('input[name="key-type"]:checked').value;
-            const testKey = selectedType === 'encoding' ? inputKey : encodeURIComponent(inputKey);
-            
-            const url = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList?serviceKey=${testKey}&cityCode=37010&nodeId=540008&numOfRows=1&pageNo=1&_type=json`;
-            window.open(url, '_blank');
-        }
-
-        // 4. 검색
+        // 검색 로직 개선
         function openSearchModal() {
             if(!apiKey) { alert("설정에서 API 키를 먼저 입력해주세요."); openSettings(); return; }
             document.getElementById('search-modal').classList.remove('hidden');
@@ -451,73 +416,71 @@
             const resultArea = document.getElementById('add-station-results');
             resultArea.innerHTML = '<p class="text-center mt-4"><i class="fa-solid fa-spinner fa-spin"></i> 검색중...</p>';
 
-            const serviceKey = getEncodedKey();
-            const proxy = 'https://cors-anywhere.herokuapp.com/';
-            const url = `http://apis.data.go.kr/1613000/BusSttnInfoInqireService/getSttnNoList?serviceKey=${serviceKey}&cityCode=${CITY_CODES[currentRegion]}&nodeNm=${encodeURIComponent(keyword)}&numOfRows=20&_type=json`;
+            const result = await searchStationAPI(keyword);
 
-            try {
-                const response = await fetch(proxy + url);
-                const text = await response.text();
-                const result = parseHybrid(text);
-
-                if (result.type === 'error') {
-                    resultArea.innerHTML = `<p class="text-center mt-4 text-red-400 text-xs">오류: ${result.msg}</p>`;
-                    return;
-                }
-
-                const data = result.data;
-                if (data.response?.header?.resultCode !== '00') {
-                    resultArea.innerHTML = `<p class="text-center mt-4 text-red-400 text-xs">오류: ${data.response.header.resultMsg}</p>`;
-                    return;
-                }
-
-                const items = data.response.body.items.item;
-                const list = Array.isArray(items) ? items : (items ? [items] : []);
-
-                if (list.length === 0) {
-                    resultArea.innerHTML = '<p class="text-center mt-4 text-gray-400">검색 결과가 없습니다.</p>';
-                    return;
-                }
-
-                let html = '';
-                list.forEach(item => {
-                    html += `
-                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border border-gray-100">
-                        <div>
-                            <p class="font-bold text-main text-sm">${item.nodenm}</p>
-                            <p class="text-xs text-gray-400">ID: ${item.nodeid} | 번호: ${item.nodeno}</p>
-                        </div>
-                        <button onclick="addStation('${item.nodenm}', '${item.nodeid}')" class="text-xs bg-blue-500 text-white px-3 py-1.5 rounded-xl font-bold hover:bg-blue-600 transition-colors">추가</button>
-                    </div>`;
-                });
-                resultArea.innerHTML = html;
-            } catch (e) {
-                console.error(e);
-                resultArea.innerHTML = '<p class="text-center mt-4 text-red-400 text-xs">오류 발생 (CORS/네트워크)</p>';
+            if (result.error) {
+                resultArea.innerHTML = `<p class="text-center mt-4 text-red-400 text-xs">오류: ${result.error}</p>`;
+                return;
             }
+
+            if (result.length === 0) {
+                resultArea.innerHTML = '<p class="text-center mt-4 text-gray-400">검색 결과가 없습니다.</p>';
+                return;
+            }
+
+            let html = '';
+            result.forEach(item => {
+                html += `
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                    <div class="flex-1 min-w-0 mr-2">
+                        <p class="font-bold text-main text-sm truncate">${item.nodenm}</p>
+                        <p class="text-xs text-gray-400 truncate">ID: ${item.nodeid} | 번호: ${item.nodeno}</p>
+                    </div>
+                    <button onclick="addStation('${item.nodenm.replace(/'/g, "\\'")}', '${item.nodeid}')" class="flex-none text-xs bg-blue-500 text-white px-3 py-2 rounded-xl font-bold hover:bg-blue-600 transition-colors">추가</button>
+                </div>`;
+            });
+            resultArea.innerHTML = html;
         }
 
+        // ... 나머지 유틸리티 함수는 동일 ...
+        async function testConnection() {
+            const inputKey = document.getElementById('api-key-input').value.trim();
+            const resultBox = document.getElementById('test-result');
+            const selectedType = document.querySelector('input[name="key-type"]:checked').value;
+            if(!inputKey) { alert("키를 입력하세요"); return; }
+            resultBox.classList.remove('hidden');
+            resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 테스트 중...';
+            apiKey = inputKey;
+            keyType = selectedType;
+            const result = await fetchBusArrival('37010', '540008'); 
+            if (Array.isArray(result)) {
+                resultBox.innerHTML = '<span class="text-green-600 font-bold">✅ 연결 성공!</span><br>모든 설정이 정상입니다.';
+            } else {
+                resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ ${result}</span>`;
+            }
+        }
+        function testDirectConnection() {
+            const inputKey = document.getElementById('api-key-input').value.trim();
+            if(!inputKey) { alert("키를 입력하세요"); return; }
+            const selectedType = document.querySelector('input[name="key-type"]:checked').value;
+            const testKey = selectedType === 'encoding' ? inputKey : encodeURIComponent(inputKey);
+            const url = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList?serviceKey=${testKey}&cityCode=37010&nodeId=540008&numOfRows=1&pageNo=1&_type=json`;
+            window.open(url, '_blank');
+        }
         function addStation(name, nodeId) {
-            stationConfig[currentRegion].push({
-                name: name,
-                sub: "추가된 정류장",
-                nodeId: nodeId,
-                tags: [] 
-            });
-            localStorage.setItem('my_station_config_v16', JSON.stringify(stationConfig));
+            stationConfig[currentRegion].push({ name: name, sub: "추가된 정류장", nodeId: nodeId, tags: [] });
+            localStorage.setItem('my_station_config_v17', JSON.stringify(stationConfig));
             alert(`'${name}' 정류장이 추가되었습니다.`);
             closeSearchModal();
             renderList();
         }
-
         function removeStation(region, index) {
             if(confirm("정말 삭제하시겠습니까?")) {
                 stationConfig[region].splice(index, 1);
-                localStorage.setItem('my_station_config_v16', JSON.stringify(stationConfig));
+                localStorage.setItem('my_station_config_v17', JSON.stringify(stationConfig));
                 renderList();
             }
         }
-
         function selectRegion(region) {
             currentRegion = region;
             ['andong', 'gumi', 'chilgok'].forEach(id => {
@@ -546,7 +509,7 @@
         }
         function resetData() {
             if(confirm("모든 데이터를 초기화하시겠습니까?")) {
-                localStorage.removeItem('my_station_config_v16');
+                localStorage.removeItem('my_station_config_v17');
                 stationConfig = JSON.parse(JSON.stringify(defaultStationConfig));
                 renderList();
                 alert("초기화되었습니다.");
