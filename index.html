@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Realtime Bus - Final Fix V2</title>
+    <title>Bus Realtime - Final V3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -110,20 +110,6 @@
                 <p class="text-sm font-bold text-main" id="loading-text">데이터 연결 중...</p>
             </div>
 
-            <!-- 에러 메시지 패널 -->
-            <div id="error-diagnosis" class="hidden mx-1 mb-4 p-4 bg-red-50 rounded-2xl border border-red-100">
-                <div class="flex items-center gap-2 mb-2">
-                    <i class="fa-solid fa-triangle-exclamation text-red-500"></i>
-                    <p class="text-sm text-red-600 font-bold" id="error-title">오류 발생</p>
-                </div>
-                <p class="text-xs text-red-500 mb-3 leading-relaxed" id="error-desc">
-                    내용
-                </p>
-                <a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" class="block w-full bg-red-500 text-white text-center py-3 rounded-xl text-xs font-bold hover:bg-red-600 transition-colors shadow-sm">
-                    여기 눌러서 권한 승인하기 (필수)
-                </a>
-            </div>
-
             <div id="dynamic-list-container" class="space-y-4"></div>
             
             <div id="empty-state" class="hidden text-center py-10 bg-white/40 rounded-3xl border border-white/60">
@@ -222,50 +208,57 @@
         
         let currentRegion = 'andong';
         let apiKey = MY_KEY || localStorage.getItem('toss_bus_api_key') || '';
-        let keyType = localStorage.getItem('toss_bus_key_type') || 'decoding'; // 기본값 Decoding
-        let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v5')) || JSON.parse(JSON.stringify(defaultStationConfig));
+        let keyType = localStorage.getItem('toss_bus_key_type') || 'decoding'; 
+        let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v6')) || JSON.parse(JSON.stringify(defaultStationConfig));
 
         document.addEventListener('DOMContentLoaded', () => {
             if(apiKey) {
                 document.getElementById('api-key-input').value = apiKey;
-                // 저장된 키 타입 불러오기
                 const radios = document.getElementsByName('key-type');
                 for(const r of radios) { if(r.value === keyType) r.checked = true; }
             }
             selectRegion('andong');
         });
 
-        // API 키 인코딩 처리 (가장 중요!)
         function getEncodedKey() {
             if (!apiKey) return '';
-            // 사용자가 "Encoding"을 선택했으면 이미 %가 포함된 키이므로 그대로 사용
-            // 사용자가 "Decoding"을 선택했으면 우리가 인코딩해줘야 함
             return keyType === 'encoding' ? apiKey : encodeURIComponent(apiKey);
         }
 
-        // 1. API 호출 (HTTPS 변경 + 키 로직 개선)
+        // 1. API 호출 (강력한 우회 서버 적용)
         async function fetchBusArrival(cityCode, nodeId) {
             if (!apiKey || !nodeId) return null;
             
             const serviceKey = getEncodedKey();
-            const proxy = 'https://cors-anywhere.herokuapp.com/';
-            // https로 변경
-            const url = `https://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPregearrInfo?serviceKey=${serviceKey}&cityCode=${cityCode}&nodeId=${nodeId}&numOfRows=100&pageNo=1&_type=json`;
+            // 더 강력한 프록시 사용 (corsproxy.io) - 버튼 클릭 필요 없음
+            const proxy1 = 'https://corsproxy.io/?';
+            // 백업 프록시 (allorigins)
+            const proxy2 = 'https://api.allorigins.win/raw?url=';
+            
+            const targetUrl = `https://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPregearrInfo?serviceKey=${serviceKey}&cityCode=${cityCode}&nodeId=${nodeId}&numOfRows=100&pageNo=1&_type=json`;
 
             try {
-                const response = await fetch(proxy + url);
-                if (response.status === 403) return "CORS_ERROR";
+                // 1차 시도
+                let response = await fetch(proxy1 + encodeURIComponent(targetUrl));
+                
+                // 1차 실패 시 2차 시도
+                if (!response.ok) {
+                    console.warn("Proxy 1 failed, trying proxy 2...");
+                    response = await fetch(proxy2 + encodeURIComponent(targetUrl));
+                }
+
+                if (!response.ok) return "NETWORK_ERROR";
                 
                 const text = await response.text();
                 
+                // XML 에러 체크
                 if (text.includes('<OpenAPI_ServiceResponse>')) {
                     if (text.includes('SERVICE_KEY_IS_NOT_REGISTERED_ERROR')) return "KEY_NOT_REGISTERED";
                     if (text.includes('SERVICE_KEY_ERROR')) return "KEY_ERROR";
-                    if (text.includes('LIMITED')) return "LIMIT_EXCEEDED";
-                    return "SERVER_ERROR";
+                    return "API_SERVER_ERROR";
                 }
 
-                // JSON 파싱 시도
+                // JSON 파싱
                 let data;
                 try { data = JSON.parse(text); } catch(e) { return "PARSE_ERROR"; }
 
@@ -286,13 +279,9 @@
             const container = document.getElementById('dynamic-list-container');
             const spinner = document.getElementById('loading-spinner');
             const empty = document.getElementById('empty-state');
-            const errorPanel = document.getElementById('error-diagnosis');
-            const errorTitle = document.getElementById('error-title');
-            const errorDesc = document.getElementById('error-desc');
             
             container.innerHTML = '';
             empty.classList.add('hidden');
-            errorPanel.classList.add('hidden');
             
             if (!apiKey) {
                 empty.classList.remove('hidden');
@@ -310,9 +299,6 @@
                 return;
             }
 
-            let errorOccurred = false;
-            let errorMsg = "";
-
             for (let i = 0; i < targets.length; i++) {
                 const station = targets[i];
                 if (!station.nodeId) continue;
@@ -321,9 +307,14 @@
                 let busItemsHtml = '';
                 
                 if (typeof result === 'string') {
-                    errorOccurred = true;
-                    errorMsg = result;
-                    busItemsHtml = `<div class="p-4 text-center text-xs text-red-400 bg-red-50 rounded-xl">오류: ${result}</div>`;
+                    // 에러 메시지 표시
+                    let msg = "데이터 로드 실패";
+                    if(result === "KEY_ERROR") msg = "키 오류 (타입 확인)";
+                    else if(result === "KEY_NOT_REGISTERED") msg = "키 등록 대기중 (1시간)";
+                    else if(result === "NETWORK_ERROR") msg = "네트워크 오류";
+                    else if(result === "API_NOT_FOUND") msg = "주소 오류 (https)";
+                    
+                    busItemsHtml = `<div class="p-4 text-center text-xs text-red-400 bg-red-50 rounded-xl">${msg}</div>`;
                 } else if (result.length > 0) {
                     let filtered = result;
                     filtered.sort((a, b) => a.arrtime - b.arrtime);
@@ -372,30 +363,12 @@
             }
             
             spinner.classList.add('hidden');
-
-            if (errorOccurred) {
-                errorPanel.classList.remove('hidden');
-                if (errorMsg === "CORS_ERROR" || errorMsg === "NETWORK_ERROR") {
-                    errorTitle.innerText = "권한 승인 필요";
-                    errorDesc.innerText = "보안 문제로 차단되었습니다. 버튼을 눌러 승인해주세요.";
-                } else if (errorMsg === "KEY_ERROR") {
-                    errorTitle.innerText = "키 오류 (Encoding 확인)";
-                    errorDesc.innerText = "설정에서 키 타입을 'Encoding'이나 'Decoding'으로 바꿔보세요.";
-                } else if (errorMsg === "KEY_NOT_REGISTERED") {
-                    errorTitle.innerText = "키 등록 대기중";
-                    errorDesc.innerText = "발급 후 1시간이 지나야 합니다.";
-                } else {
-                    errorTitle.innerText = "데이터 오류";
-                    errorDesc.innerText = `서버 메시지: ${errorMsg}`;
-                }
-            }
         }
 
         // 3. 연결 테스트 기능
         async function testConnection() {
             const inputKey = document.getElementById('api-key-input').value.trim();
             const resultBox = document.getElementById('test-result');
-            // 라디오 버튼 값 읽기
             const selectedType = document.querySelector('input[name="key-type"]:checked').value;
             
             if(!inputKey) { alert("키를 입력하세요"); return; }
@@ -403,34 +376,24 @@
             resultBox.classList.remove('hidden');
             resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 테스트 중...';
             
-            const testKey = selectedType === 'encoding' ? inputKey : encodeURIComponent(inputKey);
-            const proxy = 'https://cors-anywhere.herokuapp.com/';
-            // 안동대학교 정류장 테스트
-            const url = `https://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPregearrInfo?serviceKey=${testKey}&cityCode=37010&nodeId=540008&numOfRows=1&pageNo=1&_type=json`;
+            // 키 임시 설정
+            apiKey = inputKey;
+            keyType = selectedType;
 
-            try {
-                const response = await fetch(proxy + url);
-                if(response.status === 403) {
-                    resultBox.innerHTML = '<span class="text-red-500 font-bold">❌ 연결 실패 (CORS)</span><br>메인 화면의 빨간 버튼을 눌러주세요.';
-                    return;
-                }
-                const text = await response.text();
-                
-                if (text.includes('SERVICE_KEY_IS_NOT_REGISTERED_ERROR')) {
-                    resultBox.innerHTML = '<span class="text-orange-500 font-bold">⏳ 키 등록 대기중</span><br>발급 후 1시간이 지나야 합니다.';
-                } else if (text.includes('SERVICE_KEY_ERROR')) {
-                    resultBox.innerHTML = '<span class="text-red-500 font-bold">❌ 키 타입 오류</span><br>Encoding/Decoding 설정을 반대로 바꿔보세요.';
-                } else if (text.includes('resultCode') && text.includes('"00"')) {
-                    resultBox.innerHTML = '<span class="text-green-600 font-bold">✅ 연결 성공!</span><br>이제 저장하시면 됩니다.';
-                } else {
-                    resultBox.innerHTML = `<span class="text-gray-500">응답: ${text.substring(0, 100)}...</span>`;
-                }
-            } catch(e) {
-                resultBox.innerHTML = '<span class="text-red-500 font-bold">❌ 네트워크 오류</span>';
+            const result = await fetchBusArrival('37010', '540008'); // 안동대 테스트
+
+            if (Array.isArray(result)) {
+                resultBox.innerHTML = '<span class="text-green-600 font-bold">✅ 연결 성공!</span><br>모든 설정이 정상입니다. 저장하세요.';
+            } else if (result === "KEY_ERROR") {
+                resultBox.innerHTML = '<span class="text-red-500 font-bold">❌ 키 타입 오류</span><br>Encoding/Decoding을 바꿔보세요.';
+            } else if (result === "KEY_NOT_REGISTERED") {
+                resultBox.innerHTML = '<span class="text-orange-500 font-bold">⏳ 등록 대기중</span><br>키 발급 후 1시간이 지나야 합니다.';
+            } else {
+                resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ 오류: ${result}</span>`;
             }
         }
 
-        // 4. 검색
+        // 4. 검색 (프록시 적용)
         function openSearchModal() {
             if(!apiKey) { alert("설정에서 API 키를 먼저 입력해주세요."); openSettings(); return; }
             document.getElementById('search-modal').classList.remove('hidden');
@@ -451,11 +414,12 @@
             resultArea.innerHTML = '<p class="text-center mt-4"><i class="fa-solid fa-spinner fa-spin"></i> 검색중...</p>';
 
             const serviceKey = getEncodedKey();
-            const proxy = 'https://cors-anywhere.herokuapp.com/';
-            const url = `https://apis.data.go.kr/1613000/BusSttnInfoInqireService/getSttnNoList?serviceKey=${serviceKey}&cityCode=${CITY_CODES[currentRegion]}&nodeNm=${encodeURIComponent(keyword)}&numOfRows=20&_type=json`;
+            const proxy = 'https://corsproxy.io/?';
+            const url = `http://apis.data.go.kr/1613000/BusSttnInfoInqireService/getSttnNoList?serviceKey=${serviceKey}&cityCode=${CITY_CODES[currentRegion]}&nodeNm=${encodeURIComponent(keyword)}&numOfRows=20&_type=json`;
 
             try {
-                const response = await fetch(proxy + url);
+                const response = await fetch(proxy + encodeURIComponent(url));
+                if (!response.ok) throw new Error("Network Error");
                 const text = await response.text();
                 
                 if (text.includes('SERVICE_KEY')) {
@@ -463,9 +427,7 @@
                     return;
                 }
 
-                let data;
-                try { data = JSON.parse(text); } catch(e) { throw new Error("JSON Parse Error"); }
-
+                const data = JSON.parse(text);
                 const items = data.response.body.items.item;
                 const list = Array.isArray(items) ? items : (items ? [items] : []);
 
@@ -488,11 +450,7 @@
                 resultArea.innerHTML = html;
             } catch (e) {
                 console.error(e);
-                resultArea.innerHTML = `
-                    <div class="p-4 bg-red-50 rounded-xl">
-                        <p class="text-xs text-red-500 font-bold mb-1">⚠️ 검색 오류</p>
-                        <a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" class="block w-full bg-red-500 text-white text-center py-2 rounded-lg text-xs font-bold">권한 승인하러 가기</a>
-                    </div>`;
+                resultArea.innerHTML = '<p class="text-center mt-4 text-red-400 text-xs">오류 발생</p>';
             }
         }
 
@@ -503,7 +461,7 @@
                 nodeId: nodeId,
                 tags: [] 
             });
-            localStorage.setItem('my_station_config_v5', JSON.stringify(stationConfig));
+            localStorage.setItem('my_station_config_v6', JSON.stringify(stationConfig));
             alert(`'${name}' 정류장이 추가되었습니다.`);
             closeSearchModal();
             renderList();
@@ -512,7 +470,7 @@
         function removeStation(region, index) {
             if(confirm("정말 삭제하시겠습니까?")) {
                 stationConfig[region].splice(index, 1);
-                localStorage.setItem('my_station_config_v5', JSON.stringify(stationConfig));
+                localStorage.setItem('my_station_config_v6', JSON.stringify(stationConfig));
                 renderList();
             }
         }
@@ -545,7 +503,7 @@
         }
         function resetData() {
             if(confirm("모든 데이터를 초기화하시겠습니까?")) {
-                localStorage.removeItem('my_station_config_v5');
+                localStorage.removeItem('my_station_config_v6');
                 stationConfig = JSON.parse(JSON.stringify(defaultStationConfig));
                 renderList();
                 alert("초기화되었습니다.");
