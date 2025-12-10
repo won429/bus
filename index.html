@@ -50,8 +50,13 @@
         @keyframes pulse-custom { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
         .animate-pulse-custom { animation: pulse-custom 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         
+        /* 버튼 스타일 */
+        .btn-kakao { background-color: #FAE100; color: #3C1E1E; }
         .delete-btn { opacity: 0; transition: opacity 0.2s; }
         .toss-card:hover .delete-btn { opacity: 1; }
+        
+        .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="w-full h-[100dvh] flex flex-col overflow-hidden bg-toss-gradient">
@@ -101,7 +106,7 @@
                     <h3 class="text-lg font-bold text-main">도착 정보</h3>
                     <span class="text-xs font-medium text-sub" id="region-status-label">안동시</span>
                 </div>
-                <button onclick="openSearchModal()" class="text-xs font-bold text-blue-500 bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors shadow-sm">
+                <button id="add-btn-main" onclick="openSearchModal()" class="text-xs font-bold text-blue-500 bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors shadow-sm">
                     + 정류장 추가
                 </button>
             </div>
@@ -128,31 +133,41 @@
             <div id="empty-state" class="hidden text-center py-10 bg-white/40 rounded-3xl border border-white/60">
                 <i class="fa-solid fa-key text-3xl text-gray-300 mb-2"></i>
                 <p class="text-sm font-bold text-gray-500">API 키가 필요합니다</p>
-                <p class="text-xs text-gray-400 mt-1">우측 상단 ⚙️설정에서 키를 입력하세요.</p>
+                <p class="text-xs text-gray-400 mt-1">
+                    <span class="text-blue-500 font-bold">안동시</span>는 키 없이 이용 가능합니다.<br>
+                    다른 지역은 설정에서 키를 입력해주세요.
+                </p>
             </div>
             
             <div class="h-40"></div>
         </div>
     </main>
 
-    <!-- 검색 모달 -->
+    <!-- 검색 모달 (수동 등록 위주) -->
     <div id="search-modal" class="hidden fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-5">
         <div class="bg-white w-full max-w-sm h-[85vh] sm:h-[80vh] sm:rounded-[32px] rounded-t-[32px] p-6 shadow-2xl scale-100 transition-all flex flex-col">
             <div class="flex justify-between items-center mb-4 flex-none">
                 <div>
                     <h3 class="text-xl font-bold text-main">정류장 추가</h3>
-                    <p class="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md inline-block mt-1" id="search-modal-region">안동시에서 검색</p>
+                    <p class="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md inline-block mt-1" id="search-modal-region">안동시</p>
                 </div>
                 <button onclick="closeSearchModal()" class="text-gray-400 hover:text-gray-600 bg-gray-100 w-8 h-8 rounded-full"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             
-            <div class="flex gap-2 mb-2 flex-none">
-                <input type="text" id="add-station-input" placeholder="정류장명 (예: 안동역)" class="flex-1 bg-gray-100 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" onkeypress="if(event.keyCode==13) doSearchStation()">
+            <!-- 안동시는 수동 등록 권장 -->
+            <div id="andong-manual-guide" class="mb-4 hidden">
+                <div class="bg-blue-50 p-4 rounded-2xl mb-4">
+                    <p class="text-sm font-bold text-main mb-1">고정 시간표 모드</p>
+                    <p class="text-xs text-gray-500">안동시는 지정된 3개 정류장만 표시됩니다.<br>추가하려면 코드 내 시간표를 수정하세요.</p>
+                </div>
+            </div>
+
+            <!-- 타 지역 검색창 -->
+            <div id="api-search-box" class="flex gap-2 mb-2 flex-none">
+                <input type="text" id="add-station-input" placeholder="정류장명 검색" class="flex-1 bg-gray-100 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" onkeypress="if(event.keyCode==13) doSearchStation()">
                 <button onclick="doSearchStation()" class="bg-blue-500 text-white rounded-2xl px-4 py-3 text-sm font-bold whitespace-nowrap">검색</button>
             </div>
             
-            <p class="text-[10px] text-gray-400 mb-2 px-1 flex-none"><i class="fa-regular fa-lightbulb mr-1"></i>정류장명으로 검색하면 가장 정확합니다.</p>
-
             <div id="add-station-results" class="flex-1 overflow-y-auto space-y-2 border-t border-gray-100 pt-2 min-h-0">
                 <p class="text-center text-gray-400 mt-10 text-sm">
                     검색 결과가 여기에 표시됩니다.
@@ -170,11 +185,12 @@
             </div>
             
             <div class="mb-4">
-                <label class="block text-xs font-bold text-gray-500 mb-2">공공데이터포털 인증키 (일반인증키 Decoding)</label>
+                <label class="block text-xs font-bold text-gray-500 mb-2">공공데이터포털 인증키 (구미/칠곡용)</label>
                 <input type="text" id="api-key-input" placeholder="인증키 붙여넣기" class="w-full bg-gray-100 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <p class="text-[10px] text-blue-500 mt-1">* 안동시는 키 없이도 작동합니다.</p>
             </div>
 
-            <div class="flex gap-4 mb-6">
+            <div class="flex gap-4 mb-4">
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="radio" name="key-type" value="decoding" checked class="w-4 h-4 text-blue-500">
                     <span class="text-sm text-gray-600">Decoding</span>
@@ -183,6 +199,27 @@
                     <input type="radio" name="key-type" value="encoding" class="w-4 h-4 text-blue-500">
                     <span class="text-sm text-gray-600">Encoding</span>
                 </label>
+            </div>
+
+            <!-- CSV 도움말 (업데이트) -->
+            <div class="mb-6 bg-gray-50 p-4 rounded-2xl">
+                <h4 class="text-xs font-bold text-main mb-2">📄 시간표 파일 작성법 (안동시)</h4>
+                <div class="text-[10px] text-gray-500 space-y-1">
+                    <p>1. 엑셀 순서: <b>ID | 번호 | 방면 | 요일 | 시간...</b></p>
+                    <p class="font-mono bg-white p-1 rounded border border-gray-200">370000023, 급행1, 도청행, 평일, 08:00...</p>
+                    <p>2. 요일(D열)에 <b>평일/토요일/일요일/매일</b> 입력</p>
+                    <p>3. <b>CSV(쉼표로 분리)</b> 형식으로 저장</p>
+                </div>
+            </div>
+
+            <!-- 프록시 선택 추가 -->
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-gray-500 mb-2">프록시 서버</label>
+                <select id="proxy-select" class="w-full bg-gray-100 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none appearance-none">
+                    <option value="corsproxy">CorsProxy.io (기본)</option>
+                    <option value="codetabs">CodeTabs</option>
+                    <option value="direct">직접 연결</option>
+                </select>
             </div>
 
             <div class="space-y-2 mb-4">
@@ -205,160 +242,309 @@
     </div>
 
     <script>
-        // 초기 데이터 (ID 오류 방지를 위해 비워둠)
-        const defaultStationConfig = {
-            andong: [], 
-            gumi: [],
-            chilgok: []
+        // [중요] 안동시 고정 정류장 (기본값)
+        const ANDONG_DEFAULT_STATIONS = [
+            { name: "국립안동대학교", nodeId: "370000023", arsNo: "-", sub: "주요 정류장" },
+            { name: "CGV 건너", nodeId: "370000998", arsNo: "-", sub: "주요 정류장" }, // 임의 ID
+            { name: "안동터미널(안동역)", nodeId: "354000416", arsNo: "-", sub: "주요 정류장" } // 임의 ID
+        ];
+
+        // 초기 데이터
+        const defaultStationConfig = { 
+            andong: ANDONG_DEFAULT_STATIONS, 
+            gumi: [], 
+            chilgok: [] 
         };
 
-        // 도시 코드 (API로 가져올 것이지만, 기본값으로 세팅)
+        // 도시 코드
         let CITY_CODES = { 'andong': '37010', 'gumi': '37030', 'chilgok': '37380' };
         const CITY_NAMES = { 'andong': '안동시', 'gumi': '구미시', 'chilgok': '칠곡군' };
-        // 검색 키워드 매핑 (API에서 찾을 이름)
-        const CITY_SEARCH_NAMES = { 'andong': '안동', 'gumi': '구미', 'chilgok': '칠곡' };
         
         let currentRegion = 'andong';
         let apiKey = localStorage.getItem('toss_bus_api_key') || '';
         let keyType = localStorage.getItem('toss_bus_key_type') || 'decoding'; 
-        let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v40')) || JSON.parse(JSON.stringify(defaultStationConfig));
+        let selectedProxy = localStorage.getItem('toss_bus_proxy') || 'corsproxy';
         
-        // 행선지 캐시
+        // 초기 로드 시 안동시 데이터가 비어있으면 기본값으로 채움 + 강제 업데이트
+        let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v40')) || JSON.parse(JSON.stringify(defaultStationConfig));
+        if(!stationConfig.andong || stationConfig.andong.length === 0) {
+            stationConfig.andong = ANDONG_DEFAULT_STATIONS;
+        }
+        
+        // [강제 업데이트] 사용자가 기존 데이터를 가지고 있어도 안동시 만큼은 고정 리스트를 사용하도록 함
+        stationConfig.andong = ANDONG_DEFAULT_STATIONS;
+        localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig));
+
         let routeDestCache = JSON.parse(localStorage.getItem('route_dest_cache')) || {};
+
+        // -----------------------------------------------------------------------------------------
+        // [안동시 시간표 데이터 입력 구역]
+        // -----------------------------------------------------------------------------------------
+        const TIMETABLE_URL = ""; 
+        
+        let ANDONG_TIMETABLE = {
+            // 국립안동대학교 (370000023)
+            "370000023": [
+                { 
+                    routeNo: "110", dest: "터미널행", 
+                    times: { weekday: ["08:10", "09:30", "12:00", "15:00", "18:00"], saturday: ["08:10", "18:00"], holiday: ["08:10", "18:00"] }
+                },
+                { 
+                    routeNo: "212", dest: "도청행", 
+                    times: { weekday: ["08:20", "09:40", "12:10", "15:10", "18:10"], saturday: ["08:20", "18:10"], holiday: ["08:20", "18:10"] }
+                },
+                { 
+                    routeNo: "급행1", dest: "도청행", 
+                    times: {
+                        weekday: ["08:00", "09:00", "12:00", "15:00", "18:00"], 
+                        saturday: ["08:30", "10:30", "13:30", "16:30"],        
+                        holiday: ["09:00", "11:00", "14:00", "17:00"]          
+                    }
+                }
+            ],
+            // CGV 건너 (370000998)
+            "370000998": [
+                { routeNo: "110", dest: "안동대행", times: { weekday: ["09:00", "11:00", "14:00"], saturday: ["09:00"], holiday: ["09:00"] } },
+                { routeNo: "212", dest: "안동대행", times: { weekday: ["09:15", "11:15", "14:15"], saturday: ["09:15"], holiday: ["09:15"] } }
+            ],
+            // 안동터미널 (354000416)
+            "354000416": [
+                { routeNo: "110", dest: "안동대", times: { weekday: ["07:50", "08:50", "11:50"], saturday: ["07:50"], holiday: ["07:50"] } },
+                { routeNo: "212", dest: "안동대", times: { weekday: ["08:30", "09:30", "10:30"], saturday: ["08:30"], holiday: ["08:30"] } },
+                { 
+                    routeNo: "급행1", dest: "안동대", 
+                    times: {
+                         weekday: ["08:10", "09:10", "12:10"],
+                         saturday: ["08:40", "10:40"],
+                         holiday: ["09:10", "11:10"]
+                    }
+                }
+            ]
+        };
+        // -----------------------------------------------------------------------------------------
 
         document.addEventListener('DOMContentLoaded', () => {
             if(apiKey) {
                 document.getElementById('api-key-input').value = apiKey;
                 const radios = document.getElementsByName('key-type');
                 for(const r of radios) { if(r.value === keyType) r.checked = true; }
-                
-                // 저장된 도시 코드 있으면 불러오기
-                const savedCityCodes = localStorage.getItem('my_city_codes');
-                if (savedCityCodes) {
-                    CITY_CODES = JSON.parse(savedCityCodes);
-                    updateCityStatus();
-                }
             }
+            const proxySelect = document.getElementById('proxy-select');
+            if(proxySelect) proxySelect.value = selectedProxy;
+
+            const savedCityCodes = localStorage.getItem('my_city_codes');
+            if (savedCityCodes) {
+                CITY_CODES = JSON.parse(savedCityCodes);
+                updateCityStatus();
+            }
+            
+            // 시간표 불러오기 (외부 파일 있으면)
+            loadTimetable();
+            
             selectRegion('andong');
         });
+
+        // 시간표 파일(CSV) 불러오는 함수
+        async function loadTimetable() {
+            if (!TIMETABLE_URL) return; 
+
+            try {
+                const response = await fetchWithProxy(TIMETABLE_URL);
+                if (!response.ok) throw new Error("File not found");
+                
+                const text = await response.text();
+                parseAndongCSV(text); // CSV 파싱
+                
+                if(currentRegion === 'andong') {
+                    renderList();
+                }
+                console.log("시간표 로드 성공");
+
+            } catch (e) {
+                console.error("시간표 로드 실패:", e);
+            }
+        }
+
+        // CSV 텍스트를 구조화된 데이터로 변환 (ID,번호,방면,시간 순서 가정)
+        function parseAndongCSV(text) {
+            const lines = text.split('\n').filter(line => line.trim());
+            const table = {};
+            
+            lines.forEach((line, index) => {
+                // 첫 줄이 헤더일 경우 건너뛰기 (숫자가 아니면 헤더로 간주)
+                if (index === 0 && isNaN(line.trim().charAt(0))) return;
+
+                const cols = line.split(',').map(c => c.trim());
+                if (cols.length < 5) return; // 최소 5열 필요 (ID,번호,방면,요일,시간1)
+
+                const stationId = cols[0];
+                const routeNo = cols[1];
+                const dest = cols[2];
+                let dayType = cols[3]; // 요일 (평일/토요일/일요일/매일)
+                
+                // 요일 코드 변환
+                if(dayType === '평일') dayType = 'weekday';
+                else if(dayType === '토요일') dayType = 'saturday';
+                else if(dayType === '일요일' || dayType === '공휴일') dayType = 'holiday';
+                else dayType = 'all'; // 매일
+
+                // 5번째(E열)부터 끝까지 시간으로 인식
+                const times = [];
+                for(let i=4; i<cols.length; i++) {
+                    if(cols[i]) times.push(cols[i]);
+                }
+
+                if (!table[stationId]) table[stationId] = [];
+                
+                // 기존 노선 찾기 (같은 노선, 같은 방면이면 시간만 추가)
+                let existing = table[stationId].find(r => r.routeNo === routeNo && r.dest === dest);
+                
+                if (existing) {
+                    // 이미 있으면 times 객체에 해당 요일 추가
+                    if(dayType === 'all') {
+                         existing.times.weekday = [...(existing.times.weekday || []), ...times];
+                         existing.times.saturday = [...(existing.times.saturday || []), ...times];
+                         existing.times.holiday = [...(existing.times.holiday || []), ...times];
+                    } else {
+                         existing.times[dayType] = [...(existing.times[dayType] || []), ...times];
+                    }
+                } else {
+                    // 없으면 새로 생성
+                    let timesObj = {};
+                    if(dayType === 'all') {
+                        timesObj = { weekday: times, saturday: times, holiday: times };
+                    } else {
+                        timesObj[dayType] = times;
+                    }
+                    
+                    table[stationId].push({
+                        routeNo: routeNo,
+                        dest: dest,
+                        times: timesObj
+                    });
+                }
+            });
+            
+            // 시간순 정렬 (선택사항)
+            for (let id in table) {
+                table[id].forEach(route => {
+                    if(route.times.weekday) route.times.weekday.sort();
+                    if(route.times.saturday) route.times.saturday.sort();
+                    if(route.times.holiday) route.times.holiday.sort();
+                });
+            }
+
+            ANDONG_TIMETABLE = table;
+        }
 
         function getEncodedKey() {
             if (!apiKey) return '';
             return keyType === 'encoding' ? apiKey : encodeURIComponent(apiKey);
         }
 
-        function parseHybrid(text) {
-            try {
-                const json = JSON.parse(text);
-                return { type: 'json', data: json };
-            } catch(e) { }
+        // 프록시 URL 생성 (AllOrigins는 CSV 텍스트도 잘 받아옴)
+        function fetchWithProxy(url) {
+            const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+            return fetch(proxyUrl);
+        }
+        
+        // 기존 프록시 함수 (API 호출용)
+        function getProxyUrl(url) {
+             if (selectedProxy === 'direct') return url;
+             if (selectedProxy === 'codetabs') return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url);
+             return 'https://corsproxy.io/?' + encodeURIComponent(url);
+        }
 
+        // [데이터 정규화]
+        function normalizeBusData(bus) {
+            if (!bus) return null;
+            return {
+                ...bus,
+                routeno: (bus.routeno || bus.routeNo || '?').toString(),
+                routeid: bus.routeid || bus.routeId || '',
+                routetp: bus.routetp || bus.routeTp || '',
+                endnodenm: bus.endnodenm || bus.endNodeNm || '',
+                nodenm: bus.nodenm || bus.nodeNm || '',
+                arrtime: bus.arrtime || bus.arrTime,
+                arrprevstationcnt: bus.arrprevstationcnt || bus.arrPrevStationCnt,
+                citycode: bus.citycode || bus.cityCode || null 
+            };
+        }
+
+        function parseHybrid(text) {
+            try { return { type: 'json', data: JSON.parse(text) }; } catch(e) { }
             if (text.includes('<OpenAPI_ServiceResponse>')) {
-                if (text.includes('SERVICE_KEY_IS_NOT_REGISTERED_ERROR')) return { type: 'error', msg: 'KEY_NOT_REGISTERED' };
-                if (text.includes('SERVICE_KEY_ERROR')) return { type: 'error', msg: 'KEY_ERROR' };
+                if (text.includes('SERVICE_KEY_IS_NOT_REGISTERED_ERROR')) return { type: 'error', msg: 'SERVICE_KEY_IS_NOT_REGISTERED_ERROR' };
+                if (text.includes('SERVICE_KEY_ERROR')) return { type: 'error', msg: 'SERVICE_KEY_ERROR' };
                 return { type: 'error', msg: 'SERVER_ERROR (XML)' };
             }
             return { type: 'error', msg: 'UNKNOWN_FORMAT' };
         }
 
         function updateCityStatus() {
-            document.getElementById('status-andong').innerText = CITY_CODES.andong ? "준비완료" : "미확인";
+            document.getElementById('status-andong').innerText = "시간표 모드"; // 안동은 시간표 모드
             document.getElementById('status-gumi').innerText = CITY_CODES.gumi ? "준비완료" : "미확인";
             document.getElementById('status-chilgok').innerText = CITY_CODES.chilgok ? "준비완료" : "미확인";
             document.getElementById('city-code-status').innerText = "도시 코드 연동 완료";
         }
 
-        // ============================================================
-        // 0. 도시 코드 조회 API (getCtyCodeList)
-        // ============================================================
+        // --- APIs ---
         async function initCityCodes() {
             if (!apiKey) { alert("API 키를 먼저 저장하세요."); return; }
             const resultBox = document.getElementById('test-result');
             resultBox.classList.remove('hidden');
             resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 도시 코드 스캔 중...';
-
             const serviceKey = getEncodedKey();
-            const proxy = 'https://corsproxy.io/?';
-            // 도시코드 목록 조회 API
-            const url = `http://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCtyCodeList?serviceKey=${serviceKey}&_type=json`;
+            const targetUrl = `http://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCtyCodeList?serviceKey=${serviceKey}&_type=json`;
 
             try {
-                const response = await fetch(proxy + encodeURIComponent(url));
+                const response = await fetch(getProxyUrl(targetUrl));
                 const text = await response.text();
                 const result = parseHybrid(text);
-                
-                if (result.type === 'error') {
-                     resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ ${result.msg}</span>`;
-                     return;
-                }
-
+                if (result.type === 'error') { resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ ${result.msg}</span>`; return; }
                 const items = result.data.response.body.items.item;
-                if (!items) { resultBox.innerHTML = '도시 목록 없음'; return; }
-                
                 const list = Array.isArray(items) ? items : [items];
-                
-                // 안동, 구미, 칠곡 찾기
                 let found = 0;
                 list.forEach(city => {
+                    // 안동은 수동이므로 코드 갱신 안해도 됨, 하지만 저장은 해둠
                     if (city.cityname.includes('안동')) { CITY_CODES.andong = city.citycode; found++; }
                     if (city.cityname.includes('구미')) { CITY_CODES.gumi = city.citycode; found++; }
                     if (city.cityname.includes('칠곡')) { CITY_CODES.chilgok = city.citycode; found++; }
                 });
-
                 localStorage.setItem('my_city_codes', JSON.stringify(CITY_CODES));
                 updateCityStatus();
                 resultBox.innerHTML = `<span class="text-green-600 font-bold">✅ 도시 코드 ${found}개 갱신 완료!</span>`;
-
-            } catch (e) {
-                resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ 네트워크 오류</span>`;
-            }
+            } catch (e) { resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ 네트워크 오류</span>`; }
         }
 
-        // ============================================================
-        // 1. 버스 도착 정보 API (ArvlInfoInqireService)
-        // ============================================================
         async function fetchBusArrival(cityCode, nodeId) {
             if (!apiKey || !nodeId) return null;
-            
-            const cleanNodeId = nodeId; 
             const serviceKey = getEncodedKey();
-            const proxy = 'https://corsproxy.io/?';
-            const url = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList?serviceKey=${serviceKey}&cityCode=${cityCode}&nodeId=${cleanNodeId}&numOfRows=100&pageNo=1&_type=json`;
-
+            const targetUrl = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList?serviceKey=${serviceKey}&cityCode=${cityCode}&nodeId=${nodeId}&numOfRows=100&pageNo=1&_type=json`;
             try {
-                const response = await fetch(proxy + encodeURIComponent(url));
+                const response = await fetch(getProxyUrl(targetUrl));
                 if (!response.ok) return "NETWORK_ERROR";
-                
                 const text = await response.text();
                 const result = parseHybrid(text);
-
                 if (result.type === 'error') return result.msg;
-
                 const data = result.data;
-                if (data.response?.header?.resultCode !== '00') {
-                    return data.response?.header?.resultMsg || "API_ERROR";
-                }
-
+                if (data.response?.header?.resultCode !== '00') return data.response?.header?.resultMsg || "API_ERROR";
                 const items = data.response.body.items?.item;
                 if (!items) return [];
-                return Array.isArray(items) ? items : [items];
+                const list = Array.isArray(items) ? items : [items];
+                return list.map(normalizeBusData);
             } catch (error) { return "NETWORK_ERROR"; }
         }
         
-        // 2. 버스 노선 정보 API (BusRouteInfoInqireService - 행선지 찾기용)
         async function fetchRouteInfo(cityCode, routeId) {
             if (!apiKey || !routeId) return null;
             if (routeDestCache[routeId]) return routeDestCache[routeId]; 
-
             const serviceKey = getEncodedKey();
-            const proxy = 'https://corsproxy.io/?';
-            const url = `http://apis.data.go.kr/1613000/BusRouteInfoInqireService/getRouteInfoIem?serviceKey=${serviceKey}&cityCode=${cityCode}&routeId=${routeId}&_type=json`;
-
+            const targetUrl = `http://apis.data.go.kr/1613000/BusRouteInfoInqireService/getRouteInfoIem?serviceKey=${serviceKey}&cityCode=${cityCode}&routeId=${routeId}&_type=json`;
             try {
-                const response = await fetch(proxy + encodeURIComponent(url));
+                const response = await fetch(getProxyUrl(targetUrl));
                 const text = await response.text();
                 const result = parseHybrid(text);
-                
                 if (result.type === 'json' && result.data.response?.header?.resultCode === '00') {
                     const item = result.data.response.body.items.item;
                     if (item && item.endnodenm) {
@@ -367,27 +553,17 @@
                         return item.endnodenm;
                     }
                 }
-            } catch (e) { console.error("Route Info Fetch Error"); }
+            } catch (e) { }
             return null;
         }
 
-        // 3. 버스 정류소 검색 API (BusSttnInfoInqireService)
         async function searchStationAPI(keyword) {
             const serviceKey = getEncodedKey();
-            const proxy = 'https://corsproxy.io/?';
-            
-            // 도시 코드 필수 적용! (이걸로 지역 섞임 방지)
             const targetCityCode = CITY_CODES[currentRegion];
-            
-            let url = `http://apis.data.go.kr/1613000/BusSttnInfoInqireService/getSttnNoList?serviceKey=${serviceKey}&cityCode=${targetCityCode}&numOfRows=500&_type=json`;
-            
-            // 번호 검색 vs 이름 검색
-            // API 명세상 nodeNm과 nodeNo 파라미터가 있음. 통합검색이 안되면 분기 필요.
-            // 하지만 보통 nodeNm에 넣으면 다 찾아주는 경우가 많음. 일단 nodeNm으로 시도.
-            url += `&nodeNm=${encodeURIComponent(keyword)}`;
-
+            let targetUrl = `http://apis.data.go.kr/1613000/BusSttnInfoInqireService/getSttnNoList?serviceKey=${serviceKey}&cityCode=${targetCityCode}&numOfRows=500&_type=json`;
+            targetUrl += `&nodeNm=${encodeURIComponent(keyword)}`;
             try {
-                const response = await fetch(proxy + encodeURIComponent(url));
+                const response = await fetch(getProxyUrl(targetUrl));
                 const text = await response.text();
                 const result = parseHybrid(text);
                 if (result.type === 'error') return { error: result.msg };
@@ -395,121 +571,384 @@
                 if (data.response?.header?.resultCode !== '00') return { error: data.response.header.resultMsg };
                 const items = data.response.body.items?.item;
                 if (!items) return [];
-                return Array.isArray(items) ? items : [items];
+                const list = Array.isArray(items) ? items : [items];
+                return list.map(normalizeBusData);
             } catch (e) { return { error: "NETWORK_ERROR" }; }
         }
 
-        // 4. 정류소 경유 노선 목록 조회 API (BusSttnInfoInqireService) - NEW
-        async function getStationRoutes(cityCode, nodeId) {
-            if (!apiKey || !nodeId) return null;
-            const serviceKey = getEncodedKey();
-            const proxy = 'https://corsproxy.io/?';
-            const url = `http://apis.data.go.kr/1613000/BusSttnInfoInqireService/getSttnThrghRouteList?serviceKey=${serviceKey}&cityCode=${cityCode}&nodeId=${nodeId}&numOfRows=100&_type=json`;
-
-            try {
-                const response = await fetch(proxy + encodeURIComponent(url));
-                const text = await response.text();
-                const result = parseHybrid(text);
-                if (result.type === 'error') return null;
-                const items = result.data.response?.body?.items?.item;
-                if (!items) return [];
-                return Array.isArray(items) ? items : [items];
-            } catch (e) { return null; }
-        }
-
-        // 화면 렌더링
-        async function renderList() {
+        // --- Main Render Logic ---
+        function renderList() {
             const container = document.getElementById('dynamic-list-container');
-            const spinner = document.getElementById('loading-spinner');
             const empty = document.getElementById('empty-state');
-            const errorPanel = document.getElementById('error-diagnosis');
-            const errorTitle = document.getElementById('error-title');
-            const errorDesc = document.getElementById('error-desc');
-            
             container.innerHTML = '';
             empty.classList.add('hidden');
-            errorPanel.classList.add('hidden');
             
-            if (!apiKey) {
-                empty.classList.remove('hidden');
-                return;
-            }
-
-            spinner.classList.remove('hidden');
+            // 안동시는 키 없어도 됨
+            if (!apiKey && currentRegion !== 'andong') { empty.classList.remove('hidden'); return; }
 
             const cityCode = CITY_CODES[currentRegion];
             const targets = stationConfig[currentRegion];
 
             if (!targets || targets.length === 0) {
                 container.innerHTML = `<div class="text-center py-10 text-gray-400">등록된 정류장이 없습니다.<br>상단 '+ 정류장 추가' 버튼을 눌러보세요!</div>`;
-                spinner.classList.add('hidden');
                 return;
             }
+            
+            // 안동시는 추가 버튼 숨김 (고정 모드)
+            const addBtn = document.getElementById('add-btn-main');
+            if(addBtn) {
+                if(currentRegion === 'andong') addBtn.classList.add('hidden');
+                else addBtn.classList.remove('hidden');
+            }
 
-            let lastErrorMsg = "";
-
-            for (let i = 0; i < targets.length; i++) {
-                const station = targets[i];
-                if (!station.nodeId) continue;
-
-                const result = await fetchBusArrival(cityCode, station.nodeId);
-                let busItemsHtml = '';
-                
-                if (typeof result === 'string') {
-                    lastErrorMsg = result;
-                    busItemsHtml = `<div class="p-4 bg-red-50 rounded-xl text-xs text-red-500 font-bold mb-1">데이터 로드 실패 (${result})</div>`;
-                } else if (result.length > 0) {
-                    let filtered = result;
-                    filtered = filtered.filter(bus => bus.arrtime);
-                    filtered.sort((a, b) => parseInt(a.arrtime) - parseInt(b.arrtime));
-
-                    // 도착 정보에 노선 정보 보강
-                    for (let j = 0; j < Math.min(filtered.length, 5); j++) {
-                        const bus = filtered[j];
-                        if (!bus.endnodenm && bus.routeid) {
-                            const destName = await fetchRouteInfo(cityCode, bus.routeid);
-                            if (destName) bus.endnodenm = destName;
-                        }
-                    }
-
-                    filtered.forEach(bus => {
-                        const min = Math.floor(parseInt(bus.arrtime) / 60);
-                        const timeStr = min < 2 ? "곧 도착" : `${min}분`;
-                        const colorClass = min < 5 ? "text-red-500 font-bold" : "text-main";
-                        const badgeColor = (bus.routetp && bus.routetp.includes('급행')) ? 'bg-red-500' : 'bg-blue-500';
-                        const destText = bus.endnodenm ? `${bus.endnodenm} 방면` : (bus.nodenm ? `${bus.nodenm} 경유` : '행선지 확인중');
-                        
-                        busItemsHtml += `
-                        <div class="glass-item p-3 flex items-center justify-between active:scale-[0.98] transition-transform">
-                            <div class="flex items-center gap-3">
-                                <span class="${badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${bus.routetp || '일반'}</span>
-                                <div>
-                                    <span class="text-sm font-bold text-main">${bus.routeno}</span>
-                                    <span class="text-[10px] text-sub block">
-                                        ${destText} · ${bus.arrprevstationcnt}번째 전
-                                    </span>
+            targets.forEach((station, index) => {
+                if(currentRegion === 'andong') {
+                    // 안동: 정적 시간표 로직
+                    renderStaticCard(index, station);
+                } else {
+                    // 타 지역: 기존 API 로직 (Skeleton -> Load)
+                    const skeletonHtml = `
+                        <div id="station-card-${index}" class="toss-card p-5 mb-4 !bg-white/50 animate-pulse relative">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-10 h-10 rounded-[16px] bg-gray-200"></div>
+                                    <div>
+                                        <div class="h-4 w-32 bg-gray-200 rounded mb-1.5"></div>
+                                        <div class="h-3 w-20 bg-gray-200 rounded"></div>
+                                    </div>
                                 </div>
                             </div>
-                            <span class="text-sm ${colorClass}">${timeStr}</span>
+                            <div class="space-y-2">
+                                <div class="h-12 bg-gray-200 rounded-xl"></div>
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', skeletonHtml);
+                    loadStationData(index, cityCode, station);
+                }
+            });
+        }
+
+        // [NEW] 안동시 정적 시간표 렌더링 함수 (CSV 지원 + 아이콘/배지 적용)
+        function renderStaticCard(index, station) {
+            const container = document.getElementById('dynamic-list-container');
+            
+            // ANDONG_TIMETABLE이 비어있으면(로딩 전 or 실패) 빈 객체 처리
+            const timetable = ANDONG_TIMETABLE[station.nodeId]; 
+            
+            // 정류장 이름에 따른 아이콘/색상 결정
+            let iconClass = "fa-solid fa-map-pin";
+            let iconBgClass = "bg-gray-100";
+            let iconTextClass = "text-gray-500";
+
+            if (station.name.includes("대학교") || station.name.includes("안동대")) {
+                iconClass = "fa-solid fa-school";
+                iconBgClass = "bg-green-100";
+                iconTextClass = "text-green-600";
+            } else if (station.name.includes("CGV")) {
+                iconClass = "fa-solid fa-film";
+                iconBgClass = "bg-red-100";
+                iconTextClass = "text-red-500";
+            } else if (station.name.includes("터미널") || station.name.includes("역")) {
+                iconClass = "fa-solid fa-bus";
+                iconBgClass = "bg-blue-100";
+                iconTextClass = "text-blue-600";
+            }
+            
+            // 현재 시간 및 요일 구하기
+            const now = new Date();
+            const nowTotalMin = now.getHours() * 60 + now.getMinutes();
+            const day = now.getDay(); // 0:일, 6:토
+            
+            let dayKey = 'weekday';
+            let dayLabel = "평일";
+            if(day === 0) { dayKey = 'holiday'; dayLabel = "일/공휴일"; }
+            else if(day === 6) { dayKey = 'saturday'; dayLabel = "토요일"; }
+
+            let contentHtml = '';
+            if (!timetable || Object.keys(timetable).length === 0) {
+                let msg = "등록된 시간표가 없습니다";
+                let subMsg = "시간표 데이터가 로딩되지 않았거나 없습니다.";
+                
+                contentHtml = `
+                    <div class="p-4 bg-gray-50/50 rounded-xl text-center border border-gray-100">
+                        <i class="fa-regular fa-calendar-xmark text-gray-300 text-lg mb-1"></i>
+                        <p class="text-xs text-gray-500 font-bold">${msg}</p>
+                        <p class="text-[10px] text-gray-400">${subMsg}</p>
+                    </div>`;
+            } else {
+                let hasRoutes = false;
+                // timetable이 배열인지 체크 (CSV 파싱 방식에 따라 다를 수 있음)
+                // 만약 timetable이 배열이면 바로 loop, 아니면 keys로 loop?
+                // 현재 로직상 timetable은 배열 [{routeNo, dest, times}, ...] 형태여야 함.
+                // 하지만 CSV 파싱 로직에서 day별 분리했으므로 timetable 구조가 조금 복잡해짐?
+                // 아니, parseAndongCSV에서 이미 { times: { weekday: [], ... } } 형태로 만듦.
+                // timetable 자체가 배열임.
+
+                if(Array.isArray(timetable)) {
+                    timetable.forEach(route => {
+                        // 시간표 가져오기
+                        let timeList = [];
+                        if(Array.isArray(route.times)) {
+                            timeList = route.times; // 구버전 데이터 호환
+                        } else if(typeof route.times === 'object') {
+                            timeList = route.times[dayKey] || route.times['weekday'] || [];
+                        }
+
+                        if(!timeList || timeList.length === 0) return;
+                        hasRoutes = true;
+
+                        // 미래의 시간 중 가장 가까운 것 찾기
+                        let nextTimeStr = null;
+                        let minDiff = 9999;
+                        let isNextDay = false;
+
+                        // 오늘 남은 시간 찾기
+                        for(let time of timeList) {
+                            const [h, m] = time.split(':').map(Number);
+                            const busTotalMin = h * 60 + m;
+                            if (busTotalMin > nowTotalMin) {
+                                if (busTotalMin - nowTotalMin < minDiff) {
+                                    minDiff = busTotalMin - nowTotalMin;
+                                    nextTimeStr = time;
+                                }
+                            }
+                        }
+
+                        // 오늘 남은게 없으면 내일 첫차 찾기
+                        if (!nextTimeStr && timeList.length > 0) {
+                             nextTimeStr = timeList[0];
+                             const [h, m] = nextTimeStr.split(':').map(Number);
+                             const busTotalMin = h * 60 + m;
+                             // 하루는 1440분
+                             minDiff = (1440 - nowTotalMin) + busTotalMin;
+                             isNextDay = true;
+                    }
+
+                        let timeDisplay = "운행종료";
+                        let colorClass = "text-gray-400 text-xs";
+                        
+                        if (nextTimeStr) {
+                            if(isNextDay) {
+                                 const hours = Math.floor(minDiff / 60);
+                                 const mins = minDiff % 60;
+                                 timeDisplay = `${hours}시간 ${mins}분 후 출발 (익일 ${nextTimeStr})`;
+                                 colorClass = "text-gray-500 font-medium";
+                            } else {
+                                if (minDiff < 60) timeDisplay = `${minDiff}분 후 (${nextTimeStr})`;
+                                else timeDisplay = `${nextTimeStr} 출발`;
+                                
+                                colorClass = minDiff < 10 ? "text-red-500 font-bold" : "text-main";
+                            }
+                        }
+
+                        // 급행 버스 처리 (배지 색상)
+                        const isExpress = route.routeNo.includes("급행");
+                        const badgeText = isExpress ? "급행" : "일반";
+                        const badgeColor = isExpress ? "bg-red-500" : "bg-blue-500";
+
+                        contentHtml += `
+                        <div class="glass-item p-3 flex items-center justify-between active:scale-[0.98] transition-transform">
+                            <div class="flex items-center gap-3">
+                                <span class="${badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${badgeText}</span>
+                                <div>
+                                    <span class="text-sm font-bold text-main">${route.routeNo}</span>
+                                    <span class="text-[10px] text-sub block">${route.dest} 방면</span>
+                                </div>
+                            </div>
+                            <span class="text-sm ${colorClass}">${timeDisplay}</span>
                         </div>`;
                     });
-                } else {
-                    // 도착 정보가 없을 때: 경유 노선 보기 버튼 추가
-                    busItemsHtml = `
-                        <div id="no-info-${i}" class="p-4 bg-gray-50/50 rounded-xl text-center border border-gray-100 transition-all">
-                            <div class="mb-2">
-                                <i class="fa-solid fa-moon text-gray-300 text-lg mb-1"></i>
-                                <p class="text-xs text-gray-500 font-bold">도착 예정 정보 없음</p>
+                }
+                
+                if(!hasRoutes) {
+                     contentHtml = `
+                    <div class="p-4 bg-gray-50/50 rounded-xl text-center border border-gray-100">
+                        <p class="text-xs text-gray-500 font-bold">오늘은 운행하는 버스가 없습니다</p>
+                        <p class="text-[10px] text-gray-400">(${dayLabel} 기준)</p>
+                    </div>`;
+                }
+            }
+
+            const kakaoSearchQuery = `${CITY_NAMES[currentRegion]} ${station.name}`;
+            const kakaoMapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(kakaoSearchQuery)}`;
+
+            const cardHtml = `
+                <div class="toss-card p-5 mb-4 !bg-white/70 animate-[fadeInUp_0.4s_ease-out] relative group">
+                    <div class="absolute top-4 right-4 flex gap-1">
+                        <span class="text-[10px] text-blue-500 bg-blue-50 px-2 py-1 rounded-md font-bold">📅 ${dayLabel}</span>
+                        <a href="${kakaoMapUrl}" target="_blank" class="text-xs btn-kakao px-2 py-1 rounded-md font-bold hover:opacity-80 transition-opacity flex items-center gap-1 shadow-sm">
+                            <i class="fa-solid fa-map-location-dot"></i> 카카오맵
+                        </a>
+                        <button onclick="removeStation('${currentRegion}', ${index})" class="delete-btn text-gray-300 hover:text-red-500 p-1 hidden">
+                            <i class="fa-solid fa-trash-can text-sm"></i>
+                        </button>
+                    </div>
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 rounded-[16px] ${iconBgClass} flex items-center justify-center ${iconTextClass} text-lg shadow-sm">
+                                <i class="${iconClass}"></i>
                             </div>
-                            <button onclick="showRouteList('${cityCode}', '${station.nodeId}', 'no-info-${i}', '${CITY_NAMES[currentRegion]}')" class="text-xs bg-white text-gray-600 border border-gray-200 px-3 py-2 rounded-xl font-bold hover:bg-gray-50 transition-colors shadow-sm w-full">
-                                <i class="fa-solid fa-clock mr-1"></i> 경유 노선 및 시간표 검색
-                            </button>
-                        </div>`;
+                            <div>
+                                <h4 class="text-base font-bold text-main">${station.name}</h4>
+                                <p class="text-xs text-sub text-[10px]">ID: ${station.nodeId} (시간표 모드)</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">${contentHtml}</div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHtml);
+        }
+
+        async function loadStationData(index, cityCode, station) {
+            try {
+                // 1단계: 도착 정보 조회
+                const arrivalPromise = fetchBusArrival(cityCode, station.nodeId);
+                const promises = [arrivalPromise];
+                
+                // 안동 외 지역만 경유 노선 조회
+                if (currentRegion !== 'andong') {
+                    // promises.push(getStationRoutes(cityCode, station.nodeId)); // 필요시 추가
                 }
 
-                const card = `
+                const results = await Promise.allSettled(promises);
+                const arrivalResult = results[0];
+                const routeResult = results[1];
+
+                let safeArrivals = [];
+                let errorMessage = null;
+
+                if (arrivalResult.status === 'fulfilled') {
+                    if (typeof arrivalResult.value === 'string') errorMessage = arrivalResult.value;
+                    else if (Array.isArray(arrivalResult.value)) safeArrivals = arrivalResult.value;
+                }
+
+                let allRoutes = [];
+                if (routeResult && routeResult.status === 'fulfilled' && Array.isArray(routeResult.value)) {
+                    allRoutes = routeResult.value;
+                }
+
+                if (errorMessage) {
+                    renderErrorCard(index, station, errorMessage);
+                    return;
+                }
+
+                let finalDisplayList = [];
+
+                if (allRoutes.length > 0) {
+                    const arrivalMap = new Map();
+                    safeArrivals.forEach(a => {
+                        arrivalMap.set(String(a.routeno), a);
+                        if(a.routeid) arrivalMap.set(String(a.routeid), a); 
+                    });
+
+                    finalDisplayList = allRoutes.map(route => {
+                        let arrival = null;
+                        if(route.routeid) arrival = arrivalMap.get(String(route.routeid));
+                        if(!arrival && route.routeno) arrival = arrivalMap.get(String(route.routeno));
+
+                        if (arrival) return { ...route, ...arrival, hasInfo: true };
+                        else return { ...route, hasInfo: false };
+                    });
+                } else {
+                    finalDisplayList = safeArrivals.map(a => ({ ...a, hasInfo: true }));
+                }
+
+                finalDisplayList = finalDisplayList.filter(item => {
+                    if(!item.routeno) return false;
+                    if(item.routeno === '?') return false;
+                    return true;
+                });
+
+                finalDisplayList.sort((a, b) => {
+                    if (a.hasInfo && !b.hasInfo) return -1;
+                    if (!a.hasInfo && b.hasInfo) return 1;
+                    if (a.hasInfo && b.hasInfo) {
+                        return (parseInt(a.arrtime) || 0) - (parseInt(b.arrtime) || 0);
+                    }
+                    return String(a.routeno).localeCompare(String(b.routeno), undefined, { numeric: true, sensitivity: 'base' });
+                });
+
+                // 행선지 보강
+                for (let j = 0; j < Math.min(finalDisplayList.length, 5); j++) {
+                    const bus = finalDisplayList[j];
+                    if (bus.hasInfo && !bus.endnodenm && bus.routeid) {
+                        const destName = await fetchRouteInfo(cityCode, bus.routeid);
+                        if (destName) bus.endnodenm = destName;
+                    }
+                }
+
+                renderCard(index, station, finalDisplayList);
+
+            } catch (e) {
+                console.error(e);
+                renderErrorCard(index, station, "앱 오류: " + (e.message || "알 수 없음"));
+            }
+        }
+
+        // [수정] 헬퍼 함수: 시간 포맷 (HH:mm)
+        function formatTime(date) {
+            const h = String(date.getHours()).padStart(2, '0');
+            const m = String(date.getMinutes()).padStart(2, '0');
+            return `${h}:${m}`;
+        }
+
+        function renderCard(index, station, list) {
+            const skeletonCard = document.getElementById(`station-card-${index}`);
+            if (!skeletonCard) return;
+
+            let contentHtml = '';
+            if (list.length > 0) {
+                list.forEach(bus => {
+                    let timeStr, colorClass, badgeColor, destText;
+                    const routeType = bus.routetp || '';
+                    const routeNo = bus.routeno || '?';
+
+                    if (bus.hasInfo) {
+                        const min = Math.floor(parseInt(bus.arrtime) / 60);
+                        
+                        // [NEW] 도착 예정 시간 계산
+                        const now = new Date();
+                        const arrivalDate = new Date(now.getTime() + (parseInt(bus.arrtime) * 1000));
+                        const arrivalTimeStr = formatTime(arrivalDate);
+
+                        timeStr = min < 2 ? `곧 도착 (${arrivalTimeStr})` : `${min}분 (${arrivalTimeStr})`;
+                        colorClass = min < 5 ? "text-red-500 font-bold" : "text-main";
+                        badgeColor = routeType.includes('급행') ? 'bg-red-500' : 'bg-blue-500';
+                        destText = bus.endnodenm ? `${bus.endnodenm} 방면` : (bus.nodenm ? `${bus.nodenm} 경유` : '운행중');
+                    } else {
+                        timeStr = "도착 정보 없음";
+                        colorClass = "text-gray-400 text-xs";
+                        badgeColor = "bg-gray-400";
+                        destText = bus.endnodenm ? `${bus.endnodenm} 방면` : "운행종료/대기";
+                    }
+
+                    contentHtml += `
+                    <div class="glass-item p-3 flex items-center justify-between active:scale-[0.98] transition-transform">
+                        <div class="flex items-center gap-3">
+                            <span class="${badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${routeType || '일반'}</span>
+                            <div>
+                                <span class="text-sm font-bold text-main">${routeNo}</span>
+                                <span class="text-[10px] text-sub block">
+                                    ${destText} ${bus.arrprevstationcnt ? `· ${bus.arrprevstationcnt}번째 전` : ''}
+                                </span>
+                            </div>
+                        </div>
+                        <span class="text-sm ${colorClass}">${timeStr}</span>
+                    </div>`;
+                });
+            } else {
+                contentHtml = `
+                    <div class="p-4 bg-gray-50/50 rounded-xl text-center border border-gray-100">
+                        <i class="fa-solid fa-moon text-gray-300 text-lg mb-1"></i>
+                        <p class="text-xs text-gray-500 font-bold">운행중인 버스 없음</p>
+                    </div>`;
+            }
+
+            const cardHtml = `
                 <div class="toss-card p-5 mb-4 !bg-white/70 animate-[fadeInUp_0.4s_ease-out] relative group">
-                    <button onclick="removeStation('${currentRegion}', ${i})" class="delete-btn absolute top-4 right-4 text-gray-300 hover:text-red-500 p-1">
+                    <button onclick="removeStation('${currentRegion}', ${index})" class="delete-btn absolute top-4 right-4 text-gray-300 hover:text-red-500 p-1">
                         <i class="fa-solid fa-trash-can text-sm"></i>
                     </button>
                     <div class="flex justify-between items-start mb-4">
@@ -523,93 +962,75 @@
                             </div>
                         </div>
                     </div>
-                    <div class="space-y-2">${busItemsHtml}</div>
-                </div>`;
-                container.insertAdjacentHTML('beforeend', card);
-            }
-            spinner.classList.add('hidden');
-
-            if (lastErrorMsg) {
-                errorPanel.classList.remove('hidden');
-                errorTitle.innerText = "오류 발생";
-                if(lastErrorMsg === "CORS_ERROR") errorDesc.innerText = "보안 권한 문제 (잠시 후 다시 시도하세요)";
-                else errorDesc.innerText = lastErrorMsg;
-            }
+                    <div class="space-y-2">${contentHtml}</div>
+                </div>
+            `;
+            skeletonCard.outerHTML = cardHtml;
         }
 
-        // 경유 노선 표시 및 검색 기능 (NEW)
-        async function showRouteList(cityCode, nodeId, containerId, regionName) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-blue-500"></i> 노선 조회중...';
+        function renderErrorCard(index, station, msg) {
+            const skeletonCard = document.getElementById(`station-card-${index}`);
+            if (!skeletonCard) return;
             
-            const routes = await getStationRoutes(cityCode, nodeId);
-            
-            if (!routes || routes.length === 0) {
-                container.innerHTML = '<p class="text-xs text-gray-400">경유 노선 정보를 불러올 수 없습니다.</p>';
+            let displayMsg = msg;
+            if (msg.includes('KEY_NOT_REGISTERED') || msg.includes('KEY_ERROR')) displayMsg = "인증키 에러: 키를 확인해주세요.";
+            else if (msg === 'NETWORK_ERROR') displayMsg = "네트워크/프록시 연결 실패";
+
+            const kakaoSearchQuery = `${CITY_NAMES[currentRegion]} ${station.name}`;
+            const kakaoMapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(kakaoSearchQuery)}`;
+
+            const html = `
+                <div class="toss-card p-5 mb-4 !bg-red-50 border-red-100 relative">
+                     <div class="absolute top-4 right-4 flex gap-1">
+                        <a href="${kakaoMapUrl}" target="_blank" class="text-xs btn-kakao px-2 py-1 rounded-md font-bold hover:opacity-80 transition-opacity flex items-center gap-1 shadow-sm">
+                            <i class="fa-solid fa-map-location-dot"></i> 카카오맵
+                        </a>
+                        <button onclick="removeStation('${currentRegion}', ${index})" class="text-red-300 hover:text-red-500 p-1">
+                            <i class="fa-solid fa-trash-can text-sm"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-triangle-exclamation text-red-500"></i>
+                        <h4 class="text-base font-bold text-red-600">${station.name}</h4>
+                    </div>
+                    <p class="text-xs text-red-500 break-all">${displayMsg}</p>
+                </div>
+            `;
+            skeletonCard.outerHTML = html;
+        }
+
+        // --- Event Handlers (동일) ---
+        function openSearchModal() {
+            // 안동시는 시간표 모드라 검색 API 의미 없음 -> 수동 등록 유도
+            if(currentRegion === 'andong') { 
+                document.getElementById('search-modal').classList.remove('hidden');
+                document.getElementById('search-modal-region').innerText = "안동시 (시간표 모드)";
+                document.getElementById('api-search-box').classList.add('hidden');
+                document.getElementById('andong-manual-guide').classList.remove('hidden');
+                document.getElementById('add-station-results').innerHTML = '';
                 return;
             }
 
-            // 노선 번호 숫자 정렬 (문자열 고려)
-            routes.sort((a, b) => {
-                const numA = parseInt(a.routeno.replace(/[^0-9]/g, "")) || 0;
-                const numB = parseInt(b.routeno.replace(/[^0-9]/g, "")) || 0;
-                return numA - numB;
-            });
-
-            let html = `<div class="text-left"><p class="text-[10px] text-gray-400 mb-2 font-bold">노선 번호를 누르면 시간표를 검색합니다:</p><div class="flex flex-wrap gap-1.5">`;
-            
-            routes.forEach(route => {
-                const searchLink = `https://search.naver.com/search.naver?query=${regionName} ${route.routeno}번 버스 시간표`;
-                html += `<a href="${searchLink}" target="_blank" class="bg-white border border-gray-200 text-main font-bold rounded-lg px-2 py-1 text-xs shadow-sm hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors">${route.routeno}</a>`;
-            });
-            
-            html += `</div></div>`;
-            container.innerHTML = html;
-        }
-
-        // 검색 로직
-        function openSearchModal() {
             if(!apiKey) { alert("설정에서 API 키를 먼저 입력해주세요."); openSettings(); return; }
             document.getElementById('search-modal').classList.remove('hidden');
             document.getElementById('search-modal-region').innerText = `${CITY_NAMES[currentRegion]}에서 검색`;
+            document.getElementById('api-search-box').classList.remove('hidden');
+            document.getElementById('andong-manual-guide').classList.add('hidden');
             document.getElementById('add-station-input').placeholder = `예: ${CITY_NAMES[currentRegion]} 정류장 이름`;
             document.getElementById('add-station-input').value = '';
             document.getElementById('add-station-results').innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">정류장 이름 또는 번호를 검색해보세요.</p>';
             document.getElementById('add-station-input').focus();
         }
-
         function closeSearchModal() { document.getElementById('search-modal').classList.add('hidden'); }
-
         async function doSearchStation() {
             const keyword = document.getElementById('add-station-input').value.trim();
             if(!keyword) return;
-            
             const resultArea = document.getElementById('add-station-results');
             resultArea.innerHTML = '<p class="text-center mt-4"><i class="fa-solid fa-spinner fa-spin"></i> 검색중...</p>';
-
             const result = await searchStationAPI(keyword);
-
-            if (result.error) {
-                resultArea.innerHTML = `<p class="text-center mt-4 text-red-400 text-xs">오류: ${result.error}</p>`;
-                return;
-            }
-
-            if (result.length === 0) {
-                resultArea.innerHTML = '<p class="text-center mt-4 text-gray-400">검색 결과가 없습니다.</p>';
-                return;
-            }
-
-            // [스마트 정렬]
-            result.sort((a, b) => {
-                const nameA = a.nodenm;
-                const nameB = b.nodenm;
-                if (nameA === keyword && nameB !== keyword) return -1;
-                if (nameB === keyword && nameA !== keyword) return 1;
-                if (nameA.startsWith(keyword) && !nameB.startsWith(keyword)) return -1;
-                if (nameB.startsWith(keyword) && !nameA.startsWith(keyword)) return 1;
-                return nameA.length - nameB.length;
-            });
-
+            if (result.error) { resultArea.innerHTML = `<p class="text-center mt-4 text-red-400 text-xs">오류: ${result.error}</p>`; return; }
+            if (result.length === 0) { resultArea.innerHTML = '<p class="text-center mt-4 text-gray-400">검색 결과가 없습니다.</p>'; return; }
+            result.sort((a, b) => (a.nodenm || "").length - (b.nodenm || "").length);
             let html = '';
             result.forEach(item => {
                 const arsNo = item.nodeno || '-';
@@ -619,12 +1040,11 @@
                         <p class="font-bold text-main text-sm truncate">${item.nodenm}</p>
                         <p class="text-xs text-gray-400 truncate">번호: <span class="text-blue-500 font-bold">${arsNo}</span> | ID: ${item.nodeid}</p>
                     </div>
-                    <button onclick="addStation('${item.nodenm.replace(/'/g, "\\'")}', '${item.nodeid}', '${arsNo}')" class="flex-none text-xs bg-blue-500 text-white px-3 py-2 rounded-xl font-bold hover:bg-blue-600 transition-colors">추가</button>
+                    <button onclick="addStation('${(item.nodenm || "").replace(/'/g, "\\'")}', '${item.nodeid}', '${arsNo}')" class="flex-none text-xs bg-blue-500 text-white px-3 py-2 rounded-xl font-bold hover:bg-blue-600 transition-colors">추가</button>
                 </div>`;
             });
             resultArea.innerHTML = html;
         }
-
         function addStation(name, nodeId, arsNo) {
             stationConfig[currentRegion].push({ name: name, sub: "사용자 추가", nodeId: nodeId, arsNo: arsNo, tags: [] });
             localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig));
@@ -655,11 +1075,12 @@
         function saveSettings() {
             const key = document.getElementById('api-key-input').value.trim();
             const type = document.querySelector('input[name="key-type"]:checked').value;
+            const proxy = document.getElementById('proxy-select').value;
             if(key) {
-                apiKey = key;
-                keyType = type;
+                apiKey = key; keyType = type; selectedProxy = proxy;
                 localStorage.setItem('toss_bus_api_key', key);
                 localStorage.setItem('toss_bus_key_type', type);
+                localStorage.setItem('toss_bus_proxy', proxy);
                 alert('저장되었습니다.');
                 closeSettings();
                 renderList();
@@ -668,6 +1089,7 @@
         function resetData() {
             if(confirm("모든 데이터를 초기화하시겠습니까?")) {
                 localStorage.removeItem('my_station_config_v40');
+                localStorage.removeItem('station_routes_cache_v1');
                 stationConfig = JSON.parse(JSON.stringify(defaultStationConfig));
                 renderList();
                 alert("초기화되었습니다.");
@@ -678,27 +1100,46 @@
             const inputKey = document.getElementById('api-key-input').value.trim();
             const resultBox = document.getElementById('test-result');
             const selectedType = document.querySelector('input[name="key-type"]:checked').value;
+            const currentProxy = document.getElementById('proxy-select').value;
+            
+            // 임시 전역 변수 설정 (테스트용)
+            const originalProxy = selectedProxy;
+            selectedProxy = currentProxy;
+            
             if(!inputKey) { alert("키를 입력하세요"); return; }
             resultBox.classList.remove('hidden');
             resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 테스트 중...';
-            apiKey = inputKey;
-            keyType = selectedType;
+            apiKey = inputKey; keyType = selectedType;
+            
             // 안동대 (숫자ID)로 테스트
-            const result = await fetchBusArrival('37010', 'DJB8001793'); // 문서 예시 ID로 테스트
+            const result = await fetchBusArrival('37010', 'DJB8001793'); 
+            
+            // 전역 변수 복구
+            selectedProxy = originalProxy;
+
             if (Array.isArray(result)) {
                 resultBox.innerHTML = '<span class="text-green-600 font-bold">✅ 연결 성공!</span><br>모든 설정이 정상입니다.';
             } else {
                 resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ ${result}</span>`;
             }
         }
-        function testDirectConnection() {
-            const inputKey = document.getElementById('api-key-input').value.trim();
-            if(!inputKey) { alert("키를 입력하세요"); return; }
-            const selectedType = document.querySelector('input[name="key-type"]:checked').value;
-            const testKey = selectedType === 'encoding' ? inputKey : encodeURIComponent(inputKey);
-            const url = `http://apis.data.go.kr/1613000/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList?serviceKey=${testKey}&cityCode=37010&nodeId=DJB8001793&numOfRows=1&pageNo=1&_type=json`;
-            window.open(url, '_blank');
+
+        // [NEW] 수동 추가 함수 (버튼 핸들러)
+        function manualAddStation() {
+            const id = document.getElementById('manual-station-id').value;
+            const name = document.getElementById('manual-station-name').value;
+            if(!id || !name) { alert("이름과 ID를 모두 입력해주세요."); return; }
+            addStation(name, id, "직접추가");
         }
+        
+        // 기존 prompt 방식 수동 추가 (타 지역용)
+        function addManualStation() {
+            const name = document.getElementById('manual-station-name').value;
+            const id = document.getElementById('manual-station-id').value;
+            if(!name || !id) { alert("정보를 입력하세요"); return; }
+            addStation(name, id, "직접추가");
+        }
+
         const mainContent = document.getElementById('main-content');
         const island = document.getElementById('dynamic-island');
         mainContent.addEventListener('scroll', () => { island.classList.toggle('island-active', mainContent.scrollTop > 20); });
