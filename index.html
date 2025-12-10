@@ -63,7 +63,7 @@
         .nav-pill-active { background-color: #191F28; color: white; }
         .nav-pill-inactive { background-color: transparent; color: #6B7684; }
         
-        /* 지하철 노선 배지 색상 */
+        /* 지하철 노선 배지 색상 - 코레일 블루 */
         .badge-daegyeong { background-color: #0054A6; color: white; }
         
         /* 노선 선택 버튼 스타일 */
@@ -318,6 +318,10 @@
     </div>
 
     <script>
+        // [사용자 설정] 구미/칠곡 버스 API 인증키 (공공데이터포털)
+        // 코드를 직접 수정하여 키를 넣으려면 아래 따옴표 안에 키를 붙여넣으세요.
+        const MANUAL_API_KEY = ""; 
+
         // [중요] 안동시 고정 정류장 (기본값)
         const ANDONG_DEFAULT_STATIONS = [
             { name: "국립안동대학교", nodeId: "370000023", arsNo: "-", sub: "주요 정류장" },
@@ -361,9 +365,11 @@
                     'gyeongsan': ['경산역']
                 }
             }
+            // 1, 2, 3호선 데이터는 아직 없음 (준비중 처리)
         };
 
-        let apiKey = localStorage.getItem('toss_bus_api_key') || '';
+        // [수정] 코드 내 입력된 MANUAL_API_KEY 우선 사용
+        let apiKey = MANUAL_API_KEY || localStorage.getItem('toss_bus_api_key') || '';
         let keyType = localStorage.getItem('toss_bus_key_type') || 'decoding'; 
         let selectedProxy = localStorage.getItem('toss_bus_proxy') || 'corsproxy';
         
