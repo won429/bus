@@ -62,6 +62,14 @@
         /* 하단 네비게이션 애니메이션 */
         .nav-pill-active { background-color: #191F28; color: white; }
         .nav-pill-inactive { background-color: transparent; color: #6B7684; }
+        
+        /* 지하철 노선 배지 색상 */
+        .badge-daegyeong { background-color: #0054A6; color: white; }
+        
+        /* 노선 선택 버튼 스타일 */
+        .line-badge { transition: all 0.2s; border: 1px solid transparent; }
+        .line-badge-active { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.05); }
+        .line-badge-inactive { opacity: 0.5; background-color: #F2F4F6; color: #8B95A1; border-color: #E5E8EB; }
     </style>
 </head>
 <body class="w-full h-[100dvh] flex flex-col overflow-hidden bg-toss-gradient">
@@ -148,44 +156,48 @@
             </div>
         </div>
 
-        <!-- [2] 지하철 뷰 (초기 숨김) -->
+        <!-- [2] 지하철 뷰 -->
         <div id="view-subway" class="hidden fade-in-up">
             <!-- 지역 선택 (지하철) -->
-            <div class="mb-6 fade-in-up delay-100">
+            <div class="mb-4 fade-in-up delay-100">
                 <h3 class="text-lg font-bold text-main mb-3 px-1">지역 선택</h3>
                 <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1">
                     <!-- 구미시 -->
                     <div id="sub-btn-gumi" onclick="selectSubwayRegion('gumi')" class="toss-card region-card-selected min-w-[100px] h-[100px] p-4 flex flex-col justify-between items-start cursor-pointer transition-all">
                         <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 text-lg"><i class="fa-solid fa-train-subway"></i></div>
-                        <div><p class="text-sm font-bold text-main">구미시</p><p class="text-xs text-sub status-text">선택됨</p></div>
+                        <div><p class="text-sm font-bold text-main">경북 구미시</p><p class="text-xs text-sub status-text">선택됨</p></div>
                     </div>
                     <!-- 칠곡군 -->
                     <div id="sub-btn-chilgok" onclick="selectSubwayRegion('chilgok')" class="toss-card min-w-[100px] h-[100px] p-4 flex flex-col justify-between items-start cursor-pointer transition-all">
                         <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 text-lg"><i class="fa-solid fa-train"></i></div>
-                        <div><p class="text-sm font-bold text-main">칠곡군</p><p class="text-xs text-sub status-text">선택하기</p></div>
+                        <div><p class="text-sm font-bold text-main">경북 칠곡군</p><p class="text-xs text-sub status-text">선택하기</p></div>
                     </div>
                     <!-- 대구광역시 -->
                     <div id="sub-btn-daegu" onclick="selectSubwayRegion('daegu')" class="toss-card min-w-[100px] h-[100px] p-4 flex flex-col justify-between items-start cursor-pointer transition-all">
                         <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-lg"><i class="fa-solid fa-subway"></i></div>
-                        <div><p class="text-sm font-bold text-main">대구시</p><p class="text-xs text-sub status-text">선택하기</p></div>
+                        <div><p class="text-sm font-bold text-main">대구광역시</p><p class="text-xs text-sub status-text">선택하기</p></div>
                     </div>
                     <!-- 경산시 -->
                     <div id="sub-btn-gyeongsan" onclick="selectSubwayRegion('gyeongsan')" class="toss-card min-w-[100px] h-[100px] p-4 flex flex-col justify-between items-start cursor-pointer transition-all">
                         <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 text-lg"><i class="fa-solid fa-train-tram"></i></div>
-                        <div><p class="text-sm font-bold text-main">경산시</p><p class="text-xs text-sub status-text">선택하기</p></div>
+                        <div><p class="text-sm font-bold text-main">경북 경산시</p><p class="text-xs text-sub status-text">선택하기</p></div>
                     </div>
                 </div>
             </div>
 
-            <!-- 지하철 컨텐츠 (Placeholder) -->
+            <!-- 노선 및 역 정보 -->
             <div class="px-1 fade-in-up delay-200">
-                <h3 class="text-lg font-bold text-main mb-3">노선 정보</h3>
-                <div class="p-8 bg-white/50 rounded-3xl border border-white/60 text-center">
-                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 text-2xl">
-                        <i class="fa-solid fa-person-digging"></i>
+                <div class="mb-3">
+                    <h3 class="text-lg font-bold text-main mb-2">노선 선택</h3>
+                    <!-- 노선 선택 배지 컨테이너 -->
+                    <div id="subway-line-badges" class="flex flex-wrap gap-2">
+                        <!-- JS로 배지 주입 -->
                     </div>
-                    <p class="text-main font-bold text-sm mb-1">서비스 준비중</p>
-                    <p class="text-sub text-xs" id="subway-placeholder-text">구미시 지하철 노선 정보를 준비하고 있습니다.</p>
+                </div>
+                
+                <!-- 역 목록 컨테이너 -->
+                <div id="subway-station-list" class="space-y-3">
+                    <!-- JS로 카드 주입 -->
                 </div>
             </div>
         </div>
@@ -326,7 +338,30 @@
         
         let currentRegion = 'andong';
         let currentSubwayRegion = 'gumi'; // 초기값 구미
-        const SUBWAY_REGION_NAMES = { 'gumi': '구미시', 'chilgok': '칠곡군', 'daegu': '대구광역시', 'gyeongsan': '경산시' };
+        let currentSubwayLine = 'daegyeong'; // 초기값 대경선
+
+        const SUBWAY_REGION_NAMES = { 'gumi': '경북 구미시', 'chilgok': '경북 칠곡군', 'daegu': '대구광역시', 'gyeongsan': '경북 경산시' };
+
+        // [NEW] 지하철 데이터 (대경선) + 노선 메타데이터
+        const SUBWAY_LINES_META = {
+            '1': { name: '1호선', color: '#D93F5C' },
+            '2': { name: '2호선', color: '#00AA80' },
+            '3': { name: '3호선', color: '#FFB100' },
+            'daegyeong': { name: '대경선', color: '#0054A6' }
+        };
+
+        const SUBWAY_DATA = {
+            'daegyeong': {
+                name: '대경선',
+                color: 'badge-daegyeong',
+                stations: {
+                    'gumi': ['구미역', '사곡'], 
+                    'chilgok': ['북삼', '왜관역'], 
+                    'daegu': ['서대구역', '원대(달성공원)', '대구역', '동대구역'], 
+                    'gyeongsan': ['경산역']
+                }
+            }
+        };
 
         let apiKey = localStorage.getItem('toss_bus_api_key') || '';
         let keyType = localStorage.getItem('toss_bus_key_type') || 'decoding'; 
@@ -341,13 +376,9 @@
 
         let routeDestCache = JSON.parse(localStorage.getItem('route_dest_cache')) || {};
 
-        // -----------------------------------------------------------------------------------------
-        // [안동시 시간표 데이터 입력 구역]
-        // -----------------------------------------------------------------------------------------
         const TIMETABLE_URL = "./timetable.csv"; 
         
         let ANDONG_TIMETABLE = null; // 초기값 null (로딩 전)
-        // -----------------------------------------------------------------------------------------
 
         document.addEventListener('DOMContentLoaded', () => {
             if(apiKey) {
@@ -390,12 +421,12 @@
                 viewSubway.classList.remove('hidden');
                 viewBus.classList.add('hidden');
                 
-                // 지하철 초기화
+                // 지하철 UI 초기화
                 selectSubwayRegion(currentSubwayRegion);
             }
         }
 
-        // --- 지하철 지역 선택 ---
+        // --- 지하철 로직 ---
         function selectSubwayRegion(region) {
             currentSubwayRegion = region;
             ['gumi', 'chilgok', 'daegu', 'gyeongsan'].forEach(id => {
@@ -409,11 +440,223 @@
                     txt.innerText = '선택하기'; 
                 }
             });
-            // 플레이스홀더 텍스트 변경
-            document.getElementById('subway-placeholder-text').innerText = `${SUBWAY_REGION_NAMES[region]} 지하철 노선 정보를 준비하고 있습니다.`;
+            
+            // 지역 변경 시 기본 노선 선택 (대경선)
+            currentSubwayLine = 'daegyeong';
+            renderSubwayLineBadges(region);
+            renderSubwayStations();
         }
 
-        // 시간표 파일(CSV) 불러오는 함수
+        function renderSubwayLineBadges(region) {
+            const container = document.getElementById('subway-line-badges');
+            container.innerHTML = '';
+            
+            // 지역별 표시할 노선 정의
+            let linesToShow = [];
+            if (region === 'daegu') linesToShow = ['1', '2', '3', 'daegyeong'];
+            else if (region === 'gyeongsan') linesToShow = ['1', '2', 'daegyeong'];
+            else linesToShow = ['daegyeong']; // 구미, 칠곡
+
+            linesToShow.forEach(lineKey => {
+                const meta = SUBWAY_LINES_META[lineKey];
+                const isActive = (lineKey === currentSubwayLine);
+                
+                const btn = document.createElement('button');
+                btn.className = `line-badge px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${isActive ? 'line-badge-active text-white' : 'line-badge-inactive'}`;
+                
+                if (isActive) {
+                    btn.style.backgroundColor = meta.color;
+                    btn.style.borderColor = meta.color;
+                }
+                
+                btn.innerText = meta.name;
+                btn.onclick = () => selectSubwayLine(lineKey);
+                
+                container.appendChild(btn);
+            });
+        }
+
+        function selectSubwayLine(lineKey) {
+            currentSubwayLine = lineKey;
+            renderSubwayLineBadges(currentSubwayRegion); // 배지 스타일 갱신
+            renderSubwayStations(); // 목록 갱신
+        }
+
+        function renderSubwayStations() {
+            const region = currentSubwayRegion;
+            const lineKey = currentSubwayLine;
+            const listContainer = document.getElementById('subway-station-list');
+            listContainer.innerHTML = '';
+
+            // [NEW] 준비중 화면 처리 (대경선 외 노선)
+            if (lineKey !== 'daegyeong') {
+                const meta = SUBWAY_LINES_META[lineKey];
+                listContainer.innerHTML = `
+                    <div class="p-8 bg-white/50 rounded-3xl border border-white/60 text-center mt-4">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400 text-2xl">
+                            <i class="fa-solid fa-person-digging"></i>
+                        </div>
+                        <p class="text-main font-bold text-sm mb-1" style="color:${meta.color}">${meta.name} 준비중</p>
+                        <p class="text-sub text-xs">해당 노선의 정보는 추후 업데이트 예정입니다.</p>
+                    </div>`;
+                return;
+            }
+
+            if(!SUBWAY_DATA[lineKey]) {
+                listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs">정보가 없습니다.</div>`;
+                return;
+            }
+
+            const lineData = SUBWAY_DATA[lineKey];
+            const stations = lineData.stations[region] || [];
+
+            if(stations.length === 0) {
+                listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs">등록된 역이 없습니다.</div>`;
+                return;
+            }
+
+            // [NEW] 현재 시간 계산용
+            const now = new Date();
+            const nowTotalSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const day = now.getDay(); 
+            let dayKey = 'weekday';
+            if(day === 0) dayKey = 'holiday'; 
+            else if(day === 6) dayKey = 'saturday'; 
+
+            stations.forEach(stationName => {
+                let cardContent = '';
+                
+                let transferHtml = '';
+                if (stationName === '대구역' || stationName === '동대구역') {
+                    transferHtml = `<span class="ml-1.5 w-4 h-4 rounded-full bg-[#D93F5C] text-white text-[9px] flex items-center justify-center font-bold shadow-sm" title="1호선 환승">1</span>`;
+                } else if (stationName === '원대(달성공원)') {
+                    transferHtml = `<span class="ml-1.5 w-4 h-4 rounded-full bg-[#FFB100] text-white text-[9px] flex items-center justify-center font-bold shadow-sm" title="3호선 환승">3</span>`;
+                }
+
+                // [NEW] 시간표 조회 및 계산 함수 (초 단위)
+                const getNextTime = (destFilter) => {
+                    if (!ANDONG_TIMETABLE || ANDONG_TIMETABLE === "ERROR") return "시간표 없음";
+                    
+                    // 역 이름으로 시간표 찾기
+                    const stationData = ANDONG_TIMETABLE[stationName];
+                    if (!stationData) return "정보 없음";
+
+                    let targetRoutes = [];
+                    // 방면 필터링
+                    stationData.forEach(r => {
+                        if (destFilter.includes(r.dest)) targetRoutes.push(r);
+                    });
+
+                    if (targetRoutes.length === 0) return "운행 종료";
+
+                    let minDiff = 9999;
+                    let nextTimeStr = null;
+
+                    targetRoutes.forEach(route => {
+                        let timeList = [];
+                        if(Array.isArray(route.times)) timeList = route.times;
+                        else if(typeof route.times === 'object') timeList = route.times[dayKey] || route.times['weekday'] || [];
+
+                        timeList.forEach(time => {
+                            const [h, m, s = 0] = time.split(':').map(Number);
+                            const trainTotalSec = h * 3600 + m * 60 + s;
+                            
+                            if (trainTotalSec > nowTotalSec) {
+                                const diffSec = trainTotalSec - nowTotalSec;
+                                if (diffSec < minDiff * 60) {
+                                    minDiff = Math.floor(diffSec / 60);
+                                    nextTimeStr = time;
+                                }
+                            }
+                        });
+                    });
+                    
+                    if (!nextTimeStr) {
+                         return "운행 종료"; 
+                    }
+
+                    if (minDiff < 60) return `<span class="text-red-500 font-bold">${minDiff}분 후</span> (${nextTimeStr})`;
+                    else return `${nextTimeStr} 출발`;
+                };
+
+                if (stationName === '북삼') {
+                    cardContent = `
+                    <div class="toss-card p-5 !bg-[#E6F0FA]/90 animate-[fadeInUp_0.4s_ease-out] relative border border-blue-100">
+                        <div class="flex items-center gap-2.5 mb-4">
+                            <span class="${lineData.color} text-[10px] px-2 py-1 rounded-full font-bold shadow-sm">${lineData.name}</span>
+                            <h4 class="text-base font-bold text-main flex items-center">${stationName}${transferHtml}</h4>
+                            <span class="bg-amber-100 text-amber-600 text-[10px] font-bold px-1.5 py-0.5 rounded ml-auto">미개통</span>
+                        </div>
+                        <div class="p-4 bg-white/60 rounded-xl text-center border border-blue-50">
+                            <div class="mb-2 text-2xl">🚧</div>
+                            <p class="text-sm font-bold text-main mb-1">현재 시운전 중입니다</p>
+                            <p class="text-xs text-blue-500 font-bold">2026년 2월 개통 예정</p>
+                        </div>
+                    </div>`;
+                } else {
+                    let upHtml = '';
+                    if (stationName !== '구미역') {
+                        const timeDisplay = getNextTime(['구미']); 
+                        upHtml = `
+                        <div class="glass-item p-3 flex items-center justify-between !bg-white/60 mb-2"> <!-- [수정] mb-1 -> mb-2 for spacing -->
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold">상행</div>
+                                <div>
+                                    <span class="text-sm font-bold text-main">구미 방면</span>
+                                </div>
+                            </div>
+                            <span class="text-xs text-main font-medium">${timeDisplay}</span>
+                        </div>`;
+                    }
+
+                    let downHtml = '';
+                    if (stationName !== '경산역') {
+                        if (stationName !== '동대구역') {
+                            const timeDisplay = getNextTime(['동대구']);
+                            downHtml += `
+                            <div class="glass-item p-3 flex items-center justify-between !bg-white/60 mb-2"> <!-- [수정] mb-1 -> mb-2 for spacing -->
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold">하행</div>
+                                    <div>
+                                        <span class="text-sm font-bold text-main">동대구 방면</span>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-main font-medium">${timeDisplay}</span>
+                            </div>`;
+                        }
+                        
+                        const timeDisplay = getNextTime(['경산']);
+                        downHtml += `
+                        <div class="glass-item p-3 flex items-center justify-between !bg-white/60">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold">하행</div>
+                                <div>
+                                    <span class="text-sm font-bold text-main">경산 방면</span>
+                                </div>
+                            </div>
+                            <span class="text-xs text-main font-medium">${timeDisplay}</span>
+                        </div>`;
+                    }
+
+                    cardContent = `
+                    <div class="toss-card p-5 !bg-[#E6F0FA]/90 animate-[fadeInUp_0.4s_ease-out] relative border border-blue-100">
+                        <div class="flex items-center gap-2.5 mb-4">
+                            <span class="${lineData.color} text-[10px] px-2 py-1 rounded-full font-bold shadow-sm">${lineData.name}</span>
+                            <h4 class="text-base font-bold text-main flex items-center">${stationName}${transferHtml}</h4>
+                        </div>
+                        
+                        <div class="space-y-0"> <!-- Removed space-y-2 since we handle spacing inside items -->
+                            ${upHtml}
+                            ${downHtml}
+                        </div>
+                    </div>`;
+                }
+                
+                listContainer.insertAdjacentHTML('beforeend', cardContent);
+            });
+        }
+
+        // [수정] 시간표 파일(CSV) 불러오는 함수
         async function loadTimetable() {
             if (!TIMETABLE_URL) return; 
 
@@ -489,11 +732,17 @@
                 }
             });
             
+            // [수정] 시간순 정렬 (초 단위까지 고려하여 정렬)
             for (let id in table) {
                 table[id].forEach(route => {
-                    if(route.times.weekday) route.times.weekday.sort();
-                    if(route.times.saturday) route.times.saturday.sort();
-                    if(route.times.holiday) route.times.holiday.sort();
+                    const timeSort = (a, b) => {
+                        const [h1, m1, s1 = 0] = a.split(':').map(Number);
+                        const [h2, m2, s2 = 0] = b.split(':').map(Number);
+                        return (h1 * 3600 + m1 * 60 + s1) - (h2 * 3600 + m2 * 60 + s2);
+                    };
+                    if(route.times.weekday) route.times.weekday.sort(timeSort);
+                    if(route.times.saturday) route.times.saturday.sort(timeSort);
+                    if(route.times.holiday) route.times.holiday.sort(timeSort);
                 });
             }
 
@@ -503,6 +752,192 @@
         function getEncodedKey() {
             if (!apiKey) return '';
             return keyType === 'encoding' ? apiKey : encodeURIComponent(apiKey);
+        }
+
+        // [수정] 안동시 정적 시간표 (초 단위 계산 적용)
+        function renderStaticCard(index, station) {
+            const container = document.getElementById('dynamic-list-container');
+            
+            if (!ANDONG_TIMETABLE || ANDONG_TIMETABLE === "ERROR") return; 
+
+            const timetable = ANDONG_TIMETABLE[station.nodeId]; 
+            
+            let iconClass = "fa-solid fa-map-pin";
+            let iconBgClass = "bg-gray-100";
+            let iconTextClass = "text-gray-500";
+
+            if (station.name.includes("대학교") || station.name.includes("안동대")) {
+                iconClass = "fa-solid fa-school";
+                iconBgClass = "bg-green-100";
+                iconTextClass = "text-green-600";
+            } else if (station.name.includes("CGV")) {
+                iconClass = "fa-solid fa-film";
+                iconBgClass = "bg-red-100";
+                iconTextClass = "text-red-500";
+            } else if (station.name.includes("터미널") || station.name.includes("역")) {
+                iconClass = "fa-solid fa-bus";
+                iconBgClass = "bg-blue-100";
+                iconTextClass = "text-blue-600";
+            }
+            
+            // [수정] 현재 시간을 초 단위까지 계산
+            const now = new Date();
+            const nowTotalSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const day = now.getDay(); 
+            
+            let dayKey = 'weekday';
+            let dayLabel = "평일";
+            if(day === 0) { dayKey = 'holiday'; dayLabel = "일/공휴일"; }
+            else if(day === 6) { dayKey = 'saturday'; dayLabel = "토요일"; }
+
+            let contentHtml = '';
+            let allArrivals = [];
+
+            if (!timetable || Object.keys(timetable).length === 0) {
+                 // No data
+            } else {
+                if(Array.isArray(timetable)) {
+                    timetable.forEach(route => {
+                        let timeList = [];
+                        if(Array.isArray(route.times)) timeList = route.times; 
+                        else if(typeof route.times === 'object') timeList = route.times[dayKey] || route.times['weekday'] || [];
+
+                        if(!timeList || timeList.length === 0) return;
+
+                        let nextTimeStr = null;
+                        let minDiff = 9999; // 분 단위 차이 저장 (표시용)
+                        let isNextDay = false;
+
+                        for(let time of timeList) {
+                            const [h, m, s = 0] = time.split(':').map(Number);
+                            const busTotalSec = h * 3600 + m * 60 + s;
+                            
+                            if (busTotalSec > nowTotalSec) {
+                                const diffSec = busTotalSec - nowTotalSec;
+                                if (diffSec < minDiff * 60) { // 더 가까운 시간 발견
+                                    minDiff = Math.floor(diffSec / 60);
+                                    nextTimeStr = time;
+                                }
+                            }
+                        }
+
+                        if (!nextTimeStr && timeList.length > 0) {
+                             nextTimeStr = timeList[0];
+                             const [h, m, s = 0] = nextTimeStr.split(':').map(Number);
+                             const busTotalSec = h * 3600 + m * 60 + s;
+                             // 하루는 86400초
+                             const diffSec = (86400 - nowTotalSec) + busTotalSec;
+                             minDiff = Math.floor(diffSec / 60);
+                             isNextDay = true;
+                        }
+
+                        if (nextTimeStr) {
+                             const isExpress = route.routeNo.includes("급행");
+                             allArrivals.push({
+                                 routeNo: route.routeNo,
+                                 dest: route.dest,
+                                 minDiff: minDiff,
+                                 timeStr: nextTimeStr,
+                                 isNextDay: isNextDay,
+                                 isExpress: isExpress
+                             });
+                        }
+                    });
+                }
+            }
+            
+            if(allArrivals.length === 0) {
+                 contentHtml = `
+                    <div class="p-4 bg-gray-50/50 rounded-xl text-center border border-gray-100">
+                        <p class="text-xs text-gray-500 font-bold">오늘은 운행하는 버스가 없습니다</p>
+                        <p class="text-[10px] text-gray-400">(${dayLabel} 기준)</p>
+                    </div>`;
+            } else {
+                const grouped = {};
+                allArrivals.forEach(item => {
+                    if (!grouped[item.routeNo]) grouped[item.routeNo] = [];
+                    grouped[item.routeNo].push(item);
+                });
+
+                for (let r in grouped) {
+                    grouped[r].sort((a, b) => a.minDiff - b.minDiff);
+                }
+
+                const sortedRoutes = Object.keys(grouped).sort((a, b) => {
+                    return grouped[a][0].minDiff - grouped[b][0].minDiff;
+                });
+
+                sortedRoutes.forEach(r => {
+                    const groupItems = grouped[r];
+                    const first = groupItems[0];
+                    const badgeText = first.isExpress ? "급행" : "일반";
+                    const badgeColor = first.isExpress ? "bg-red-500" : "bg-blue-500";
+                    
+                    const firstTimeDisplay = formatMinDiff(first.minDiff, first.timeStr, first.isNextDay);
+                    const firstColor = first.minDiff < 10 && !first.isNextDay ? "text-red-500 font-bold" : "text-main";
+
+                    contentHtml += `
+                    <div class="glass-item p-3 mb-2 flex flex-col gap-2 active:scale-[0.98] transition-transform">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="${badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${badgeText}</span>
+                                <div>
+                                    <span class="text-sm font-bold text-main">${r}</span>
+                                    <span class="text-[10px] text-sub ml-1">${first.dest} 방면</span>
+                                </div>
+                            </div>
+                            <span class="text-sm ${firstColor}">${firstTimeDisplay}</span>
+                        </div>
+                    `;
+
+                    if (groupItems.length > 1) {
+                        contentHtml += `<div class="pl-2 border-t border-gray-100/50 pt-2 space-y-1">`;
+                        for(let i=1; i<groupItems.length; i++) {
+                            const sub = groupItems[i];
+                            const subTimeDisplay = formatMinDiff(sub.minDiff, sub.timeStr, sub.isNextDay);
+                            const subColor = sub.minDiff < 10 && !sub.isNextDay ? "text-red-500 font-bold" : "text-gray-600";
+                            
+                            contentHtml += `
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] text-sub pl-9">${sub.dest} 방면</span>
+                                <span class="text-xs ${subColor}">${subTimeDisplay}</span>
+                            </div>`;
+                        }
+                        contentHtml += `</div>`;
+                    }
+                    contentHtml += `</div>`;
+                });
+            }
+
+            const kakaoSearchQuery = `${CITY_NAMES[currentRegion]} ${station.name}`;
+            const kakaoMapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(kakaoSearchQuery)}`;
+
+            const cardHtml = `
+                <div class="toss-card p-5 mb-4 !bg-white/70 animate-[fadeInUp_0.4s_ease-out] relative group">
+                    <div class="absolute top-4 right-4 flex gap-1">
+                        <span class="text-[10px] text-blue-500 bg-blue-50 px-2 py-1 rounded-md font-bold">📅 ${dayLabel}</span>
+                        <a href="${kakaoMapUrl}" target="_blank" class="text-xs btn-kakao px-2 py-1 rounded-md font-bold hover:opacity-80 transition-opacity flex items-center gap-1 shadow-sm">
+                            <i class="fa-solid fa-map-location-dot"></i> 카카오맵
+                        </a>
+                        <button onclick="removeStation('${currentRegion}', ${index})" class="delete-btn text-gray-300 hover:text-red-500 p-1 hidden">
+                            <i class="fa-solid fa-trash-can text-sm"></i>
+                        </button>
+                    </div>
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 rounded-[16px] ${iconBgClass} flex items-center justify-center ${iconTextClass} text-lg shadow-sm">
+                                <i class="${iconClass}"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-base font-bold text-main">${station.name}</h4>
+                                <p class="text-xs text-sub text-[10px]">ID: ${station.nodeId} (시간표 모드)</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-1">${contentHtml}</div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHtml);
         }
 
         function fetchWithProxy(url) {
@@ -660,23 +1095,36 @@
             }
 
             // [NEW] 안동시 CSV 로드 실패 시 전역 에러 표시 (카드별 중복 방지)
-            if (currentRegion === 'andong' && ANDONG_TIMETABLE === "ERROR") {
-                container.innerHTML = `
-                    <div class="p-8 bg-red-50/50 rounded-3xl border border-red-100 text-center">
-                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl shadow-sm">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
+            if (currentRegion === 'andong') {
+                if (ANDONG_TIMETABLE === "ERROR") {
+                    container.innerHTML = `
+                        <div class="p-8 bg-red-50/50 rounded-3xl border border-red-100 text-center">
+                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl shadow-sm">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <p class="text-base font-bold text-red-600 mb-2">시간표 파일을 불러올 수 없습니다</p>
+                            <p class="text-xs text-red-400 leading-relaxed mb-4">
+                                서버에 <span class="font-mono bg-red-100 px-1 rounded">timetable.csv</span> 파일이 없거나<br>
+                                파일 경로를 찾을 수 없습니다.
+                            </p>
+                            <button onclick="loadTimetable()" class="text-xs bg-white border border-red-200 text-red-500 px-4 py-2 rounded-xl font-bold hover:bg-red-50 transition-colors shadow-sm">
+                                <i class="fa-solid fa-rotate-right mr-1"></i> 다시 불러오기
+                            </button>
                         </div>
-                        <p class="text-base font-bold text-red-600 mb-2">시간표 파일을 불러올 수 없습니다</p>
-                        <p class="text-xs text-red-400 leading-relaxed mb-4">
-                            서버에 <span class="font-mono bg-red-100 px-1 rounded">timetable.csv</span> 파일이 없거나<br>
-                            파일 경로를 찾을 수 없습니다.
-                        </p>
-                        <button onclick="loadTimetable()" class="text-xs bg-white border border-red-200 text-red-500 px-4 py-2 rounded-xl font-bold hover:bg-red-50 transition-colors shadow-sm">
-                            <i class="fa-solid fa-rotate-right mr-1"></i> 다시 불러오기
-                        </button>
-                    </div>
-                `;
-                return; // 더 이상 렌더링하지 않음
+                    `;
+                    return; 
+                }
+                
+                // [NEW] 데이터가 아직 로드되지 않은 경우 (null 상태)
+                if (ANDONG_TIMETABLE === null) {
+                    container.innerHTML = `
+                        <div class="text-center py-20 animate-pulse">
+                            <i class="fa-solid fa-satellite-dish text-3xl text-gray-300 mb-2"></i>
+                            <p class="text-sm font-bold text-gray-400">시간표 데이터 로딩중...</p>
+                        </div>
+                    `;
+                    return;
+                }
             }
 
             targets.forEach((station, index) => {
@@ -703,249 +1151,6 @@
                     loadStationData(index, cityCode, station);
                 }
             });
-        }
-
-        // [수정] 안동시 정적 시간표 (그룹화 적용)
-        function renderStaticCard(index, station) {
-            const container = document.getElementById('dynamic-list-container');
-            
-            // 데이터가 아직 null인 경우 로딩 대기
-            if (ANDONG_TIMETABLE === null) return; 
-
-            const timetable = ANDONG_TIMETABLE[station.nodeId]; 
-            
-            let iconClass = "fa-solid fa-map-pin";
-            let iconBgClass = "bg-gray-100";
-            let iconTextClass = "text-gray-500";
-
-            if (station.name.includes("대학교") || station.name.includes("안동대")) {
-                iconClass = "fa-solid fa-school";
-                iconBgClass = "bg-green-100";
-                iconTextClass = "text-green-600";
-            } else if (station.name.includes("CGV")) {
-                iconClass = "fa-solid fa-film";
-                iconBgClass = "bg-red-100";
-                iconTextClass = "text-red-500";
-            } else if (station.name.includes("터미널") || station.name.includes("역")) {
-                iconClass = "fa-solid fa-bus";
-                iconBgClass = "bg-blue-100";
-                iconTextClass = "text-blue-600";
-            }
-            
-            const now = new Date();
-            const nowTotalMin = now.getHours() * 60 + now.getMinutes();
-            const day = now.getDay(); 
-            
-            let dayKey = 'weekday';
-            let dayLabel = "평일";
-            if(day === 0) { dayKey = 'holiday'; dayLabel = "일/공휴일"; }
-            else if(day === 6) { dayKey = 'saturday'; dayLabel = "토요일"; }
-
-            let contentHtml = '';
-            let allArrivals = [];
-
-            if (!timetable || Object.keys(timetable).length === 0) {
-                 // No data
-            } else {
-                if(Array.isArray(timetable)) {
-                    timetable.forEach(route => {
-                        let timeList = [];
-                        if(Array.isArray(route.times)) timeList = route.times; 
-                        else if(typeof route.times === 'object') timeList = route.times[dayKey] || route.times['weekday'] || [];
-
-                        if(!timeList || timeList.length === 0) return;
-
-                        let nextTimeStr = null;
-                        let minDiff = 9999;
-                        let isNextDay = false;
-
-                        for(let time of timeList) {
-                            const [h, m] = time.split(':').map(Number);
-                            const busTotalMin = h * 60 + m;
-                            if (busTotalMin > nowTotalMin) {
-                                if (busTotalMin - nowTotalMin < minDiff) {
-                                    minDiff = busTotalMin - nowTotalMin;
-                                    nextTimeStr = time;
-                                }
-                            }
-                        }
-
-                        if (!nextTimeStr && timeList.length > 0) {
-                             nextTimeStr = timeList[0];
-                             const [h, m] = nextTimeStr.split(':').map(Number);
-                             const busTotalMin = h * 60 + m;
-                             minDiff = (1440 - nowTotalMin) + busTotalMin;
-                             isNextDay = true;
-                        }
-
-                        if (nextTimeStr) {
-                             const isExpress = route.routeNo.includes("급행");
-                             allArrivals.push({
-                                 routeNo: route.routeNo,
-                                 dest: route.dest,
-                                 minDiff: minDiff,
-                                 timeStr: nextTimeStr,
-                                 isNextDay: isNextDay,
-                                 isExpress: isExpress
-                             });
-                        }
-                    });
-                }
-            }
-            
-            if(allArrivals.length === 0) {
-                 contentHtml = `
-                    <div class="p-4 bg-gray-50/50 rounded-xl text-center border border-gray-100">
-                        <p class="text-xs text-gray-500 font-bold">오늘은 운행하는 버스가 없습니다</p>
-                        <p class="text-[10px] text-gray-400">(${dayLabel} 기준)</p>
-                    </div>`;
-            } else {
-                // [그룹화 로직] 노선 번호별로 묶기
-                const grouped = {};
-                allArrivals.forEach(item => {
-                    if (!grouped[item.routeNo]) grouped[item.routeNo] = [];
-                    grouped[item.routeNo].push(item);
-                });
-
-                // 각 그룹 내에서 시간순 정렬
-                for (let r in grouped) {
-                    grouped[r].sort((a, b) => a.minDiff - b.minDiff);
-                }
-
-                // 그룹 대표 시간(가장 빠른 시간) 기준으로 전체 그룹 정렬
-                const sortedRoutes = Object.keys(grouped).sort((a, b) => {
-                    return grouped[a][0].minDiff - grouped[b][0].minDiff;
-                });
-
-                // 렌더링
-                sortedRoutes.forEach(r => {
-                    const groupItems = grouped[r];
-                    const first = groupItems[0];
-                    const badgeText = first.isExpress ? "급행" : "일반";
-                    const badgeColor = first.isExpress ? "bg-red-500" : "bg-blue-500";
-                    
-                    // 첫번째 줄 (헤더 역할)
-                    const firstTimeDisplay = formatMinDiff(first.minDiff, first.timeStr, first.isNextDay);
-                    const firstColor = first.minDiff < 10 && !first.isNextDay ? "text-red-500 font-bold" : "text-main";
-
-                    contentHtml += `
-                    <div class="glass-item p-3 mb-2 flex flex-col gap-2 active:scale-[0.98] transition-transform">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="${badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${badgeText}</span>
-                                <div>
-                                    <span class="text-sm font-bold text-main">${r}</span>
-                                    <span class="text-[10px] text-sub ml-1">${first.dest} 방면</span>
-                                </div>
-                            </div>
-                            <span class="text-sm ${firstColor}">${firstTimeDisplay}</span>
-                        </div>
-                    `;
-
-                    // 두번째 줄부터 (추가 행선지/시간)
-                    if (groupItems.length > 1) {
-                        contentHtml += `<div class="pl-2 border-t border-gray-100/50 pt-2 space-y-1">`;
-                        for(let i=1; i<groupItems.length; i++) {
-                            const sub = groupItems[i];
-                            const subTimeDisplay = formatMinDiff(sub.minDiff, sub.timeStr, sub.isNextDay);
-                            const subColor = sub.minDiff < 10 && !sub.isNextDay ? "text-red-500 font-bold" : "text-gray-600";
-                            
-                            contentHtml += `
-                            <div class="flex justify-between items-center">
-                                <span class="text-[10px] text-sub pl-9">${sub.dest} 방면</span>
-                                <span class="text-xs ${subColor}">${subTimeDisplay}</span>
-                            </div>`;
-                        }
-                        contentHtml += `</div>`;
-                    }
-                    contentHtml += `</div>`;
-                });
-            }
-
-            const kakaoSearchQuery = `${CITY_NAMES[currentRegion]} ${station.name}`;
-            const kakaoMapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(kakaoSearchQuery)}`;
-
-            const cardHtml = `
-                <div class="toss-card p-5 mb-4 !bg-white/70 animate-[fadeInUp_0.4s_ease-out] relative group">
-                    <div class="absolute top-4 right-4 flex gap-1">
-                        <span class="text-[10px] text-blue-500 bg-blue-50 px-2 py-1 rounded-md font-bold">📅 ${dayLabel}</span>
-                        <a href="${kakaoMapUrl}" target="_blank" class="text-xs btn-kakao px-2 py-1 rounded-md font-bold hover:opacity-80 transition-opacity flex items-center gap-1 shadow-sm">
-                            <i class="fa-solid fa-map-location-dot"></i> 카카오맵
-                        </a>
-                        <button onclick="removeStation('${currentRegion}', ${index})" class="delete-btn text-gray-300 hover:text-red-500 p-1 hidden">
-                            <i class="fa-solid fa-trash-can text-sm"></i>
-                        </button>
-                    </div>
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-10 h-10 rounded-[16px] ${iconBgClass} flex items-center justify-center ${iconTextClass} text-lg shadow-sm">
-                                <i class="${iconClass}"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-base font-bold text-main">${station.name}</h4>
-                                <p class="text-xs text-sub text-[10px]">ID: ${station.nodeId} (시간표 모드)</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="space-y-1">${contentHtml}</div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', cardHtml);
-        }
-        
-        function formatMinDiff(minDiff, timeStr, isNextDay) {
-            if(isNextDay) {
-                 const hours = Math.floor(minDiff / 60);
-                 const mins = minDiff % 60;
-                 return `${hours}시간 ${mins}분 후 (익일 ${timeStr})`;
-            } else {
-                if (minDiff < 60) return `${minDiff}분 후 (${timeStr})`;
-                else return `${timeStr} 출발`;
-            }
-        }
-
-        async function loadStationData(index, cityCode, station) {
-            try {
-                const arrivalPromise = fetchBusArrival(cityCode, station.nodeId);
-                const promises = [arrivalPromise];
-                
-                const results = await Promise.allSettled(promises);
-                const arrivalResult = results[0];
-
-                let safeArrivals = [];
-                let errorMessage = null;
-
-                if (arrivalResult.status === 'fulfilled') {
-                    if (typeof arrivalResult.value === 'string') errorMessage = arrivalResult.value;
-                    else if (Array.isArray(arrivalResult.value)) safeArrivals = arrivalResult.value;
-                }
-
-                if (errorMessage) {
-                    renderErrorCard(index, station, errorMessage);
-                    return;
-                }
-                
-                // 행선지 보강
-                for (let j = 0; j < Math.min(safeArrivals.length, 5); j++) {
-                    const bus = safeArrivals[j];
-                    if (!bus.endnodenm && bus.routeid) {
-                        const destName = await fetchRouteInfo(cityCode, bus.routeid);
-                        if (destName) bus.endnodenm = destName;
-                    }
-                }
-
-                renderCard(index, station, safeArrivals);
-
-            } catch (e) {
-                console.error(e);
-                renderErrorCard(index, station, "앱 오류: " + (e.message || "알 수 없음"));
-            }
-        }
-
-        function formatTime(date) {
-            const h = String(date.getHours()).padStart(2, '0');
-            const m = String(date.getMinutes()).padStart(2, '0');
-            return `${h}:${m}`;
         }
 
         // [수정] API 데이터 렌더링 (그룹화 적용)
