@@ -245,8 +245,8 @@
         // [중요] 안동시 고정 정류장 (기본값)
         const ANDONG_DEFAULT_STATIONS = [
             { name: "국립안동대학교", nodeId: "370000023", arsNo: "-", sub: "주요 정류장" },
-            { name: "CGV 건너", nodeId: "370000998", arsNo: "-", sub: "주요 정류장" }, // 임의 ID
-            { name: "안동터미널(안동역)", nodeId: "354000416", arsNo: "-", sub: "주요 정류장" } // 임의 ID
+            { name: "CGV 건너", nodeId: "370000998", arsNo: "-", sub: "주요 정류장" }, 
+            { name: "안동터미널(안동역)", nodeId: "354000416", arsNo: "-", sub: "주요 정류장" } 
         ];
 
         // 초기 데이터
@@ -265,13 +265,10 @@
         let keyType = localStorage.getItem('toss_bus_key_type') || 'decoding'; 
         let selectedProxy = localStorage.getItem('toss_bus_proxy') || 'corsproxy';
         
-        // 초기 로드 시 안동시 데이터가 비어있으면 기본값으로 채움 + 강제 업데이트
         let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v40')) || JSON.parse(JSON.stringify(defaultStationConfig));
         if(!stationConfig.andong || stationConfig.andong.length === 0) {
             stationConfig.andong = ANDONG_DEFAULT_STATIONS;
         }
-        
-        // [강제 업데이트] 사용자가 기존 데이터를 가지고 있어도 안동시 만큼은 고정 리스트를 사용하도록 함
         stationConfig.andong = ANDONG_DEFAULT_STATIONS;
         localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig));
 
@@ -280,10 +277,9 @@
         // -----------------------------------------------------------------------------------------
         // [안동시 시간표 데이터 입력 구역]
         // -----------------------------------------------------------------------------------------
-        const TIMETABLE_URL = ""; 
+        const TIMETABLE_URL = "./timetable.csv"; 
         
-        // 가짜 데이터 모두 제거됨. 이제 사용자가 CSV를 연결하지 않으면 아무것도 안 뜸.
-        let ANDONG_TIMETABLE = {}; 
+        let ANDONG_TIMETABLE = null; // 초기값 null (로딩 전)
         // -----------------------------------------------------------------------------------------
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -312,19 +308,20 @@
             if (!TIMETABLE_URL) return; 
 
             try {
-                const response = await fetchWithProxy(TIMETABLE_URL);
-                if (!response.ok) throw new Error("File not found");
+                const response = await fetch(TIMETABLE_URL);
+                if (!response.ok) throw new Error("File not found or Network Error");
                 
                 const text = await response.text();
                 parseAndongCSV(text); // CSV 파싱
-                
-                if(currentRegion === 'andong') {
-                    renderList();
-                }
                 console.log("시간표 로드 성공");
-
             } catch (e) {
                 console.error("시간표 로드 실패:", e);
+                ANDONG_TIMETABLE = "ERROR"; // 에러 상태 플래그 설정
+            }
+            
+            // 로드 완료 또는 실패 후 안동 화면이면 리렌더링
+            if(currentRegion === 'andong') {
+                renderList();
             }
         }
 
@@ -334,24 +331,21 @@
             const table = {};
             
             lines.forEach((line, index) => {
-                // 첫 줄이 헤더일 경우 건너뛰기 (숫자가 아니면 헤더로 간주)
                 if (index === 0 && isNaN(line.trim().charAt(0))) return;
 
                 const cols = line.split(',').map(c => c.trim());
-                if (cols.length < 5) return; // 최소 5열 필요 (ID,번호,방면,요일,시간1)
+                if (cols.length < 5) return; 
 
                 const stationId = cols[0];
                 const routeNo = cols[1];
                 const dest = cols[2];
-                let dayType = cols[3]; // 요일 (평일/토요일/일요일/매일)
+                let dayType = cols[3]; 
                 
-                // 요일 코드 변환
                 if(dayType === '평일') dayType = 'weekday';
                 else if(dayType === '토요일') dayType = 'saturday';
                 else if(dayType === '일요일' || dayType === '공휴일') dayType = 'holiday';
-                else dayType = 'all'; // 매일
+                else dayType = 'all'; 
 
-                // 5번째(E열)부터 끝까지 시간으로 인식
                 const times = [];
                 for(let i=4; i<cols.length; i++) {
                     if(cols[i]) times.push(cols[i]);
@@ -359,11 +353,9 @@
 
                 if (!table[stationId]) table[stationId] = [];
                 
-                // 기존 노선 찾기 (같은 노선, 같은 방면이면 시간만 추가)
                 let existing = table[stationId].find(r => r.routeNo === routeNo && r.dest === dest);
                 
                 if (existing) {
-                    // 이미 있으면 times 객체에 해당 요일 추가
                     if(dayType === 'all') {
                          existing.times.weekday = [...(existing.times.weekday || []), ...times];
                          existing.times.saturday = [...(existing.times.saturday || []), ...times];
@@ -372,7 +364,6 @@
                          existing.times[dayType] = [...(existing.times[dayType] || []), ...times];
                     }
                 } else {
-                    // 없으면 새로 생성
                     let timesObj = {};
                     if(dayType === 'all') {
                         timesObj = { weekday: times, saturday: times, holiday: times };
@@ -388,7 +379,6 @@
                 }
             });
             
-            // 시간순 정렬 (선택사항)
             for (let id in table) {
                 table[id].forEach(route => {
                     if(route.times.weekday) route.times.weekday.sort();
@@ -405,20 +395,17 @@
             return keyType === 'encoding' ? apiKey : encodeURIComponent(apiKey);
         }
 
-        // 프록시 URL 생성 (AllOrigins는 CSV 텍스트도 잘 받아옴)
         function fetchWithProxy(url) {
             const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
             return fetch(proxyUrl);
         }
         
-        // 기존 프록시 함수 (API 호출용)
         function getProxyUrl(url) {
              if (selectedProxy === 'direct') return url;
              if (selectedProxy === 'codetabs') return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url);
              return 'https://corsproxy.io/?' + encodeURIComponent(url);
         }
 
-        // [데이터 정규화]
         function normalizeBusData(bus) {
             if (!bus) return null;
             return {
@@ -445,7 +432,7 @@
         }
 
         function updateCityStatus() {
-            document.getElementById('status-andong').innerText = "시간표 모드"; // 안동은 시간표 모드
+            document.getElementById('status-andong').innerText = "시간표 모드"; 
             document.getElementById('status-gumi').innerText = CITY_CODES.gumi ? "준비완료" : "미확인";
             document.getElementById('status-chilgok').innerText = CITY_CODES.chilgok ? "준비완료" : "미확인";
             document.getElementById('city-code-status').innerText = "도시 코드 연동 완료";
@@ -469,7 +456,6 @@
                 const list = Array.isArray(items) ? items : [items];
                 let found = 0;
                 list.forEach(city => {
-                    // 안동은 수동이므로 코드 갱신 안해도 됨, 하지만 저장은 해둠
                     if (city.cityname.includes('안동')) { CITY_CODES.andong = city.citycode; found++; }
                     if (city.cityname.includes('구미')) { CITY_CODES.gumi = city.citycode; found++; }
                     if (city.cityname.includes('칠곡')) { CITY_CODES.chilgok = city.citycode; found++; }
@@ -557,7 +543,6 @@
                 return;
             }
             
-            // 안동시는 추가 버튼 숨김 (고정 모드)
             const addBtn = document.getElementById('add-btn-main');
             if(addBtn) {
                 if(currentRegion === 'andong') addBtn.classList.add('hidden');
@@ -566,10 +551,8 @@
 
             targets.forEach((station, index) => {
                 if(currentRegion === 'andong') {
-                    // 안동: 정적 시간표 로직
                     renderStaticCard(index, station);
                 } else {
-                    // 타 지역: 기존 API 로직 (Skeleton -> Load)
                     const skeletonHtml = `
                         <div id="station-card-${index}" class="toss-card p-5 mb-4 !bg-white/50 animate-pulse relative">
                             <div class="flex justify-between items-start mb-4">
@@ -592,14 +575,51 @@
             });
         }
 
-        // [NEW] 안동시 정적 시간표 렌더링 함수 (CSV 지원 + 아이콘/배지 적용)
+        // [수정] 안동시 정적 시간표 (그룹화 적용)
         function renderStaticCard(index, station) {
             const container = document.getElementById('dynamic-list-container');
             
-            // ANDONG_TIMETABLE이 비어있으면(로딩 전 or 실패) 빈 객체 처리
+            // 1. [에러 처리] 시간표 파일 로드 실패 시
+            if (ANDONG_TIMETABLE === "ERROR") {
+                const kakaoSearchQuery = `${CITY_NAMES[currentRegion]} ${station.name}`;
+                const kakaoMapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(kakaoSearchQuery)}`;
+                
+                const errorHtml = `
+                    <div class="toss-card p-5 mb-4 !bg-white/70 animate-[fadeInUp_0.4s_ease-out] relative group">
+                        <div class="absolute top-4 right-4 flex gap-1">
+                            <a href="${kakaoMapUrl}" target="_blank" class="text-xs btn-kakao px-2 py-1 rounded-md font-bold hover:opacity-80 transition-opacity flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-map-location-dot"></i> 카카오맵
+                            </a>
+                        </div>
+                        <div class="flex justify-between items-start mb-4">
+                             <div class="flex items-center gap-2.5">
+                                <div class="w-10 h-10 rounded-[16px] bg-red-100 flex items-center justify-center text-red-500 text-lg shadow-sm">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-bold text-main">${station.name}</h4>
+                                    <p class="text-xs text-sub text-[10px]">ID: ${station.nodeId}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-red-50 rounded-xl text-center border border-red-100">
+                            <p class="text-xs text-red-500 font-bold">시간표 파일(timetable.csv)을 불러올 수 없습니다</p>
+                            <p class="text-[10px] text-red-400 mt-1">파일 경로를 확인하거나 다시 시도해주세요.</p>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', errorHtml);
+                return;
+            }
+
+            // 2. [로딩 중] 데이터가 아직 null인 경우
+            if (ANDONG_TIMETABLE === null) {
+                // 로딩 중 UI (스켈레톤 등) 표시 가능, 일단 패스
+                return; 
+            }
+
             const timetable = ANDONG_TIMETABLE[station.nodeId]; 
             
-            // 정류장 이름에 따른 아이콘/색상 결정
             let iconClass = "fa-solid fa-map-pin";
             let iconBgClass = "bg-gray-100";
             let iconTextClass = "text-gray-500";
@@ -618,10 +638,9 @@
                 iconTextClass = "text-blue-600";
             }
             
-            // 현재 시간 및 요일 구하기
             const now = new Date();
             const nowTotalMin = now.getHours() * 60 + now.getMinutes();
-            const day = now.getDay(); // 0:일, 6:토
+            const day = now.getDay(); 
             
             let dayKey = 'weekday';
             let dayLabel = "평일";
@@ -629,44 +648,23 @@
             else if(day === 6) { dayKey = 'saturday'; dayLabel = "토요일"; }
 
             let contentHtml = '';
-            if (!timetable || Object.keys(timetable).length === 0) {
-                let msg = "등록된 시간표가 없습니다";
-                let subMsg = "시간표 데이터가 로딩되지 않았거나 없습니다.";
-                
-                contentHtml = `
-                    <div class="p-4 bg-gray-50/50 rounded-xl text-center border border-gray-100">
-                        <i class="fa-regular fa-calendar-xmark text-gray-300 text-lg mb-1"></i>
-                        <p class="text-xs text-gray-500 font-bold">${msg}</p>
-                        <p class="text-[10px] text-gray-400">${subMsg}</p>
-                    </div>`;
-            } else {
-                let hasRoutes = false;
-                // timetable이 배열인지 체크 (CSV 파싱 방식에 따라 다를 수 있음)
-                // 만약 timetable이 배열이면 바로 loop, 아니면 keys로 loop?
-                // 현재 로직상 timetable은 배열 [{routeNo, dest, times}, ...] 형태여야 함.
-                // 하지만 CSV 파싱 로직에서 day별 분리했으므로 timetable 구조가 조금 복잡해짐?
-                // 아니, parseAndongCSV에서 이미 { times: { weekday: [], ... } } 형태로 만듦.
-                // timetable 자체가 배열임.
+            let allArrivals = [];
 
+            if (!timetable || Object.keys(timetable).length === 0) {
+                 // No data
+            } else {
                 if(Array.isArray(timetable)) {
                     timetable.forEach(route => {
-                        // 시간표 가져오기
                         let timeList = [];
-                        if(Array.isArray(route.times)) {
-                            timeList = route.times; // 구버전 데이터 호환
-                        } else if(typeof route.times === 'object') {
-                            timeList = route.times[dayKey] || route.times['weekday'] || [];
-                        }
+                        if(Array.isArray(route.times)) timeList = route.times; 
+                        else if(typeof route.times === 'object') timeList = route.times[dayKey] || route.times['weekday'] || [];
 
                         if(!timeList || timeList.length === 0) return;
-                        hasRoutes = true;
 
-                        // 미래의 시간 중 가장 가까운 것 찾기
                         let nextTimeStr = null;
                         let minDiff = 9999;
                         let isNextDay = false;
 
-                        // 오늘 남은 시간 찾기
                         for(let time of timeList) {
                             const [h, m] = time.split(':').map(Number);
                             const busTotalMin = h * 60 + m;
@@ -678,59 +676,96 @@
                             }
                         }
 
-                        // 오늘 남은게 없으면 내일 첫차 찾기
                         if (!nextTimeStr && timeList.length > 0) {
                              nextTimeStr = timeList[0];
                              const [h, m] = nextTimeStr.split(':').map(Number);
                              const busTotalMin = h * 60 + m;
-                             // 하루는 1440분
                              minDiff = (1440 - nowTotalMin) + busTotalMin;
                              isNextDay = true;
-                    }
-
-                        let timeDisplay = "운행종료";
-                        let colorClass = "text-gray-400 text-xs";
-                        
-                        if (nextTimeStr) {
-                            if(isNextDay) {
-                                 const hours = Math.floor(minDiff / 60);
-                                 const mins = minDiff % 60;
-                                 timeDisplay = `${hours}시간 ${mins}분 후 출발 (익일 ${nextTimeStr})`;
-                                 colorClass = "text-gray-500 font-medium";
-                            } else {
-                                if (minDiff < 60) timeDisplay = `${minDiff}분 후 (${nextTimeStr})`;
-                                else timeDisplay = `${nextTimeStr} 출발`;
-                                
-                                colorClass = minDiff < 10 ? "text-red-500 font-bold" : "text-main";
-                            }
                         }
 
-                        // 급행 버스 처리 (배지 색상)
-                        const isExpress = route.routeNo.includes("급행");
-                        const badgeText = isExpress ? "급행" : "일반";
-                        const badgeColor = isExpress ? "bg-red-500" : "bg-blue-500";
-
-                        contentHtml += `
-                        <div class="glass-item p-3 flex items-center justify-between active:scale-[0.98] transition-transform">
-                            <div class="flex items-center gap-3">
-                                <span class="${badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${badgeText}</span>
-                                <div>
-                                    <span class="text-sm font-bold text-main">${route.routeNo}</span>
-                                    <span class="text-[10px] text-sub block">${route.dest} 방면</span>
-                                </div>
-                            </div>
-                            <span class="text-sm ${colorClass}">${timeDisplay}</span>
-                        </div>`;
+                        if (nextTimeStr) {
+                             const isExpress = route.routeNo.includes("급행");
+                             allArrivals.push({
+                                 routeNo: route.routeNo,
+                                 dest: route.dest,
+                                 minDiff: minDiff,
+                                 timeStr: nextTimeStr,
+                                 isNextDay: isNextDay,
+                                 isExpress: isExpress
+                             });
+                        }
                     });
                 }
-                
-                if(!hasRoutes) {
-                     contentHtml = `
+            }
+            
+            if(allArrivals.length === 0) {
+                 contentHtml = `
                     <div class="p-4 bg-gray-50/50 rounded-xl text-center border border-gray-100">
                         <p class="text-xs text-gray-500 font-bold">오늘은 운행하는 버스가 없습니다</p>
                         <p class="text-[10px] text-gray-400">(${dayLabel} 기준)</p>
                     </div>`;
+            } else {
+                // [그룹화 로직] 노선 번호별로 묶기
+                const grouped = {};
+                allArrivals.forEach(item => {
+                    if (!grouped[item.routeNo]) grouped[item.routeNo] = [];
+                    grouped[item.routeNo].push(item);
+                });
+
+                // 각 그룹 내에서 시간순 정렬
+                for (let r in grouped) {
+                    grouped[r].sort((a, b) => a.minDiff - b.minDiff);
                 }
+
+                // 그룹 대표 시간(가장 빠른 시간) 기준으로 전체 그룹 정렬
+                const sortedRoutes = Object.keys(grouped).sort((a, b) => {
+                    return grouped[a][0].minDiff - grouped[b][0].minDiff;
+                });
+
+                // 렌더링
+                sortedRoutes.forEach(r => {
+                    const groupItems = grouped[r];
+                    const first = groupItems[0];
+                    const badgeText = first.isExpress ? "급행" : "일반";
+                    const badgeColor = first.isExpress ? "bg-red-500" : "bg-blue-500";
+                    
+                    // 첫번째 줄 (헤더 역할)
+                    const firstTimeDisplay = formatMinDiff(first.minDiff, first.timeStr, first.isNextDay);
+                    const firstColor = first.minDiff < 10 && !first.isNextDay ? "text-red-500 font-bold" : "text-main";
+
+                    contentHtml += `
+                    <div class="glass-item p-3 mb-2 flex flex-col gap-2 active:scale-[0.98] transition-transform">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="${badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${badgeText}</span>
+                                <div>
+                                    <span class="text-sm font-bold text-main">${r}</span>
+                                    <span class="text-[10px] text-sub ml-1">${first.dest} 방면</span>
+                                </div>
+                            </div>
+                            <span class="text-sm ${firstColor}">${firstTimeDisplay}</span>
+                        </div>
+                    `;
+
+                    // 두번째 줄부터 (추가 행선지/시간)
+                    if (groupItems.length > 1) {
+                        contentHtml += `<div class="pl-2 border-t border-gray-100/50 pt-2 space-y-1">`;
+                        for(let i=1; i<groupItems.length; i++) {
+                            const sub = groupItems[i];
+                            const subTimeDisplay = formatMinDiff(sub.minDiff, sub.timeStr, sub.isNextDay);
+                            const subColor = sub.minDiff < 10 && !sub.isNextDay ? "text-red-500 font-bold" : "text-gray-600";
+                            
+                            contentHtml += `
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] text-sub pl-9">${sub.dest} 방면</span>
+                                <span class="text-xs ${subColor}">${subTimeDisplay}</span>
+                            </div>`;
+                        }
+                        contentHtml += `</div>`;
+                    }
+                    contentHtml += `</div>`;
+                });
             }
 
             const kakaoSearchQuery = `${CITY_NAMES[currentRegion]} ${station.name}`;
@@ -758,26 +793,30 @@
                             </div>
                         </div>
                     </div>
-                    <div class="space-y-2">${contentHtml}</div>
+                    <div class="space-y-1">${contentHtml}</div>
                 </div>
             `;
             container.insertAdjacentHTML('beforeend', cardHtml);
         }
+        
+        function formatMinDiff(minDiff, timeStr, isNextDay) {
+            if(isNextDay) {
+                 const hours = Math.floor(minDiff / 60);
+                 const mins = minDiff % 60;
+                 return `${hours}시간 ${mins}분 후 (익일 ${timeStr})`;
+            } else {
+                if (minDiff < 60) return `${minDiff}분 후 (${timeStr})`;
+                else return `${timeStr} 출발`;
+            }
+        }
 
         async function loadStationData(index, cityCode, station) {
             try {
-                // 1단계: 도착 정보 조회
                 const arrivalPromise = fetchBusArrival(cityCode, station.nodeId);
                 const promises = [arrivalPromise];
                 
-                // 안동 외 지역만 경유 노선 조회
-                if (currentRegion !== 'andong') {
-                    // promises.push(getStationRoutes(cityCode, station.nodeId)); // 필요시 추가
-                }
-
                 const results = await Promise.allSettled(promises);
                 const arrivalResult = results[0];
-                const routeResult = results[1];
 
                 let safeArrivals = [];
                 let errorMessage = null;
@@ -787,62 +826,21 @@
                     else if (Array.isArray(arrivalResult.value)) safeArrivals = arrivalResult.value;
                 }
 
-                let allRoutes = [];
-                if (routeResult && routeResult.status === 'fulfilled' && Array.isArray(routeResult.value)) {
-                    allRoutes = routeResult.value;
-                }
-
                 if (errorMessage) {
                     renderErrorCard(index, station, errorMessage);
                     return;
                 }
-
-                let finalDisplayList = [];
-
-                if (allRoutes.length > 0) {
-                    const arrivalMap = new Map();
-                    safeArrivals.forEach(a => {
-                        arrivalMap.set(String(a.routeno), a);
-                        if(a.routeid) arrivalMap.set(String(a.routeid), a); 
-                    });
-
-                    finalDisplayList = allRoutes.map(route => {
-                        let arrival = null;
-                        if(route.routeid) arrival = arrivalMap.get(String(route.routeid));
-                        if(!arrival && route.routeno) arrival = arrivalMap.get(String(route.routeno));
-
-                        if (arrival) return { ...route, ...arrival, hasInfo: true };
-                        else return { ...route, hasInfo: false };
-                    });
-                } else {
-                    finalDisplayList = safeArrivals.map(a => ({ ...a, hasInfo: true }));
-                }
-
-                finalDisplayList = finalDisplayList.filter(item => {
-                    if(!item.routeno) return false;
-                    if(item.routeno === '?') return false;
-                    return true;
-                });
-
-                finalDisplayList.sort((a, b) => {
-                    if (a.hasInfo && !b.hasInfo) return -1;
-                    if (!a.hasInfo && b.hasInfo) return 1;
-                    if (a.hasInfo && b.hasInfo) {
-                        return (parseInt(a.arrtime) || 0) - (parseInt(b.arrtime) || 0);
-                    }
-                    return String(a.routeno).localeCompare(String(b.routeno), undefined, { numeric: true, sensitivity: 'base' });
-                });
-
+                
                 // 행선지 보강
-                for (let j = 0; j < Math.min(finalDisplayList.length, 5); j++) {
-                    const bus = finalDisplayList[j];
-                    if (bus.hasInfo && !bus.endnodenm && bus.routeid) {
+                for (let j = 0; j < Math.min(safeArrivals.length, 5); j++) {
+                    const bus = safeArrivals[j];
+                    if (!bus.endnodenm && bus.routeid) {
                         const destName = await fetchRouteInfo(cityCode, bus.routeid);
                         if (destName) bus.endnodenm = destName;
                     }
                 }
 
-                renderCard(index, station, finalDisplayList);
+                renderCard(index, station, safeArrivals);
 
             } catch (e) {
                 console.error(e);
@@ -850,57 +848,89 @@
             }
         }
 
-        // [수정] 헬퍼 함수: 시간 포맷 (HH:mm)
         function formatTime(date) {
             const h = String(date.getHours()).padStart(2, '0');
             const m = String(date.getMinutes()).padStart(2, '0');
             return `${h}:${m}`;
         }
 
+        // [수정] API 데이터 렌더링 (그룹화 적용)
         function renderCard(index, station, list) {
             const skeletonCard = document.getElementById(`station-card-${index}`);
             if (!skeletonCard) return;
 
             let contentHtml = '';
+            
             if (list.length > 0) {
+                // 1. 그룹화
+                const grouped = {};
                 list.forEach(bus => {
-                    let timeStr, colorClass, badgeColor, destText;
-                    const routeType = bus.routetp || '';
-                    const routeNo = bus.routeno || '?';
-
-                    if (bus.hasInfo) {
-                        const min = Math.floor(parseInt(bus.arrtime) / 60);
-                        
-                        // [NEW] 도착 예정 시간 계산
-                        const now = new Date();
-                        const arrivalDate = new Date(now.getTime() + (parseInt(bus.arrtime) * 1000));
-                        const arrivalTimeStr = formatTime(arrivalDate);
-
-                        timeStr = min < 2 ? `곧 도착 (${arrivalTimeStr})` : `${min}분 (${arrivalTimeStr})`;
-                        colorClass = min < 5 ? "text-red-500 font-bold" : "text-main";
-                        badgeColor = routeType.includes('급행') ? 'bg-red-500' : 'bg-blue-500';
-                        destText = bus.endnodenm ? `${bus.endnodenm} 방면` : (bus.nodenm ? `${bus.nodenm} 경유` : '운행중');
-                    } else {
-                        timeStr = "도착 정보 없음";
-                        colorClass = "text-gray-400 text-xs";
-                        badgeColor = "bg-gray-400";
-                        destText = bus.endnodenm ? `${bus.endnodenm} 방면` : "운행종료/대기";
-                    }
-
-                    contentHtml += `
-                    <div class="glass-item p-3 flex items-center justify-between active:scale-[0.98] transition-transform">
-                        <div class="flex items-center gap-3">
-                            <span class="${badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${routeType || '일반'}</span>
-                            <div>
-                                <span class="text-sm font-bold text-main">${routeNo}</span>
-                                <span class="text-[10px] text-sub block">
-                                    ${destText} ${bus.arrprevstationcnt ? `· ${bus.arrprevstationcnt}번째 전` : ''}
-                                </span>
-                            </div>
-                        </div>
-                        <span class="text-sm ${colorClass}">${timeStr}</span>
-                    </div>`;
+                    const no = bus.routeno || '?';
+                    if(!grouped[no]) grouped[no] = [];
+                    grouped[no].push(bus);
                 });
+                
+                // 2. 시간순 정렬 (그룹 내부)
+                for(let no in grouped) {
+                    grouped[no].sort((a, b) => (parseInt(a.arrtime)||0) - (parseInt(b.arrtime)||0));
+                }
+
+                // 3. 그룹 정렬 (가장 빠른 도착시간 기준)
+                const sortedKeys = Object.keys(grouped).sort((a, b) => {
+                     return (parseInt(grouped[a][0].arrtime)||0) - (parseInt(grouped[b][0].arrtime)||0);
+                });
+
+                sortedKeys.forEach(no => {
+                    const groupItems = grouped[no];
+                    const first = groupItems[0];
+                    
+                    const routeType = first.routetp || '일반';
+                    const badgeColor = routeType.includes('급행') ? 'bg-red-500' : 'bg-blue-500';
+                    const min = Math.floor(parseInt(first.arrtime) / 60);
+                    const now = new Date();
+                    const arrivalDate = new Date(now.getTime() + (parseInt(first.arrtime) * 1000));
+                    const arrivalTimeStr = formatTime(arrivalDate);
+
+                    const timeStr = min < 2 ? `곧 도착 (${arrivalTimeStr})` : `${min}분 (${arrivalTimeStr})`;
+                    const colorClass = min < 5 ? "text-red-500 font-bold" : "text-main";
+                    const destText = first.endnodenm ? `${first.endnodenm} 방면` : (first.nodenm ? `${first.nodenm} 경유` : '운행중');
+                    
+                    contentHtml += `
+                    <div class="glass-item p-3 mb-2 flex flex-col gap-2 active:scale-[0.98] transition-transform">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="${badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${routeType}</span>
+                                <div>
+                                    <span class="text-sm font-bold text-main">${no}</span>
+                                    <span class="text-[10px] text-sub ml-1">${destText} ${first.arrprevstationcnt ? `· ${first.arrprevstationcnt}전` : ''}</span>
+                                </div>
+                            </div>
+                            <span class="text-sm ${colorClass}">${timeStr}</span>
+                        </div>
+                    `;
+
+                    // 추가 도착 정보 (같은 번호)
+                    if (groupItems.length > 1) {
+                         contentHtml += `<div class="pl-2 border-t border-gray-100/50 pt-2 space-y-1">`;
+                         for(let i=1; i<groupItems.length; i++) {
+                             const sub = groupItems[i];
+                             const sMin = Math.floor(parseInt(sub.arrtime) / 60);
+                             const sDate = new Date(now.getTime() + (parseInt(sub.arrtime) * 1000));
+                             const sTimeStr = sMin < 2 ? `곧 도착` : `${sMin}분`;
+                             const sDest = sub.endnodenm ? `${sub.endnodenm} 방면` : '운행중';
+                             const sColor = sMin < 5 ? "text-red-500 font-bold" : "text-gray-600";
+                             
+                             contentHtml += `
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] text-sub pl-9">${sDest} (${formatTime(sDate)})</span>
+                                <span class="text-xs ${sColor}">${sTimeStr}</span>
+                            </div>`;
+                         }
+                         contentHtml += `</div>`;
+                    }
+                    contentHtml += `</div>`;
+                });
+
             } else {
                 contentHtml = `
                     <div class="p-4 bg-gray-50/50 rounded-xl text-center border border-gray-100">
@@ -925,7 +955,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="space-y-2">${contentHtml}</div>
+                    <div class="space-y-1">${contentHtml}</div>
                 </div>
             `;
             skeletonCard.outerHTML = cardHtml;
@@ -964,7 +994,6 @@
 
         // --- Event Handlers (동일) ---
         function openSearchModal() {
-            // 안동시는 시간표 모드라 검색 API 의미 없음 -> 수동 등록 유도
             if(currentRegion === 'andong') { 
                 document.getElementById('search-modal').classList.remove('hidden');
                 document.getElementById('search-modal-region').innerText = "안동시 (시간표 모드)";
@@ -1065,7 +1094,6 @@
             const selectedType = document.querySelector('input[name="key-type"]:checked').value;
             const currentProxy = document.getElementById('proxy-select').value;
             
-            // 임시 전역 변수 설정 (테스트용)
             const originalProxy = selectedProxy;
             selectedProxy = currentProxy;
             
@@ -1074,10 +1102,8 @@
             resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 테스트 중...';
             apiKey = inputKey; keyType = selectedType;
             
-            // 안동대 (숫자ID)로 테스트
             const result = await fetchBusArrival('37010', 'DJB8001793'); 
             
-            // 전역 변수 복구
             selectedProxy = originalProxy;
 
             if (Array.isArray(result)) {
@@ -1087,7 +1113,6 @@
             }
         }
 
-        // [NEW] 수동 추가 함수 (버튼 핸들러)
         function manualAddStation() {
             const id = document.getElementById('manual-station-id').value;
             const name = document.getElementById('manual-station-name').value;
@@ -1095,7 +1120,6 @@
             addStation(name, id, "직접추가");
         }
         
-        // 기존 prompt 방식 수동 추가 (타 지역용)
         function addManualStation() {
             const name = document.getElementById('manual-station-name').value;
             const id = document.getElementById('manual-station-id').value;
