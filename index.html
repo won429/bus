@@ -777,13 +777,13 @@
             if (min < 5) { // 5분 미만 (임박) - 빨강
                 badgeClass = "bg-red-50 text-red-600 border border-red-100";
                 if (min === 0) {
-                    timeText = `${sec}초 후`;
+                    timeText = `${sec}초 후 도착`;
                 } else {
-                    timeText = `${min}분 후`;
+                    timeText = `${min}분 후 도착`;
                 }
             } else { // 5분 이상 (여유) - 회색
                 badgeClass = "bg-gray-100 text-gray-500 border border-gray-200";
-                timeText = `${min}분 후`;
+                timeText = `${min}분 후 도착`;
             }
 
             // 시간이 있을 경우에만 표시
@@ -1107,7 +1107,7 @@
         function formatMinDiff(minDiff, timeStr, isNextDay) {
             if (isNextDay) return `내일 ${timeStr}`;
             if (minDiff < 1) return "곧 도착";
-            return `${minDiff}분 후 (${timeStr})`;
+            return `${minDiff}분 후 도착 (${timeStr})`;
         }
 
         function fetchWithProxy(url) {
