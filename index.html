@@ -63,7 +63,7 @@
         .nav-pill-active { background-color: #191F28; color: white; }
         .nav-pill-inactive { background-color: transparent; color: #6B7684; }
         
-        /* 지하철 노선 배지 색상 - 코레일 블루 */
+        /* 지하철 노선 배지 색상 */
         .badge-daegyeong { background-color: #0054A6; color: white; }
         
         /* 노선 선택 버튼 스타일 */
@@ -319,7 +319,6 @@
 
     <script>
         // [사용자 설정] 구미/칠곡 버스 API 인증키 (공공데이터포털)
-        // 코드를 직접 수정하여 키를 넣으려면 아래 따옴표 안에 키를 붙여넣으세요.
         const MANUAL_API_KEY = ""; 
 
         // [중요] 안동시 고정 정류장 (기본값)
@@ -368,7 +367,6 @@
             // 1, 2, 3호선 데이터는 아직 없음 (준비중 처리)
         };
 
-        // [수정] 코드 내 입력된 MANUAL_API_KEY 우선 사용
         let apiKey = MANUAL_API_KEY || localStorage.getItem('toss_bus_api_key') || '';
         let keyType = localStorage.getItem('toss_bus_key_type') || 'decoding'; 
         let selectedProxy = localStorage.getItem('toss_bus_proxy') || 'corsproxy';
@@ -651,7 +649,7 @@
                             <h4 class="text-base font-bold text-main flex items-center">${stationName}${transferHtml}</h4>
                         </div>
                         
-                        <div class="space-y-0"> <!-- Removed space-y-2 since we handle spacing inside items -->
+                        <div class="space-y-2"> <!-- [수정] 다시 space-y-2 복원 -->
                             ${upHtml}
                             ${downHtml}
                         </div>
@@ -1159,189 +1157,22 @@
             });
         }
 
-        // [수정] API 데이터 렌더링 (그룹화 적용)
-        function renderCard(index, station, list) {
-            const skeletonCard = document.getElementById(`station-card-${index}`);
-            if (!skeletonCard) return;
-
-            let contentHtml = '';
-            
-            if (list.length > 0) {
-                // 1. 그룹화
-                const grouped = {};
-                list.forEach(bus => {
-                    const no = bus.routeno || '?';
-                    if(!grouped[no]) grouped[no] = [];
-                    grouped[no].push(bus);
-                });
-                
-                // 2. 시간순 정렬 (그룹 내부)
-                for(let no in grouped) {
-                    grouped[no].sort((a, b) => (parseInt(a.arrtime)||0) - (parseInt(b.arrtime)||0));
-                }
-
-                // 3. 그룹 정렬 (가장 빠른 도착시간 기준)
-                const sortedKeys = Object.keys(grouped).sort((a, b) => {
-                     return (parseInt(grouped[a][0].arrtime)||0) - (parseInt(grouped[b][0].arrtime)||0);
-                });
-
-                sortedKeys.forEach(no => {
-                    const groupItems = grouped[no];
-                    const first = groupItems[0];
-                    
-                    const routeType = first.routetp || '일반';
-                    const badgeColor = routeType.includes('급행') ? 'bg-red-500' : 'bg-blue-500';
-                    const min = Math.floor(parseInt(first.arrtime) / 60);
-                    const now = new Date();
-                    const arrivalDate = new Date(now.getTime() + (parseInt(first.arrtime) * 1000));
-                    const arrivalTimeStr = formatTime(arrivalDate);
-
-                    const timeStr = min < 2 ? `곧 도착 (${arrivalTimeStr})` : `${min}분 (${arrivalTimeStr})`;
-                    const colorClass = min < 5 ? "text-red-500 font-bold" : "text-main";
-                    const destText = first.endnodenm ? `${first.endnodenm} 방면` : (first.nodenm ? `${first.nodenm} 경유` : '운행중');
-                    
-                    contentHtml += `
-                    <div class="glass-item p-3 mb-2 flex flex-col gap-2 active:scale-[0.98] transition-transform">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="${badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${routeType}</span>
-                                <div>
-                                    <span class="text-sm font-bold text-main">${no}</span>
-                                    <span class="text-[10px] text-sub ml-1">${destText} ${first.arrprevstationcnt ? `· ${first.arrprevstationcnt}전` : ''}</span>
-                                </div>
-                            </div>
-                            <span class="text-sm ${colorClass}">${timeStr}</span>
-                        </div>
-                    `;
-
-                    // 추가 도착 정보 (같은 번호)
-                    if (groupItems.length > 1) {
-                         contentHtml += `<div class="pl-2 border-t border-gray-100/50 pt-2 space-y-1">`;
-                         for(let i=1; i<groupItems.length; i++) {
-                             const sub = groupItems[i];
-                             const sMin = Math.floor(parseInt(sub.arrtime) / 60);
-                             const sDate = new Date(now.getTime() + (parseInt(sub.arrtime) * 1000));
-                             const sTimeStr = sMin < 2 ? `곧 도착` : `${sMin}분`;
-                             const sDest = sub.endnodenm ? `${sub.endnodenm} 방면` : '운행중';
-                             const sColor = sMin < 5 ? "text-red-500 font-bold" : "text-gray-600";
-                             
-                             contentHtml += `
-                            <div class="flex justify-between items-center">
-                                <span class="text-[10px] text-sub pl-9">${sDest} (${formatTime(sDate)})</span>
-                                <span class="text-xs ${sColor}">${sTimeStr}</span>
-                            </div>`;
-                         }
-                         contentHtml += `</div>`;
-                    }
-                    contentHtml += `</div>`;
-                });
-
-            } else {
-                contentHtml = `
-                    <div class="p-4 bg-gray-50/50 rounded-xl text-center border border-gray-100">
-                        <i class="fa-solid fa-moon text-gray-300 text-lg mb-1"></i>
-                        <p class="text-xs text-gray-500 font-bold">운행중인 버스 없음</p>
-                    </div>`;
-            }
-
-            const cardHtml = `
-                <div class="toss-card p-5 mb-4 !bg-white/70 animate-[fadeInUp_0.4s_ease-out] relative group">
-                    <button onclick="removeStation('${currentRegion}', ${index})" class="delete-btn absolute top-4 right-4 text-gray-300 hover:text-red-500 p-1">
-                        <i class="fa-solid fa-trash-can text-sm"></i>
-                    </button>
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-10 h-10 rounded-[16px] bg-blue-100 flex items-center justify-center text-blue-600 text-lg shadow-sm">
-                                <i class="fa-solid fa-bus"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-base font-bold text-main">${station.name}</h4>
-                                <p class="text-xs text-sub text-[10px]">ARS: ${station.arsNo || '-'} | Node: ${station.nodeId}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="space-y-1">${contentHtml}</div>
-                </div>
-            `;
-            skeletonCard.outerHTML = cardHtml;
+        // [NEW] 수동 추가 함수 (버튼 핸들러)
+        function manualAddStation() {
+            const id = document.getElementById('manual-station-id').value;
+            const name = document.getElementById('manual-station-name').value;
+            if(!id || !name) { alert("이름과 ID를 모두 입력해주세요."); return; }
+            addStation(name, id, "직접추가");
         }
-
-        function renderErrorCard(index, station, msg) {
-            const skeletonCard = document.getElementById(`station-card-${index}`);
-            if (!skeletonCard) return;
-            
-            let displayMsg = msg;
-            if (msg.includes('KEY_NOT_REGISTERED') || msg.includes('KEY_ERROR')) displayMsg = "인증키 에러: 키를 확인해주세요.";
-            else if (msg === 'NETWORK_ERROR') displayMsg = "네트워크/프록시 연결 실패";
-
-            const kakaoSearchQuery = `${CITY_NAMES[currentRegion]} ${station.name}`;
-            const kakaoMapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(kakaoSearchQuery)}`;
-
-            const html = `
-                <div class="toss-card p-5 mb-4 !bg-red-50 border-red-100 relative">
-                     <div class="absolute top-4 right-4 flex gap-1">
-                        <a href="${kakaoMapUrl}" target="_blank" class="text-xs btn-kakao px-2 py-1 rounded-md font-bold hover:opacity-80 transition-opacity flex items-center gap-1 shadow-sm">
-                            <i class="fa-solid fa-map-location-dot"></i> 카카오맵
-                        </a>
-                        <button onclick="removeStation('${currentRegion}', ${index})" class="text-red-300 hover:text-red-500 p-1">
-                            <i class="fa-solid fa-trash-can text-sm"></i>
-                        </button>
-                    </div>
-                    <div class="flex items-center gap-2 mb-2">
-                        <i class="fa-solid fa-triangle-exclamation text-red-500"></i>
-                        <h4 class="text-base font-bold text-red-600">${station.name}</h4>
-                    </div>
-                    <p class="text-xs text-red-500 break-all">${displayMsg}</p>
-                </div>
-            `;
-            skeletonCard.outerHTML = html;
+        
+        // 기존 prompt 방식 수동 추가 (타 지역용)
+        function addManualStation() {
+            const name = document.getElementById('manual-station-name').value;
+            const id = document.getElementById('manual-station-id').value;
+            if(!name || !id) { alert("정보를 입력하세요"); return; }
+            addStation(name, id, "직접추가");
         }
-
-        // --- Event Handlers (동일) ---
-        function openSearchModal() {
-            if(currentRegion === 'andong') { 
-                document.getElementById('search-modal').classList.remove('hidden');
-                document.getElementById('search-modal-region').innerText = "안동시 (시간표 모드)";
-                document.getElementById('api-search-box').classList.add('hidden');
-                document.getElementById('andong-manual-guide').classList.remove('hidden');
-                document.getElementById('add-station-results').innerHTML = '';
-                return;
-            }
-
-            if(!apiKey) { alert("설정에서 API 키를 먼저 입력해주세요."); openSettings(); return; }
-            document.getElementById('search-modal').classList.remove('hidden');
-            document.getElementById('search-modal-region').innerText = `${CITY_NAMES[currentRegion]}에서 검색`;
-            document.getElementById('api-search-box').classList.remove('hidden');
-            document.getElementById('andong-manual-guide').classList.add('hidden');
-            document.getElementById('add-station-input').placeholder = `예: ${CITY_NAMES[currentRegion]} 정류장 이름`;
-            document.getElementById('add-station-input').value = '';
-            document.getElementById('add-station-results').innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">정류장 이름 또는 번호를 검색해보세요.</p>';
-            document.getElementById('add-station-input').focus();
-        }
-        function closeSearchModal() { document.getElementById('search-modal').classList.add('hidden'); }
-        async function doSearchStation() {
-            const keyword = document.getElementById('add-station-input').value.trim();
-            if(!keyword) return;
-            const resultArea = document.getElementById('add-station-results');
-            resultArea.innerHTML = '<p class="text-center mt-4"><i class="fa-solid fa-spinner fa-spin"></i> 검색중...</p>';
-            const result = await searchStationAPI(keyword);
-            if (result.error) { resultArea.innerHTML = `<p class="text-center mt-4 text-red-400 text-xs">오류: ${result.error}</p>`; return; }
-            if (result.length === 0) { resultArea.innerHTML = '<p class="text-center mt-4 text-gray-400">검색 결과가 없습니다.</p>'; return; }
-            result.sort((a, b) => (a.nodenm || "").length - (b.nodenm || "").length);
-            let html = '';
-            result.forEach(item => {
-                const arsNo = item.nodeno || '-';
-                html += `
-                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border border-gray-100">
-                    <div class="flex-1 min-w-0 mr-2">
-                        <p class="font-bold text-main text-sm truncate">${item.nodenm}</p>
-                        <p class="text-xs text-gray-400 truncate">번호: <span class="text-blue-500 font-bold">${arsNo}</span> | ID: ${item.nodeid}</p>
-                    </div>
-                    <button onclick="addStation('${(item.nodenm || "").replace(/'/g, "\\'")}', '${item.nodeid}', '${arsNo}')" class="flex-none text-xs bg-blue-500 text-white px-3 py-2 rounded-xl font-bold hover:bg-blue-600 transition-colors">추가</button>
-                </div>`;
-            });
-            resultArea.innerHTML = html;
-        }
+        
         function addStation(name, nodeId, arsNo) {
             stationConfig[currentRegion].push({ name: name, sub: "사용자 추가", nodeId: nodeId, arsNo: arsNo, tags: [] });
             localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig));
@@ -1399,6 +1230,7 @@
             const selectedType = document.querySelector('input[name="key-type"]:checked').value;
             const currentProxy = document.getElementById('proxy-select').value;
             
+            // 임시 전역 변수 설정 (테스트용)
             const originalProxy = selectedProxy;
             selectedProxy = currentProxy;
             
@@ -1407,8 +1239,10 @@
             resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 테스트 중...';
             apiKey = inputKey; keyType = selectedType;
             
+            // 안동대 (숫자ID)로 테스트
             const result = await fetchBusArrival('37010', 'DJB8001793'); 
             
+            // 전역 변수 복구
             selectedProxy = originalProxy;
 
             if (Array.isArray(result)) {
@@ -1418,19 +1252,6 @@
             }
         }
 
-        function manualAddStation() {
-            const id = document.getElementById('manual-station-id').value;
-            const name = document.getElementById('manual-station-name').value;
-            if(!id || !name) { alert("이름과 ID를 모두 입력해주세요."); return; }
-            addStation(name, id, "직접추가");
-        }
-        
-        function addManualStation() {
-            const name = document.getElementById('manual-station-name').value;
-            const id = document.getElementById('manual-station-id').value;
-            if(!name || !id) { alert("정보를 입력하세요"); return; }
-            addStation(name, id, "직접추가");
-        }
 
         const mainContent = document.getElementById('main-content');
         const island = document.getElementById('dynamic-island');
