@@ -314,7 +314,7 @@
         localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig));
 
         let CITY_CODES = { 'andong': '37010', 'gumi': '37030', 'chilgok': '37380' };
-        const CITY_NAMES = { 'andong': '안동시', 'gumi': '구미시', 'chilgok': '칠곡군' };
+        const CITY_NAMES = { 'andong': '안동시', 'gumi': '구미시', 'chilgok': '칠곡군', 'daegu': '대구광역시' };
         
         let currentRegion = 'andong';
         let currentBusBroadRegion = 'gyeongbuk'; // [신규] 버스 현재 대권역 (기본: 경북)
@@ -353,11 +353,28 @@
         // [수정] 버스 대권역별 세부 지역 데이터 (구미/칠곡 -> 대구권 이동)
         const BROAD_REGION_DATA_BUS = {
             'daegu': [
+                { id: 'daegu', name: '대구광역시', icon: 'fa-building', color: 'blue', isPlanned: true },
                 { id: 'gumi', name: '구미시', icon: 'fa-city', color: 'orange' },
                 { id: 'chilgok', name: '칠곡군', icon: 'fa-tree', color: 'emerald' }
             ],
             'gyeongbuk': [
                 { id: 'andong', name: '안동시', icon: 'fa-location-dot', color: 'purple' }
+            ],
+            // [신규] 추가된 지역 데이터 (지원 예정 플래그 추가)
+            'busan': [
+                { id: 'busan_city', name: '부산광역시', icon: 'fa-ship', color: 'blue', isPlanned: true }
+            ],
+            'chungcheong': [
+                { id: 'daejeon', name: '대전광역시', icon: 'fa-flask', color: 'cyan', isPlanned: true }
+            ],
+            'gwangju': [
+                { id: 'gwangju_city', name: '광주광역시', icon: 'fa-building', color: 'teal', isPlanned: true }
+            ],
+            'gyeongnam': [
+                { id: 'jinju', name: '진주시', icon: 'fa-layer-group', color: 'indigo', isPlanned: true }
+            ],
+            'jeonju': [
+                { id: 'iksan', name: '익산시', icon: 'fa-train', color: 'yellow', isPlanned: true }
             ]
         };
 
@@ -837,6 +854,9 @@
                 document.getElementById('view-bus').classList.remove('hidden'); document.getElementById('view-subway').classList.add('hidden');
                 document.getElementById('nav-bus').className = 'nav-pill-active rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300';
                 document.getElementById('nav-subway').className = 'nav-pill-inactive rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300 hover:bg-gray-100';
+                
+                // [신규] 버스 탭 전환 시 UI 초기화
+                window.renderBusSpecificRegions();
                 window.renderList();
             } else {
                 document.getElementById('view-bus').classList.add('hidden'); document.getElementById('view-subway').classList.remove('hidden');
@@ -934,6 +954,24 @@
             const container = document.getElementById('dynamic-list-container'); const empty = document.getElementById('empty-state');
             container.innerHTML = ''; empty.classList.add('hidden');
             if (!apiKey && currentRegion !== 'andong') { empty.classList.remove('hidden'); return; }
+            
+            // [신규] 지원 예정 지역 체크
+            const regions = BROAD_REGION_DATA_BUS[currentBusBroadRegion];
+            const currentRegionData = regions ? regions.find(r => r.id === currentRegion) : null;
+            
+            if (currentRegionData && currentRegionData.isPlanned) {
+                container.innerHTML = `<div class="flex flex-col items-center justify-center py-10 text-gray-400 gap-3">
+                    <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-2xl text-gray-300">
+                        <i class="fa-solid fa-person-digging"></i>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm font-bold text-gray-500">서비스 준비중입니다</p>
+                        <p class="text-xs text-gray-400 mt-1">곧 지원될 예정입니다.</p>
+                    </div>
+                </div>`;
+                return;
+            }
+
             const cityCode = CITY_CODES[currentRegion]; const targets = stationConfig[currentRegion];
             if (!targets || targets.length === 0) { 
                 // [수정] 현재 권역에 데이터가 있는지 확인
@@ -952,26 +990,6 @@
                     container.insertAdjacentHTML('beforeend', skeletonHtml); window.loadStationData(index, cityCode, station);
                 }
             });
-        };
-        window.switchTab = function(mode) {
-            if (mode === 'bus') {
-                document.getElementById('view-bus').classList.remove('hidden'); document.getElementById('view-subway').classList.add('hidden');
-                document.getElementById('nav-bus').className = 'nav-pill-active rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300';
-                document.getElementById('nav-subway').className = 'nav-pill-inactive rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300 hover:bg-gray-100';
-                
-                // [신규] 버스 탭 전환 시 UI 초기화
-                window.renderBusSpecificRegions();
-                window.renderList();
-            } else {
-                document.getElementById('view-bus').classList.add('hidden'); document.getElementById('view-subway').classList.remove('hidden');
-                document.getElementById('nav-subway').className = 'nav-pill-active rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300';
-                document.getElementById('nav-bus').className = 'nav-pill-inactive rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300 hover:bg-gray-100';
-                
-                // [신규] 탭 전환 시 UI 초기화 및 렌더링
-                window.renderSubwaySpecificRegions(); 
-                window.renderSubwayLineBadges();
-                window.renderSubwayStations();
-            }
         };
 
         // 모달 및 설정
