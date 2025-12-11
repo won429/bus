@@ -493,7 +493,9 @@
                 routeno: (bus.routeno || bus.routeNo || '?').toString(),
                 endnodenm: bus.endnodenm || bus.endNodeNm || '',
                 arrtime: bus.arrtime || bus.arrTime,
-                arrprevstationcnt: bus.arrprevstationcnt || bus.arrPrevStationCnt
+                arrprevstationcnt: bus.arrprevstationcnt || bus.arrPrevStationCnt,
+                // [신규] 노선 유형(급행, 간선 등) 정보 추가
+                routeTp: bus.routeTp || bus.routeType || '' 
             };
         }
 
@@ -780,80 +782,70 @@
         window.loadStationData = async function(index, cityCode, station) {
             const cardId = `station-card-${index}`; const card = document.getElementById(cardId); if (!card) return;
             
-            // 1. 기본 지역 코드(cityCode)로 1차 조회
             let primaryResult = await window.fetchBusArrival(cityCode, station.nodeId);
             
             let finalArrivals = [];
-            let errorState = null; // 초기 에러 상태는 없음
+            let errorState = null;
 
-            // 1차 조회 결과 처리
             if (Array.isArray(primaryResult)) {
                 finalArrivals = [...primaryResult];
             } else if (typeof primaryResult === 'string') {
-                errorState = primaryResult; // 에러 발생 시 메시지 저장
+                errorState = primaryResult; 
             }
 
-            // [수정] 칠곡/구미 통합 데이터 병합 로직 강화
-            // 칠곡(37380)인 경우, 1차 조회가 실패했더라도 무조건 구미(37030) 데이터도 조회
             if (cityCode === '37380') {
                 const secondaryResult = await window.fetchBusArrival('37030', station.nodeId);
-                
-                // 구미 데이터가 정상이면
-                if (Array.isArray(secondaryResult) && secondaryResult.length > 0) {
-                    // 기존 데이터와 병합 (중복 제거)
+                if (Array.isArray(secondaryResult)) {
                     const existingKeys = new Set(finalArrivals.map(b => `${b.routeno}_${b.arrtime}`));
-                    
                     secondaryResult.forEach(bus => {
                         const key = `${bus.routeno}_${bus.arrtime}`;
                         if (!existingKeys.has(key)) {
                             finalArrivals.push(bus);
                         }
                     });
-                    
-                    // [핵심] 구미 데이터가 하나라도 있으면 칠곡 조회 에러는 무시하고 데이터를 보여줌
-                    errorState = null; 
+                    if (finalArrivals.length > 0) errorState = null;
                 }
             }
 
-            // 유효한 데이터만 남기기 (도착 시간이 없는 데이터 등 필터링)
-            const arrivals = finalArrivals.filter(bus => {
-                return bus.arrtime && !isNaN(parseInt(bus.arrtime));
-            });
+            const arrivals = finalArrivals;
 
-            // 에러가 있고 데이터가 하나도 없을 때만 에러 화면 표시
             if (errorState && arrivals.length === 0) { 
                 card.innerHTML = `<div class="p-4 text-center bg-red-50 rounded-2xl border border-red-100"><p class="text-red-500 text-xs font-bold mb-1">정보 불러오기 실패</p><p class="text-red-400 text-[10px]">${errorState === 'NETWORK_ERROR' ? '인터넷 연결 확인' : 'API 키 확인 필요'}</p></div><div class="text-center mt-2"><button onclick="removeStation('${currentRegion}', ${index})" class="text-xs text-gray-400 underline">삭제</button></div>`; 
                 card.classList.remove('animate-pulse'); 
                 return; 
             }
             
-            // 데이터가 없을 때 (운행 종료 등)
             if (arrivals.length === 0) { 
                 card.innerHTML = `<div class="p-5 flex justify-between items-center"><div class="flex items-center gap-2.5"><div class="w-10 h-10 rounded-[16px] bg-gray-100 flex items-center justify-center text-gray-400 text-lg"><i class="fa-solid fa-ban"></i></div><div><h4 class="text-base font-bold text-main">${station.name}</h4><p class="text-[10px] text-sub">정보 없음 (운행종료)</p></div></div><button onclick="removeStation('${currentRegion}', ${index})" class="text-gray-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></div>`; 
                 card.classList.remove('animate-pulse'); 
                 return; 
             }
 
-            // 도착 시간순 정렬
             arrivals.sort((a, b) => parseInt(a.arrtime) - parseInt(b.arrtime));
-            
             let contentHtml = ''; 
-            const now = new Date(); // 기준 시간
-
             arrivals.forEach(bus => {
                 const arrSeconds = parseInt(bus.arrtime);
                 
-                // [수정] NaN 방어 로직: 숫자가 아니면 렌더링 건너뜀
                 if (isNaN(arrSeconds)) return;
 
-                const arrivalDate = new Date(now.getTime() + arrSeconds * 1000);
-                const hours = arrivalDate.getHours();
-                const minutes = arrivalDate.getMinutes();
-                const timeStr = `${hours}:${minutes.toString().padStart(2,'0')}`;
+                const arrivalDate = new Date(Date.now() + arrSeconds * 1000);
+                const timeStr = `${arrivalDate.getHours()}:${arrivalDate.getMinutes().toString().padStart(2,'0')}`;
                 
-                contentHtml += `<div class="glass-item p-3 mb-2 flex items-center justify-between"><div class="flex items-center gap-3"><span class="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${bus.routeno}</span><div><span class="text-sm font-bold text-main">${bus.routeno}번</span><span class="text-[10px] text-sub ml-1">${bus.endnodenm} 방면</span></div></div>${renderBadge(arrSeconds, timeStr)}</div>`;
+                // [신규] 버스 유형 배지 생성 로직
+                let typeBadge = '';
+                const type = bus.routeTp;
+                
+                if (type) {
+                    let badgeColor = 'bg-gray-500'; // 기본값
+                    if (type.includes('급행') || type.includes('좌석')) badgeColor = 'bg-red-500';
+                    else if (type.includes('간선')) badgeColor = 'bg-blue-500';
+                    else if (type.includes('지선') || type.includes('마을') || type.includes('순환')) badgeColor = 'bg-emerald-500';
+                    
+                    typeBadge = `<span class="${badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[30px] text-center ml-1 shadow-sm">${type}</span>`;
+                }
+
+                contentHtml += `<div class="glass-item p-3 mb-2 flex items-center justify-between"><div class="flex items-center gap-2"><span class="bg-blue-50 text-blue-600 text-[11px] font-bold px-2 py-1 rounded-lg min-w-[40px] text-center shadow-sm border border-blue-100">${bus.routeno}</span>${typeBadge}<div><div class="text-[10px] text-sub ml-1 flex items-center gap-1"><i class="fa-solid fa-arrow-right text-[8px]"></i>${bus.endnodenm}</div></div></div>${renderBadge(arrSeconds, timeStr)}</div>`;
             });
-            
             card.innerHTML = `<div class="flex justify-between items-start mb-4"><div class="flex items-center gap-2.5"><div class="w-10 h-10 rounded-[16px] bg-blue-100 flex items-center justify-center text-blue-600 text-lg shadow-sm"><i class="fa-solid fa-bus-simple"></i></div><div><h4 class="text-base font-bold text-main">${station.name}</h4><p class="text-xs text-sub text-[10px]">ID: ${station.nodeId}</p></div></div><button onclick="removeStation('${currentRegion}', ${index})" class="delete-btn text-gray-300 hover:text-red-500 p-1"><i class="fa-solid fa-trash-can text-sm"></i></button></div><div class="space-y-1">${contentHtml}</div>`;
             card.classList.remove('animate-pulse'); card.classList.add('!bg-white/70');
         };
