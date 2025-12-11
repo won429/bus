@@ -101,20 +101,37 @@
             <!-- 지역 선택 (버스) -->
             <div class="mb-6 fade-in-up delay-100">
                 <h3 class="text-lg font-bold text-main mb-3 px-1">지역 선택</h3>
-                <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1">
-                    <div id="btn-andong" onclick="selectRegion('andong')" class="toss-card region-card-selected min-w-[100px] h-[100px] p-4 flex flex-col justify-between items-start cursor-pointer transition-all">
-                        <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 text-lg"><i class="fa-solid fa-location-dot"></i></div>
-                        <div><p class="text-sm font-bold text-main">안동시</p><p class="text-xs text-sub status-text" id="status-andong">연결 대기</p></div>
-                    </div>
-                    <div id="btn-gumi" onclick="selectRegion('gumi')" class="toss-card min-w-[100px] h-[100px] p-4 flex flex-col justify-between items-start cursor-pointer transition-all">
-                        <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 text-lg"><i class="fa-solid fa-city"></i></div>
-                        <div><p class="text-sm font-bold text-main">구미시</p><p class="text-xs text-sub status-text" id="status-gumi">연결 대기</p></div>
-                    </div>
-                    <div id="btn-chilgok" onclick="selectRegion('chilgok')" class="toss-card min-w-[100px] h-[100px] p-4 flex flex-col justify-between items-start cursor-pointer transition-all">
-                        <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 text-lg"><i class="fa-solid fa-tree"></i></div>
-                        <div><p class="text-sm font-bold text-main">칠곡군</p><p class="text-xs text-sub status-text" id="status-chilgok">연결 대기</p></div>
-                    </div>
+                
+                <!-- [1] 상단: 권역 선택 (버스용) -->
+                <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1 mb-1">
+                    <button onclick="selectBusBroadRegion('daegu')" id="bus-broad-btn-daegu" class="toss-card min-w-[60px] h-[40px] px-3 flex justify-center items-center cursor-pointer transition-all whitespace-nowrap">
+                        <span class="text-xs font-bold text-gray-400">대구권</span>
+                    </button>
+                    <button onclick="selectBusBroadRegion('busan')" id="bus-broad-btn-busan" class="toss-card min-w-[60px] h-[40px] px-3 flex justify-center items-center cursor-pointer transition-all whitespace-nowrap">
+                        <span class="text-xs font-bold text-gray-400">부산권</span>
+                    </button>
+                    <button onclick="selectBusBroadRegion('chungcheong')" id="bus-broad-btn-chungcheong" class="toss-card min-w-[60px] h-[40px] px-3 flex justify-center items-center cursor-pointer transition-all whitespace-nowrap">
+                        <span class="text-xs font-bold text-gray-400">충청권</span>
+                    </button>
+                    <button onclick="selectBusBroadRegion('gwangju')" id="bus-broad-btn-gwangju" class="toss-card min-w-[60px] h-[40px] px-3 flex justify-center items-center cursor-pointer transition-all whitespace-nowrap">
+                        <span class="text-xs font-bold text-gray-400">광주전남</span>
+                    </button>
+                    <button onclick="selectBusBroadRegion('gyeongbuk')" id="bus-broad-btn-gyeongbuk" class="toss-card region-card-selected min-w-[60px] h-[40px] px-3 flex justify-center items-center cursor-pointer transition-all whitespace-nowrap">
+                        <span class="text-xs font-bold text-main">경북</span>
+                    </button>
+                    <button onclick="selectBusBroadRegion('gyeongnam')" id="bus-broad-btn-gyeongnam" class="toss-card min-w-[60px] h-[40px] px-3 flex justify-center items-center cursor-pointer transition-all whitespace-nowrap">
+                        <span class="text-xs font-bold text-gray-400">경남</span>
+                    </button>
+                    <button onclick="selectBusBroadRegion('jeonju')" id="bus-broad-btn-jeonju" class="toss-card min-w-[60px] h-[40px] px-3 flex justify-center items-center cursor-pointer transition-all whitespace-nowrap">
+                        <span class="text-xs font-bold text-gray-400">전주권</span>
+                    </button>
                 </div>
+
+                <!-- [2] 하단: 세부 지역 선택 (버스용) -->
+                <div id="bus-specific-region-container" class="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1 min-h-[90px]">
+                    <!-- 자바스크립트로 동적 렌더링 -->
+                </div>
+
                 <p id="city-code-status" class="text-[10px] text-gray-400 mt-2 px-1 text-right">도시 코드 조회 대기중...</p>
             </div>
 
@@ -148,27 +165,26 @@
             <!-- 지역 선택 (지하철) -->
             <div class="mb-4 fade-in-up delay-100">
                 <h3 class="text-lg font-bold text-main mb-3 px-1">지역 선택</h3>
-                <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1">
-                    <!-- 구미시 -->
-                    <div id="sub-btn-gumi" onclick="selectSubwayRegion('gumi')" class="toss-card region-card-selected min-w-[100px] h-[100px] p-4 flex flex-col justify-between items-start cursor-pointer transition-all">
-                        <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 text-lg"><i class="fa-solid fa-train-subway"></i></div>
-                        <div><p class="text-sm font-bold text-main">경북 구미시</p><p class="text-xs text-sub status-text">선택됨</p></div>
-                    </div>
-                    <!-- 칠곡군 -->
-                    <div id="sub-btn-chilgok" onclick="selectSubwayRegion('chilgok')" class="toss-card min-w-[100px] h-[100px] p-4 flex flex-col justify-between items-start cursor-pointer transition-all">
-                        <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 text-lg"><i class="fa-solid fa-train"></i></div>
-                        <div><p class="text-sm font-bold text-main">경북 칠곡군</p><p class="text-xs text-sub status-text">선택하기</p></div>
-                    </div>
-                    <!-- 대구광역시 -->
-                    <div id="sub-btn-daegu" onclick="selectSubwayRegion('daegu')" class="toss-card min-w-[100px] h-[100px] p-4 flex flex-col justify-between items-start cursor-pointer transition-all">
-                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-lg"><i class="fa-solid fa-subway"></i></div>
-                        <div><p class="text-sm font-bold text-main">대구광역시</p><p class="text-xs text-sub status-text">선택하기</p></div>
-                    </div>
-                    <!-- 경산시 -->
-                    <div id="sub-btn-gyeongsan" onclick="selectSubwayRegion('gyeongsan')" class="toss-card min-w-[100px] h-[100px] p-4 flex flex-col justify-between items-start cursor-pointer transition-all">
-                        <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 text-lg"><i class="fa-solid fa-train-tram"></i></div>
-                        <div><p class="text-sm font-bold text-main">경북 경산시</p><p class="text-xs text-sub status-text">선택하기</p></div>
-                    </div>
+                
+                <!-- [1] 상단: 권역 선택 (두 칸으로 나누기 - 윗칸) -->
+                <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1 mb-1">
+                    <button onclick="selectBroadRegion('daegu')" id="broad-btn-daegu" class="toss-card region-card-selected min-w-[60px] h-[40px] px-3 flex justify-center items-center cursor-pointer transition-all whitespace-nowrap">
+                        <span class="text-xs font-bold text-main">대구권</span>
+                    </button>
+                    <button onclick="selectBroadRegion('busan')" id="broad-btn-busan" class="toss-card min-w-[60px] h-[40px] px-3 flex justify-center items-center cursor-pointer transition-all whitespace-nowrap">
+                        <span class="text-xs font-bold text-gray-400">부산권</span>
+                    </button>
+                    <button onclick="selectBroadRegion('chungcheong')" id="broad-btn-chungcheong" class="toss-card min-w-[60px] h-[40px] px-3 flex justify-center items-center cursor-pointer transition-all whitespace-nowrap">
+                        <span class="text-xs font-bold text-gray-400">충청권</span>
+                    </button>
+                    <button onclick="selectBroadRegion('gwangju')" id="broad-btn-gwangju" class="toss-card min-w-[60px] h-[40px] px-3 flex justify-center items-center cursor-pointer transition-all whitespace-nowrap">
+                        <span class="text-xs font-bold text-gray-400">광주전남</span>
+                    </button>
+                </div>
+
+                <!-- [2] 하단: 세부 지역 선택 (두 칸으로 나누기 - 아랫칸) -->
+                <div id="subway-specific-region-container" class="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1 min-h-[90px]">
+                    <!-- 자바스크립트로 동적 렌더링 -->
                 </div>
             </div>
 
@@ -301,7 +317,9 @@
         const CITY_NAMES = { 'andong': '안동시', 'gumi': '구미시', 'chilgok': '칠곡군' };
         
         let currentRegion = 'andong';
+        let currentBusBroadRegion = 'gyeongbuk'; // [신규] 버스 현재 대권역 (기본: 경북)
         let currentSubwayRegion = 'gumi';
+        let currentSubwayBroadRegion = 'daegu'; 
         let currentSubwayLine = 'daegyeong';
 
         const SUBWAY_LINES_META = {
@@ -322,6 +340,35 @@
                     'gyeongsan': ['경산역']
                 }
             }
+        };
+
+        // [신규] 지역별 이용 가능한 노선 정의 (누락 복구)
+        const REGION_LINES = {
+            'gumi': ['daegyeong'],
+            'chilgok': ['daegyeong'],
+            'daegu': ['daegyeong', '1', '2', '3'],
+            'gyeongsan': ['daegyeong', '1', '2']
+        };
+
+        // [수정] 버스 대권역별 세부 지역 데이터 (구미/칠곡 -> 대구권 이동)
+        const BROAD_REGION_DATA_BUS = {
+            'daegu': [
+                { id: 'gumi', name: '구미시', icon: 'fa-city', color: 'orange' },
+                { id: 'chilgok', name: '칠곡군', icon: 'fa-tree', color: 'emerald' }
+            ],
+            'gyeongbuk': [
+                { id: 'andong', name: '안동시', icon: 'fa-location-dot', color: 'purple' }
+            ]
+        };
+
+        // [기존] 지하철 대권역별 세부 지역 데이터
+        const BROAD_REGION_DATA = {
+            'daegu': [
+                { id: 'gumi', name: '경북 구미시', icon: 'fa-train-subway', color: 'orange' },
+                { id: 'chilgok', name: '경북 칠곡군', icon: 'fa-train', color: 'emerald' },
+                { id: 'daegu', name: '대구광역시', icon: 'fa-subway', color: 'blue' },
+                { id: 'gyeongsan', name: '경북 경산시', icon: 'fa-train-tram', color: 'indigo' }
+            ]
         };
 
         let apiKey = MANUAL_API_KEY || localStorage.getItem('toss_bus_api_key') || '';
@@ -616,9 +663,53 @@
             card.classList.remove('animate-pulse'); card.classList.add('!bg-white/70');
         };
 
+        // [신규] 노선 선택 배지 렌더링 함수
+        window.renderSubwayLineBadges = function() {
+            const container = document.getElementById('subway-line-badges');
+            container.innerHTML = '';
+            
+            const lines = REGION_LINES[currentSubwayRegion] || ['daegyeong'];
+            
+            lines.forEach(lineKey => {
+                const meta = SUBWAY_LINES_META[lineKey];
+                if(!meta) return;
+                
+                const isActive = (currentSubwayLine === lineKey);
+                const btn = document.createElement('button');
+                
+                let classes = "px-3 py-1.5 rounded-full text-xs font-bold transition-all border shadow-sm ";
+                if(isActive) {
+                    classes += "text-white transform scale-105 border-transparent";
+                    btn.style.backgroundColor = meta.color;
+                } else {
+                    classes += "bg-white text-gray-400 border-gray-100 hover:bg-gray-50";
+                }
+                
+                btn.className = classes;
+                btn.innerText = meta.name;
+                btn.onclick = () => {
+                    currentSubwayLine = lineKey;
+                    window.renderSubwayLineBadges();
+                    window.renderSubwayStations();
+                };
+                container.appendChild(btn);
+            });
+        };
+
         window.renderSubwayStations = function() {
             const listContainer = document.getElementById('subway-station-list'); listContainer.innerHTML = '';
-            if (currentSubwayLine !== 'daegyeong') { listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs">준비중입니다.</div>`; return; }
+            
+            // [수정] 대구권 외에는 '지원 예정' 표시하고 함수 종료
+            if (currentSubwayBroadRegion !== 'daegu') {
+                 listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs flex flex-col items-center gap-2"><i class="fa-solid fa-person-digging text-2xl mb-1"></i><p>지원 예정입니다.</p></div>`; 
+                 return;
+            }
+
+            // [수정] 지원 예정 노선 안내 문구 변경
+            if (currentSubwayLine !== 'daegyeong') { 
+                listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs flex flex-col items-center gap-2"><i class="fa-solid fa-person-digging text-2xl mb-1"></i><p>지원 예정입니다.</p></div>`; 
+                return; 
+            }
             
             // [수정] 사용자 추가 지하철 역 로드
             const userStations = JSON.parse(localStorage.getItem('my_subway_stations_v1')) || {};
@@ -666,40 +757,78 @@
             });
         };
 
-        // 6. UI 제어 함수들 (Global)
-        window.selectRegion = function(region) {
-            currentRegion = region;
-            ['andong', 'gumi', 'chilgok'].forEach(id => {
-                const el = document.getElementById('btn-' + id);
-                if (id === region) { el.classList.add('region-card-selected'); el.querySelector('.status-text').innerText = '선택됨'; }
-                else { el.classList.remove('region-card-selected'); el.querySelector('.status-text').innerText = '선택하기'; }
-            });
-            window.renderList();
-        };
-
-        window.renderList = function() {
-            const container = document.getElementById('dynamic-list-container'); const empty = document.getElementById('empty-state');
-            container.innerHTML = ''; empty.classList.add('hidden');
-            if (!apiKey && currentRegion !== 'andong') { empty.classList.remove('hidden'); return; }
-            const cityCode = CITY_CODES[currentRegion]; const targets = stationConfig[currentRegion];
-            if (!targets || targets.length === 0) { container.innerHTML = `<div class="text-center py-10 text-gray-400">등록된 정류장이 없습니다.<br>상단 '+ 정류장 추가' 버튼을 눌러보세요!</div>`; return; }
+        // [신규] 대권역 선택 함수
+        window.selectBroadRegion = function(broadId) {
+            currentSubwayBroadRegion = broadId;
             
-            targets.forEach((station, index) => {
-                if(currentRegion === 'andong') { window.renderStaticCard(index, station); } 
-                else {
-                    const skeletonHtml = `<div id="station-card-${index}" class="toss-card p-5 mb-4 !bg-white/50 animate-pulse relative"><div class="flex justify-between items-start mb-4"><div class="flex items-center gap-2.5"><div class="w-10 h-10 rounded-[16px] bg-gray-200"></div><div><div class="h-4 w-32 bg-gray-200 rounded mb-1.5"></div><div class="h-3 w-20 bg-gray-200 rounded"></div></div></div></div><div class="space-y-2"><div class="h-12 bg-gray-200 rounded-xl"></div></div></div>`;
-                    container.insertAdjacentHTML('beforeend', skeletonHtml); window.loadStationData(index, cityCode, station);
+            // 1. 상단 버튼 스타일 업데이트 (경북, 경남, 전주 제거)
+            const broadIds = ['daegu', 'busan', 'chungcheong', 'gwangju'];
+            broadIds.forEach(id => {
+                const btn = document.getElementById('broad-btn-' + id);
+                if (!btn) return;
+                const span = btn.querySelector('span');
+                if (id === broadId) {
+                    btn.classList.add('region-card-selected');
+                    span.classList.remove('text-gray-400');
+                    span.classList.add('text-main');
+                } else {
+                    btn.classList.remove('region-card-selected');
+                    span.classList.add('text-gray-400');
+                    span.classList.remove('text-main');
                 }
             });
+
+            // 2. 하단 세부 지역 렌더링
+            window.renderSubwaySpecificRegions();
+
+            // 3. 역 목록 초기화 (대구권 아니면 지원예정 표시됨)
+            window.renderSubwayLineBadges();
+            window.renderSubwayStations();
+        };
+
+        // [신규] 세부 지역 렌더링 함수
+        window.renderSubwaySpecificRegions = function() {
+            const container = document.getElementById('subway-specific-region-container');
+            container.innerHTML = '';
+
+            if (currentSubwayBroadRegion === 'daegu') {
+                const regions = BROAD_REGION_DATA['daegu'];
+                regions.forEach(r => {
+                    const isSelected = (currentSubwayRegion === r.id);
+                    const selectedClass = isSelected ? 'region-card-selected' : '';
+                    const statusText = isSelected ? '선택됨' : '선택하기';
+                    
+                    // 메뉴 크기가 작아지게: min-w-[80px] h-[80px] 로 조정 (기존 100px)
+                    const html = `
+                    <div id="sub-btn-${r.id}" onclick="selectSubwayRegion('${r.id}')" class="toss-card ${selectedClass} min-w-[80px] h-[80px] p-3 flex flex-col justify-between items-start cursor-pointer transition-all">
+                        <div class="w-8 h-8 rounded-full bg-${r.color}-50 flex items-center justify-center text-${r.color}-500 text-sm"><i class="fa-solid ${r.icon}"></i></div>
+                        <div><p class="text-xs font-bold text-main">${r.name}</p><p class="text-[10px] text-sub status-text">${statusText}</p></div>
+                    </div>`;
+                    container.insertAdjacentHTML('beforeend', html);
+                });
+            } else {
+                container.innerHTML = `<div class="w-full text-center text-gray-400 text-xs py-8 flex flex-col items-center justify-center h-[80px]"><p>아직 지원하지 않는 지역입니다.</p></div>`;
+            }
         };
 
         window.selectSubwayRegion = function(region) {
             currentSubwayRegion = region;
-            ['gumi', 'chilgok', 'daegu', 'gyeongsan'].forEach(id => {
-                const el = document.getElementById('sub-btn-' + id);
-                if (id === region) { el.classList.add('region-card-selected'); el.querySelector('.status-text').innerText = '선택됨'; }
-                else { el.classList.remove('region-card-selected'); el.querySelector('.status-text').innerText = '선택하기'; }
-            });
+            
+            // [수정] 동적으로 생성된 버튼들의 스타일 업데이트
+            if (currentSubwayBroadRegion === 'daegu') {
+                ['gumi', 'chilgok', 'daegu', 'gyeongsan'].forEach(id => {
+                    const el = document.getElementById('sub-btn-' + id);
+                    if (!el) return;
+                    if (id === region) { el.classList.add('region-card-selected'); el.querySelector('.status-text').innerText = '선택됨'; }
+                    else { el.classList.remove('region-card-selected'); el.querySelector('.status-text').innerText = '선택하기'; }
+                });
+            }
+            
+            // [신규] 지역 변경 시 유효하지 않은 노선이면 초기화
+            const allowed = REGION_LINES[region] || ['daegyeong'];
+            if(!allowed.includes(currentSubwayLine)) currentSubwayLine = allowed[0];
+
+            window.renderSubwayLineBadges();
             window.renderSubwayStations();
         };
 
@@ -713,6 +842,134 @@
                 document.getElementById('view-bus').classList.add('hidden'); document.getElementById('view-subway').classList.remove('hidden');
                 document.getElementById('nav-subway').className = 'nav-pill-active rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300';
                 document.getElementById('nav-bus').className = 'nav-pill-inactive rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300 hover:bg-gray-100';
+                
+                // [신규] 탭 전환 시 UI 초기화 및 렌더링
+                window.renderSubwaySpecificRegions(); 
+                window.renderSubwayLineBadges();
+                window.renderSubwayStations();
+            }
+        };
+
+        // 6. UI 제어 함수들 (Global)
+        
+        // [신규] 버스 대권역 선택 함수
+        window.selectBusBroadRegion = function(broadId) {
+            currentBusBroadRegion = broadId;
+            
+            // 1. 상단 버튼 스타일 업데이트
+            const broadIds = ['daegu', 'busan', 'chungcheong', 'gwangju', 'gyeongbuk', 'gyeongnam', 'jeonju'];
+            broadIds.forEach(id => {
+                const btn = document.getElementById('bus-broad-btn-' + id);
+                if(!btn) return;
+                const span = btn.querySelector('span');
+                if (id === broadId) {
+                    btn.classList.add('region-card-selected');
+                    span.classList.remove('text-gray-400');
+                    span.classList.add('text-main');
+                } else {
+                    btn.classList.remove('region-card-selected');
+                    span.classList.add('text-gray-400');
+                    span.classList.remove('text-main');
+                }
+            });
+
+            // 2. 하단 세부 지역 렌더링
+            window.renderBusSpecificRegions();
+
+            // 3. [신규] 권역 변경 시 해당 권역의 첫 번째 지역 자동 선택
+            const regions = BROAD_REGION_DATA_BUS[broadId];
+            if (regions && regions.length > 0) {
+                // 현재 선택된 지역이 새 권역 목록에 없으면 첫 번째 지역으로 변경
+                const currentInNewList = regions.find(r => r.id === currentRegion);
+                if (!currentInNewList) {
+                    window.selectRegion(regions[0].id);
+                } else {
+                    window.renderList(); // 이미 유효하다면 목록만 갱신
+                }
+            } else {
+                window.renderList(); // 지원 예정 지역 등
+            }
+        };
+
+        // [신규] 버스 세부 지역 렌더링 함수
+        window.renderBusSpecificRegions = function() {
+            const container = document.getElementById('bus-specific-region-container');
+            container.innerHTML = '';
+
+            // [수정] 데이터가 있는 경우 렌더링, 없으면 지원 예정 표시
+            const regions = BROAD_REGION_DATA_BUS[currentBusBroadRegion];
+            
+            if (regions) {
+                regions.forEach(r => {
+                    const isSelected = (currentRegion === r.id);
+                    const selectedClass = isSelected ? 'region-card-selected' : '';
+                    const statusText = isSelected ? '선택됨' : (r.id === 'andong' ? document.getElementById('status-andong')?.innerText || '연결 대기' : '연결 대기');
+                    
+                    const html = `
+                    <div id="btn-${r.id}" onclick="selectRegion('${r.id}')" class="toss-card ${selectedClass} min-w-[80px] h-[80px] p-3 flex flex-col justify-between items-start cursor-pointer transition-all">
+                        <div class="w-8 h-8 rounded-full bg-${r.color}-50 flex items-center justify-center text-${r.color}-500 text-sm"><i class="fa-solid ${r.icon}"></i></div>
+                        <div><p class="text-xs font-bold text-main">${r.name}</p><p class="text-[10px] text-sub status-text" id="status-${r.id}">${statusText}</p></div>
+                    </div>`;
+                    container.insertAdjacentHTML('beforeend', html);
+                });
+            } else {
+                container.innerHTML = `<div class="w-full text-center text-gray-400 text-xs py-8 flex flex-col items-center justify-center h-[80px]"><p>아직 지원하지 않는 지역입니다.</p></div>`;
+            }
+        };
+
+        window.selectRegion = function(region) {
+            currentRegion = region;
+            
+            // [수정] 동적으로 생성된 버튼들의 스타일 업데이트 (요소가 존재할 때만 처리)
+            ['andong', 'gumi', 'chilgok'].forEach(id => {
+                const el = document.getElementById('btn-' + id);
+                if (!el) return;
+                if (id === region) { el.classList.add('region-card-selected'); el.querySelector('.status-text').innerText = '선택됨'; }
+                else { el.classList.remove('region-card-selected'); el.querySelector('.status-text').innerText = '선택하기'; }
+            });
+            window.renderList();
+        };
+
+        window.renderList = function() {
+            const container = document.getElementById('dynamic-list-container'); const empty = document.getElementById('empty-state');
+            container.innerHTML = ''; empty.classList.add('hidden');
+            if (!apiKey && currentRegion !== 'andong') { empty.classList.remove('hidden'); return; }
+            const cityCode = CITY_CODES[currentRegion]; const targets = stationConfig[currentRegion];
+            if (!targets || targets.length === 0) { 
+                // [수정] 현재 권역에 데이터가 있는지 확인
+                if (!BROAD_REGION_DATA_BUS[currentBusBroadRegion]) {
+                    container.innerHTML = `<div class="text-center py-10 text-gray-400">지원 예정 지역입니다.</div>`;
+                } else {
+                    container.innerHTML = `<div class="text-center py-10 text-gray-400">등록된 정류장이 없습니다.<br>상단 '+ 정류장 추가' 버튼을 눌러보세요!</div>`; 
+                }
+                return; 
+            }
+            
+            targets.forEach((station, index) => {
+                if(currentRegion === 'andong') { window.renderStaticCard(index, station); } 
+                else {
+                    const skeletonHtml = `<div id="station-card-${index}" class="toss-card p-5 mb-4 !bg-white/50 animate-pulse relative"><div class="flex justify-between items-start mb-4"><div class="flex items-center gap-2.5"><div class="w-10 h-10 rounded-[16px] bg-gray-200"></div><div><div class="h-4 w-32 bg-gray-200 rounded mb-1.5"></div><div class="h-3 w-20 bg-gray-200 rounded"></div></div></div></div><div class="space-y-2"><div class="h-12 bg-gray-200 rounded-xl"></div></div></div>`;
+                    container.insertAdjacentHTML('beforeend', skeletonHtml); window.loadStationData(index, cityCode, station);
+                }
+            });
+        };
+        window.switchTab = function(mode) {
+            if (mode === 'bus') {
+                document.getElementById('view-bus').classList.remove('hidden'); document.getElementById('view-subway').classList.add('hidden');
+                document.getElementById('nav-bus').className = 'nav-pill-active rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300';
+                document.getElementById('nav-subway').className = 'nav-pill-inactive rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300 hover:bg-gray-100';
+                
+                // [신규] 버스 탭 전환 시 UI 초기화
+                window.renderBusSpecificRegions();
+                window.renderList();
+            } else {
+                document.getElementById('view-bus').classList.add('hidden'); document.getElementById('view-subway').classList.remove('hidden');
+                document.getElementById('nav-subway').className = 'nav-pill-active rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300';
+                document.getElementById('nav-bus').className = 'nav-pill-inactive rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300 hover:bg-gray-100';
+                
+                // [신규] 탭 전환 시 UI 초기화 및 렌더링
+                window.renderSubwaySpecificRegions(); 
+                window.renderSubwayLineBadges();
                 window.renderSubwayStations();
             }
         };
@@ -810,6 +1067,10 @@
             if(apiKey) document.getElementById('api-key-input').value = apiKey;
             window.loadTimetable();
             window.selectRegion('andong');
+            
+            // [신규] 버스/지하철 초기 렌더링 준비
+            window.renderBusSpecificRegions();
+            window.renderSubwaySpecificRegions();
             
             // [IMPORTANT] Start live updates once
             startLiveUpdates();
