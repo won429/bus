@@ -67,6 +67,16 @@
         .line-badge { transition: all 0.2s; border: 1px solid transparent; }
         .line-badge-active { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.05); }
         .line-badge-inactive { opacity: 0.5; background-color: #F2F4F6; color: #8B95A1; border-color: #E5E8EB; }
+
+        /* [신규] 공지사항 배너용 Marquee 애니메이션 */
+        @keyframes marquee { 
+            0% { transform: translateX(0); } 
+            100% { transform: translateX(-50%); } 
+        }
+        .animate-marquee { 
+            display: inline-block;
+            animation: marquee 15s linear infinite; 
+        }
     </style>
 </head>
 <body class="w-full h-[100dvh] flex flex-col overflow-hidden bg-toss-gradient">
@@ -194,6 +204,14 @@
                     <h3 class="text-lg font-bold text-main mb-2">노선 선택</h3>
                     <!-- 노선 선택 배지 컨테이너 -->
                     <div id="subway-line-badges" class="flex flex-wrap gap-2"></div>
+                    
+                    <!-- [신규] 대경선 공지사항 배너 -->
+                    <div id="subway-notice" class="hidden mt-3 bg-red-50 border border-red-100 rounded-lg overflow-hidden py-2.5">
+                        <div class="whitespace-nowrap animate-marquee">
+                            <span class="text-xs font-bold text-red-500 mr-8"><i class="fa-solid fa-triangle-exclamation mr-1"></i>청도 열차 사고로 운행 횟수 100회 -> 98회로 2회 감소 및 지연 발생 가능</span>
+                            <span class="text-xs font-bold text-red-500 mr-8"><i class="fa-solid fa-triangle-exclamation mr-1"></i>청도 열차 사고로 운행 횟수 100회 -> 98회로 2회 감소 및 지연 발생 가능</span>
+                        </div>
+                    </div>
                 </div>
                 <!-- 역 목록 컨테이너 -->
                 <div id="subway-station-list" class="space-y-3"></div>
@@ -326,7 +344,21 @@
             '1': { name: '1호선', color: '#D93F5C' },
             '2': { name: '2호선', color: '#00AA80' },
             '3': { name: '3호선', color: '#FFB100' },
-            'daegyeong': { name: '대경선', color: '#0054A6' }
+            'daegyeong': { name: '대경선', color: '#0054A6' },
+            // [신규] 부산권 노선 추가
+            'busan1': { name: '1호선', color: '#F06A00' },
+            'busan2': { name: '2호선', color: '#81BF48' },
+            'busan3': { name: '3호선', color: '#BB8C00' },
+            'busan4': { name: '4호선', color: '#217DCB' },
+            'bgl': { name: '부산김해경전철', color: '#8652A1' },
+            'donghae': { name: '동해선', color: '#003DA5' },
+            'yangsan_line': { name: '양산선', color: '#77C4A3' },
+            // [신규] 충청/광주 노선 추가
+            'daejeon1': { name: '1호선', color: '#007448' },
+            'daejeon2': { name: '2호선', color: '#55A630' },
+            'chungcheong_wide': { name: '충청권 광역철도', color: '#AECC54' },
+            'gwangju1': { name: '1호선', color: '#009088' },
+            'gwangju2': { name: '2호선', color: '#0072C6' }
         };
 
         const SUBWAY_DATA = {
@@ -347,7 +379,15 @@
             'gumi': ['daegyeong'],
             'chilgok': ['daegyeong'],
             'daegu': ['daegyeong', '1', '2', '3'],
-            'gyeongsan': ['daegyeong', '1', '2']
+            'gyeongsan': ['daegyeong', '1', '2'],
+            // [신규] 부산권 지역별 노선 정의
+            'busan_city': ['busan1', 'busan2', 'busan3', 'busan4', 'bgl', 'donghae', 'yangsan_line'],
+            'ulsan': ['donghae'],
+            'gimhae': ['bgl'],
+            'yangsan': ['yangsan_line'],
+            // [신규] 충청/광주 지역별 노선 정의
+            'daejeon': ['daejeon1', 'daejeon2', 'chungcheong_wide'],
+            'gwangju_city': ['gwangju1', 'gwangju2']
         };
 
         // [수정] 버스 대권역별 세부 지역 데이터 (구미/칠곡 -> 대구권 이동)
@@ -378,13 +418,28 @@
             ]
         };
 
-        // [기존] 지하철 대권역별 세부 지역 데이터
+        // [신규] 지하철 대권역별 세부 지역 데이터
         const BROAD_REGION_DATA = {
             'daegu': [
                 { id: 'gumi', name: '경북 구미시', icon: 'fa-train-subway', color: 'orange' },
                 { id: 'chilgok', name: '경북 칠곡군', icon: 'fa-train', color: 'emerald' },
                 { id: 'daegu', name: '대구광역시', icon: 'fa-subway', color: 'blue' },
                 { id: 'gyeongsan', name: '경북 경산시', icon: 'fa-train-tram', color: 'indigo' }
+            ],
+            // [신규] 부산권 추가
+            'busan': [
+                { id: 'busan_city', name: '부산광역시', icon: 'fa-train-subway', color: 'blue' },
+                { id: 'ulsan', name: '울산광역시', icon: 'fa-train', color: 'cyan' },
+                { id: 'gimhae', name: '경남 김해시', icon: 'fa-train-tram', color: 'teal' },
+                { id: 'yangsan', name: '경남 양산시', icon: 'fa-subway', color: 'emerald' }
+            ],
+            // [신규] 충청권 추가
+            'chungcheong': [
+                { id: 'daejeon', name: '대전광역시', icon: 'fa-subway', color: 'green' }
+            ],
+            // [신규] 광주전남 추가
+            'gwangju': [
+                { id: 'gwangju_city', name: '광주광역시', icon: 'fa-subway', color: 'teal' }
             ]
         };
 
@@ -711,11 +766,43 @@
                 };
                 container.appendChild(btn);
             });
+
+            // [신규] 대경선 공지사항 표시 로직
+            const noticeEl = document.getElementById('subway-notice');
+            if (currentSubwayBroadRegion === 'daegu' && currentSubwayLine === 'daegyeong') {
+                noticeEl.classList.remove('hidden');
+            } else {
+                noticeEl.classList.add('hidden');
+            }
         };
 
         window.renderSubwayStations = function() {
             const listContainer = document.getElementById('subway-station-list'); listContainer.innerHTML = '';
             
+            // [신규] 양산선 선택 시 개통 예정 문구 표시
+            if (currentSubwayLine === 'yangsan_line') {
+                listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs flex flex-col items-center gap-2"><i class="fa-solid fa-person-digging text-2xl mb-1"></i><p>2026년 개통 예정입니다.</p></div>`;
+                return;
+            }
+
+            // [신규] 광주 2호선 선택 시 개통 예정 문구 표시
+            if (currentSubwayLine === 'gwangju2') {
+                listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs flex flex-col items-center gap-2"><i class="fa-solid fa-person-digging text-2xl mb-1"></i><p>2027년 12월 이후 언젠간 개통 예정입니다.</p></div>`;
+                return;
+            }
+
+            // [신규] 대전 2호선 상태 표시
+            if (currentSubwayLine === 'daejeon2') {
+                listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs flex flex-col items-center gap-2"><i class="fa-solid fa-person-digging text-2xl mb-1"></i><p>공사 진행중, 2028년 하반기 개통 예정입니다.</p></div>`;
+                return;
+            }
+
+            // [신규] 충청권 광역철도 상태 표시 (문구 수정됨)
+            if (currentSubwayLine === 'chungcheong_wide') {
+                listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs flex flex-col items-center gap-2"><i class="fa-solid fa-person-digging text-2xl mb-1"></i><p>공사 진행중, 2027년 6월 부터 순차적 개통 예정입니다.</p></div>`;
+                return;
+            }
+
             // [수정] 대구권 외에는 '지원 예정' 표시하고 함수 종료
             if (currentSubwayBroadRegion !== 'daegu') {
                  listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs flex flex-col items-center gap-2"><i class="fa-solid fa-person-digging text-2xl mb-1"></i><p>지원 예정입니다.</p></div>`; 
@@ -778,7 +865,7 @@
         window.selectBroadRegion = function(broadId) {
             currentSubwayBroadRegion = broadId;
             
-            // 1. 상단 버튼 스타일 업데이트 (경북, 경남, 전주 제거)
+            // 1. 상단 버튼 스타일 업데이트
             const broadIds = ['daegu', 'busan', 'chungcheong', 'gwangju'];
             broadIds.forEach(id => {
                 const btn = document.getElementById('broad-btn-' + id);
@@ -798,6 +885,16 @@
             // 2. 하단 세부 지역 렌더링
             window.renderSubwaySpecificRegions();
 
+            // [신규] 권역 변경 시 해당 권역의 첫 번째 지역 자동 선택
+            const regions = BROAD_REGION_DATA[broadId];
+            if (regions && regions.length > 0) {
+                const currentInList = regions.find(r => r.id === currentSubwayRegion);
+                if (!currentInList) {
+                    window.selectSubwayRegion(regions[0].id);
+                    return; // selectSubwayRegion에서 렌더링 호출함
+                }
+            }
+
             // 3. 역 목록 초기화 (대구권 아니면 지원예정 표시됨)
             window.renderSubwayLineBadges();
             window.renderSubwayStations();
@@ -808,14 +905,15 @@
             const container = document.getElementById('subway-specific-region-container');
             container.innerHTML = '';
 
-            if (currentSubwayBroadRegion === 'daegu') {
-                const regions = BROAD_REGION_DATA['daegu'];
+            // [수정] 동적 데이터 기반 렌더링
+            const regions = BROAD_REGION_DATA[currentSubwayBroadRegion];
+
+            if (regions) {
                 regions.forEach(r => {
                     const isSelected = (currentSubwayRegion === r.id);
                     const selectedClass = isSelected ? 'region-card-selected' : '';
                     const statusText = isSelected ? '선택됨' : '선택하기';
                     
-                    // 메뉴 크기가 작아지게: min-w-[80px] h-[80px] 로 조정 (기존 100px)
                     const html = `
                     <div id="sub-btn-${r.id}" onclick="selectSubwayRegion('${r.id}')" class="toss-card ${selectedClass} min-w-[80px] h-[80px] p-3 flex flex-col justify-between items-start cursor-pointer transition-all">
                         <div class="w-8 h-8 rounded-full bg-${r.color}-50 flex items-center justify-center text-${r.color}-500 text-sm"><i class="fa-solid ${r.icon}"></i></div>
@@ -832,18 +930,24 @@
             currentSubwayRegion = region;
             
             // [수정] 동적으로 생성된 버튼들의 스타일 업데이트
-            if (currentSubwayBroadRegion === 'daegu') {
-                ['gumi', 'chilgok', 'daegu', 'gyeongsan'].forEach(id => {
-                    const el = document.getElementById('sub-btn-' + id);
+            const regions = BROAD_REGION_DATA[currentSubwayBroadRegion];
+            if (regions) {
+                regions.forEach(r => {
+                    const el = document.getElementById('sub-btn-' + r.id);
                     if (!el) return;
-                    if (id === region) { el.classList.add('region-card-selected'); el.querySelector('.status-text').innerText = '선택됨'; }
-                    else { el.classList.remove('region-card-selected'); el.querySelector('.status-text').innerText = '선택하기'; }
+                    if (r.id === region) { 
+                        el.classList.add('region-card-selected'); 
+                        el.querySelector('.status-text').innerText = '선택됨'; 
+                    } else { 
+                        el.classList.remove('region-card-selected'); 
+                        el.querySelector('.status-text').innerText = '선택하기'; 
+                    }
                 });
             }
             
             // [신규] 지역 변경 시 유효하지 않은 노선이면 초기화
             const allowed = REGION_LINES[region] || ['daegyeong'];
-            if(!allowed.includes(currentSubwayLine)) currentSubwayLine = allowed[0];
+            if(!allowed.includes(currentSubwayLine)) currentSubwayLine = allowed[0]; // 기본값 혹은 없는 경우 유지
 
             window.renderSubwayLineBadges();
             window.renderSubwayStations();
