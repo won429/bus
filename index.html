@@ -44,7 +44,6 @@
             width: 140px !important; background-color: #191F28 !important; border-radius: 9999px !important;
             margin-top: 10px; padding: 8px 16px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
         }
-        /* .header-title 대신 .header-left-group을 숨김 처리하여 뒤로가기 버튼도 같이 숨김 */
         .island-active .header-left-group { width: 0; opacity: 0; margin: 0; overflow: hidden; transform: scale(0.8); }
         .island-active .icon-container { width: 100%; justify-content: center; gap: 24px !important; }
         .island-active .icon-bg { background-color: transparent !important; width: auto !important; height: auto !important; box-shadow: none !important; color: white !important; }
@@ -68,7 +67,6 @@
         .line-badge-active { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.05); }
         .line-badge-inactive { opacity: 0.5; background-color: #F2F4F6; color: #8B95A1; border-color: #E5E8EB; }
 
-        /* [신규] 공지사항 배너용 Marquee 애니메이션 */
         @keyframes marquee { 
             0% { transform: translateX(0); } 
             100% { transform: translateX(-50%); } 
@@ -78,7 +76,6 @@
             animation: marquee 15s linear infinite; 
         }
 
-        /* [신규] 시간표 그리드 스타일 */
         .timetable-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
         .time-chip { 
             background: #F2F4F6; padding: 6px 2px; border-radius: 8px; 
@@ -96,7 +93,6 @@
     <!-- 헤더 -->
     <header class="fixed top-0 left-0 w-full z-50 flex justify-center pt-safe pointer-events-none">
         <div id="dynamic-island" class="pointer-events-auto w-full max-w-md px-5 py-2 flex items-center justify-between bg-transparent mx-auto origin-top mt-2">
-            <!-- 좌측 그룹 (뒤로가기 + 타이틀) -->
             <div class="header-left-group flex items-center gap-3 transition-all duration-300 origin-left">
                 <a href="https://won429.github.io/enjoysite/" class="text-main text-lg p-1 hover:opacity-60 transition-opacity">
                     <i class="fa-solid fa-chevron-left"></i>
@@ -120,11 +116,9 @@
         
         <!-- [1] 버스 뷰 -->
         <div id="view-bus" class="fade-in-up">
-            <!-- 지역 선택 (버스) -->
             <div class="mb-6 fade-in-up delay-100">
                 <h3 class="text-lg font-bold text-main mb-3 px-1">지역 선택</h3>
                 
-                <!-- [1] 상단: 권역 선택 (버스용) -->
                 <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1 mb-1">
                     <button onclick="selectBusBroadRegion('daegu')" id="bus-broad-btn-daegu" class="toss-card min-w-[60px] h-[40px] px-3 flex justify-center items-center cursor-pointer transition-all whitespace-nowrap">
                         <span class="text-xs font-bold text-gray-400">대구권</span>
@@ -149,15 +143,13 @@
                     </button>
                 </div>
 
-                <!-- [2] 하단: 세부 지역 선택 (버스용) -->
                 <div id="bus-specific-region-container" class="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1 min-h-[90px]">
-                    <!-- 자바스크립트로 동적 렌더링 -->
+                    <!-- JS 렌더링 -->
                 </div>
 
                 <p id="city-code-status" class="text-[10px] text-gray-400 mt-2 px-1 text-right">도시 코드 조회 대기중...</p>
             </div>
 
-            <!-- 버스 목록 -->
             <div class="mb-4 fade-in-up delay-200">
                 <div class="flex justify-between items-end mb-3 px-1">
                     <div>
@@ -184,11 +176,9 @@
 
         <!-- [2] 지하철 뷰 -->
         <div id="view-subway" class="hidden fade-in-up">
-            <!-- 지역 선택 (지하철) -->
             <div class="mb-4 fade-in-up delay-100">
                 <h3 class="text-lg font-bold text-main mb-3 px-1">지역 선택</h3>
                 
-                <!-- [1] 상단: 권역 선택 (두 칸으로 나누기 - 윗칸) -->
                 <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1 mb-1">
                     <button onclick="selectBroadRegion('daegu')" id="broad-btn-daegu" class="toss-card region-card-selected min-w-[60px] h-[40px] px-3 flex justify-center items-center cursor-pointer transition-all whitespace-nowrap">
                         <span class="text-xs font-bold text-main">대구권</span>
@@ -204,20 +194,16 @@
                     </button>
                 </div>
 
-                <!-- [2] 하단: 세부 지역 선택 (두 칸으로 나누기 - 아랫칸) -->
                 <div id="subway-specific-region-container" class="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1 min-h-[90px]">
-                    <!-- 자바스크립트로 동적 렌더링 -->
+                    <!-- JS 렌더링 -->
                 </div>
             </div>
 
-            <!-- 노선 및 역 정보 -->
             <div class="px-1 fade-in-up delay-200">
                 <div class="mb-3">
                     <h3 class="text-lg font-bold text-main mb-2">노선 선택</h3>
-                    <!-- 노선 선택 배지 컨테이너 -->
                     <div id="subway-line-badges" class="flex flex-wrap gap-2"></div>
                     
-                    <!-- [신규] 대경선 공지사항 배너 -->
                     <div id="subway-notice" class="hidden mt-3 bg-red-50 border border-red-100 rounded-lg overflow-hidden py-2.5">
                         <div class="whitespace-nowrap animate-marquee">
                             <span class="text-xs font-bold text-red-500 mr-8"><i class="fa-solid fa-triangle-exclamation mr-1"></i>청도 열차 사고로 운행 횟수 100회 -> 98회로 2회 감소 및 지연 발생 가능</span>
@@ -225,7 +211,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- 역 목록 컨테이너 -->
                 <div id="subway-station-list" class="space-y-3"></div>
             </div>
         </div>
@@ -276,7 +261,7 @@
         </div>
     </div>
 
-    <!-- [신규] 시간표 모달 -->
+    <!-- 시간표 모달 -->
     <div id="timetable-modal" class="hidden fixed inset-0 z-[80] bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-5">
         <div class="bg-white w-full max-w-sm h-[85vh] sm:h-[80vh] sm:rounded-[32px] rounded-t-[32px] p-6 shadow-2xl scale-100 transition-all flex flex-col">
             <div class="flex justify-between items-center mb-4 flex-none">
@@ -287,17 +272,13 @@
                 <button onclick="closeTimetableModal()" class="text-gray-400 hover:text-gray-600 bg-gray-100 w-8 h-8 rounded-full"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             
-            <!-- 요일 탭 -->
             <div class="flex p-1 bg-gray-100 rounded-2xl mb-4 flex-none">
                 <button onclick="switchTimetableTab('weekday')" id="tab-weekday" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all timetable-tab-active">평일</button>
                 <button onclick="switchTimetableTab('saturday')" id="tab-saturday" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all timetable-tab-inactive">토요일</button>
                 <button onclick="switchTimetableTab('holiday')" id="tab-holiday" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all timetable-tab-inactive">휴일</button>
             </div>
 
-            <!-- 시간표 내용 -->
-            <div id="timetable-content" class="flex-1 overflow-y-auto space-y-6 min-h-0 pb-10 pr-1 custom-scrollbar">
-                <!-- JS로 동적 생성됨 -->
-            </div>
+            <div id="timetable-content" class="flex-1 overflow-y-auto space-y-6 min-h-0 pb-10 pr-1 custom-scrollbar"></div>
         </div>
     </div>
 
@@ -354,8 +335,7 @@
     </div>
 
     <script>
-        // 1. 전역 변수 (Global Variables)
-        const MANUAL_API_KEY = "61a63f368537b5e5660bb073ed3d610de59c4982ec365edafebcfd749b87bc93"; // [중요] 여기에 공공데이터포털 인증키(Decoding)를 붙여넣으세요
+        const MANUAL_API_KEY = "61a63f368537b5e5660bb073ed3d610de59c4982ec365edafebcfd749b87bc93"; // 여기에 공공데이터포털 인증키(Decoding)를 입력하세요
         const ANDONG_DEFAULT_STATIONS = [
             { name: "국립안동대학교", nodeId: "370000023", arsNo: "-", sub: "주요 정류장" },
             { name: "CGV 건너", nodeId: "370000998", arsNo: "-", sub: "주요 정류장" }, 
@@ -369,10 +349,21 @@
         localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig));
 
         let CITY_CODES = { 'andong': '37010', 'gumi': '37030', 'chilgok': '37380' };
-        const CITY_NAMES = { 'andong': '안동시', 'gumi': '구미시', 'chilgok': '칠곡군', 'daegu': '대구광역시' };
+        
+        const CITY_NAMES = { 
+            'andong': '안동시', 
+            'gumi': '구미시', 
+            'chilgok': '칠곡군', 
+            'daegu': '대구광역시',
+            'busan_city': '부산광역시',
+            'daejeon': '대전광역시',
+            'gwangju_city': '광주광역시',
+            'jinju': '진주시',
+            'iksan': '익산시'
+        };
         
         let currentRegion = 'andong';
-        let currentBusBroadRegion = 'gyeongbuk'; // [신규] 버스 현재 대권역 (기본: 경북)
+        let currentBusBroadRegion = 'gyeongbuk'; 
         let currentSubwayRegion = 'gumi';
         let currentSubwayBroadRegion = 'daegu'; 
         let currentSubwayLine = 'daegyeong';
@@ -382,7 +373,6 @@
             '2': { name: '2호선', color: '#00AA80' },
             '3': { name: '3호선', color: '#FFB100' },
             'daegyeong': { name: '대경선', color: '#0054A6' },
-            // [신규] 부산권 노선 추가
             'busan1': { name: '1호선', color: '#F06A00' },
             'busan2': { name: '2호선', color: '#81BF48' },
             'busan3': { name: '3호선', color: '#BB8C00' },
@@ -390,7 +380,6 @@
             'bgl': { name: '부산김해경전철', color: '#8652A1' },
             'donghae': { name: '동해선', color: '#003DA5' },
             'yangsan_line': { name: '양산선', color: '#77C4A3' },
-            // [신규] 충청/광주 노선 추가
             'daejeon1': { name: '1호선', color: '#007448' },
             'daejeon2': { name: '2호선', color: '#55A630' },
             'chungcheong_wide': { name: '충청권 광역철도', color: '#AECC54' },
@@ -411,23 +400,19 @@
             }
         };
 
-        // [신규] 지역별 이용 가능한 노선 정의 (누락 복구)
         const REGION_LINES = {
             'gumi': ['daegyeong'],
             'chilgok': ['daegyeong'],
             'daegu': ['daegyeong', '1', '2', '3'],
             'gyeongsan': ['daegyeong', '1', '2'],
-            // [신규] 부산권 지역별 노선 정의
             'busan_city': ['busan1', 'busan2', 'busan3', 'busan4', 'bgl', 'donghae', 'yangsan_line'],
             'ulsan': ['donghae'],
             'gimhae': ['bgl'],
             'yangsan': ['yangsan_line'],
-            // [신규] 충청/광주 지역별 노선 정의
             'daejeon': ['daejeon1', 'daejeon2', 'chungcheong_wide'],
             'gwangju_city': ['gwangju1', 'gwangju2']
         };
 
-        // [수정] 버스 대권역별 세부 지역 데이터 (구미/칠곡 -> 대구권 이동)
         const BROAD_REGION_DATA_BUS = {
             'daegu': [
                 { id: 'daegu', name: '대구광역시', icon: 'fa-building', color: 'blue', isPlanned: true },
@@ -437,7 +422,6 @@
             'gyeongbuk': [
                 { id: 'andong', name: '안동시', icon: 'fa-location-dot', color: 'purple' }
             ],
-            // [신규] 추가된 지역 데이터 (지원 예정 플래그 추가)
             'busan': [
                 { id: 'busan_city', name: '부산광역시', icon: 'fa-ship', color: 'blue', isPlanned: true }
             ],
@@ -455,7 +439,6 @@
             ]
         };
 
-        // [신규] 지하철 대권역별 세부 지역 데이터
         const BROAD_REGION_DATA = {
             'daegu': [
                 { id: 'gumi', name: '경북 구미시', icon: 'fa-train-subway', color: 'orange' },
@@ -463,18 +446,15 @@
                 { id: 'daegu', name: '대구광역시', icon: 'fa-subway', color: 'blue' },
                 { id: 'gyeongsan', name: '경북 경산시', icon: 'fa-train-tram', color: 'indigo' }
             ],
-            // [신규] 부산권 추가
             'busan': [
                 { id: 'busan_city', name: '부산광역시', icon: 'fa-train-subway', color: 'blue' },
                 { id: 'ulsan', name: '울산광역시', icon: 'fa-train', color: 'cyan' },
                 { id: 'gimhae', name: '경남 김해시', icon: 'fa-train-tram', color: 'teal' },
                 { id: 'yangsan', name: '경남 양산시', icon: 'fa-subway', color: 'emerald' }
             ],
-            // [신규] 충청권 추가
             'chungcheong': [
                 { id: 'daejeon', name: '대전광역시', icon: 'fa-subway', color: 'green' }
             ],
-            // [신규] 광주전남 추가
             'gwangju': [
                 { id: 'gwangju_city', name: '광주광역시', icon: 'fa-subway', color: 'teal' }
             ]
@@ -486,11 +466,10 @@
         
         let GLOBAL_TIMETABLE = null; 
         
-        // [신규] 시간표 모달 관련 변수
         let currentTimetableKey = null;
         let currentTimetableDay = 'weekday';
+        let refreshInterval = null;
 
-        // 2. 유틸리티 함수 (Utility Functions)
         function getEncodedKey() {
             if (!apiKey) return '';
             return keyType === 'encoding' ? apiKey : encodeURIComponent(apiKey);
@@ -516,7 +495,6 @@
             return { type: 'error', msg: '알 수 없는 응답 형식' };
         }
 
-        // [MODIFIED] renderBadge now sets a data-target for live updates
         function renderBadge(diffSeconds, timeStr) {
             const now = Date.now();
             const targetTime = now + (diffSeconds * 1000);
@@ -533,7 +511,6 @@
 
             const timeHtml = timeStr ? `<span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">(${timeStr})</span>` : '';
 
-            // Added 'live-badge' class and 'data-target' attribute
             return `
                 <div class="flex items-center justify-end gap-2 shrink-0 ml-auto">
                     ${timeHtml}
@@ -542,7 +519,6 @@
             `;
         }
 
-        // [NEW] Live countdown function
         function startLiveUpdates() {
             setInterval(() => {
                 const now = Date.now();
@@ -553,7 +529,6 @@
                     const diffMs = target - now;
                     const diffSec = Math.ceil(diffMs / 1000);
 
-                    // Constants for classes
                     const baseClasses = "live-badge px-2 py-0.5 rounded-md text-xs font-bold shadow-sm whitespace-nowrap";
                     const redClasses = "bg-red-50 text-red-600 border border-red-100";
                     const grayClasses = "bg-gray-100 text-gray-500 border border-gray-200";
@@ -577,7 +552,6 @@
             }, 1000);
         }
 
-        // 3. API 통신 및 데이터 로드
         window.fetchWithFallback = async function(targetUrl) {
             const timestamp = `&_=${Date.now()}`; 
             const proxies = [
@@ -651,7 +625,6 @@
             } catch (e) { resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ 네트워크 오류</span>`; }
         };
 
-        // 4. 시간표 파일 파싱 (Bus & Subway)
         window.loadTimetable = async function() {
             if (!TIMETABLE_URL) return;
             try {
@@ -713,7 +686,6 @@
             return { diff: bestDiff, html: renderBadge(bestDiff, bestTime) };
         };
 
-        // 5. 렌더링 함수들
         window.renderStaticCard = function(index, station) {
             const container = document.getElementById('dynamic-list-container');
             if (GLOBAL_TIMETABLE === "ERROR") { container.innerHTML = `<div class="p-4 bg-red-50 text-red-500 text-center text-xs rounded-xl">시간표 파일을 불러오지 못했습니다.</div>`; return; }
@@ -726,7 +698,6 @@
                 const now = new Date();
                 const nowTotalSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
 
-                // [수정됨] 기존 getNextTimeFromFile 대신 각 노선(r)의 시간표를 직접 참조하여 정확도 향상
                 const routes = stationData.map(r => { 
                     const times = r.times[dayKey] || [];
                     let bestDiff = 999999; 
@@ -757,7 +728,6 @@
                 }
             } else { contentHtml = `<div class="text-center text-gray-400 text-xs py-2">데이터 로딩중...</div>`; }
             
-            // [수정] 시간표 보기 버튼 추가 (우측 상단 삭제 버튼 옆)
             const cardHtml = `
             <div class="toss-card p-5 mb-4 !bg-white/70 animate-[fadeInUp_0.4s_ease-out] relative">
                 <div class="flex justify-between items-start mb-4">
@@ -778,43 +748,33 @@
         window.loadStationData = async function(index, cityCode, station) {
             const cardId = `station-card-${index}`; const card = document.getElementById(cardId); if (!card) return;
             
-            // 1. 기본 지역 코드(cityCode)로 1차 조회
             let primaryResult = await window.fetchBusArrival(cityCode, station.nodeId);
             
-            // 최종 데이터를 담을 배열
             let finalArrivals = [];
             let errorState = null;
 
-            // 1차 조회 결과 처리
             if (Array.isArray(primaryResult)) {
                 finalArrivals = [...primaryResult];
             } else if (typeof primaryResult === 'string') {
-                errorState = primaryResult; // 에러 메시지 저장
+                errorState = primaryResult; 
             }
 
-            // [수정] 칠곡/구미 통합 데이터 병합 로직 강화
-            // 칠곡(37380)인 경우, 데이터 존재 여부와 상관없이 무조건 구미(37030) 데이터도 조회하여 합침
             if (cityCode === '37380') {
                 const secondaryResult = await window.fetchBusArrival('37030', station.nodeId);
                 if (Array.isArray(secondaryResult)) {
-                    // 중복 방지를 위해 키 생성 (노선번호_예상시간)
                     const existingKeys = new Set(finalArrivals.map(b => `${b.routeno}_${b.arrtime}`));
-                    
                     secondaryResult.forEach(bus => {
                         const key = `${bus.routeno}_${bus.arrtime}`;
                         if (!existingKeys.has(key)) {
                             finalArrivals.push(bus);
                         }
                     });
-                    
-                    // 구미 데이터가 성공적으로 들어왔다면 에러 상태 해제 (칠곡 데이터가 에러여도 구미 데이터로 보여주기 위함)
                     if (finalArrivals.length > 0) errorState = null;
                 }
             }
 
             const arrivals = finalArrivals;
 
-            // 에러 처리 및 렌더링
             if (errorState && arrivals.length === 0) { 
                 card.innerHTML = `<div class="p-4 text-center bg-red-50 rounded-2xl border border-red-100"><p class="text-red-500 text-xs font-bold mb-1">정보 불러오기 실패</p><p class="text-red-400 text-[10px]">${errorState === 'NETWORK_ERROR' ? '인터넷 연결 확인' : 'API 키 확인 필요'}</p></div><div class="text-center mt-2"><button onclick="removeStation('${currentRegion}', ${index})" class="text-xs text-gray-400 underline">삭제</button></div>`; 
                 card.classList.remove('animate-pulse'); 
@@ -828,9 +788,9 @@
             }
 
             arrivals.sort((a, b) => parseInt(a.arrtime) - parseInt(b.arrtime));
-            let contentHtml = ''; const now = new Date(); 
+            let contentHtml = ''; 
             arrivals.forEach(bus => {
-                const arrSeconds = parseInt(bus.arrtime); const arrivalDate = new Date(now.getTime() + arrSeconds * 1000);
+                const arrSeconds = parseInt(bus.arrtime); const arrivalDate = new Date(Date.now() + arrSeconds * 1000);
                 const timeStr = `${arrivalDate.getHours()}:${arrivalDate.getMinutes().toString().padStart(2,'0')}`;
                 contentHtml += `<div class="glass-item p-3 mb-2 flex items-center justify-between"><div class="flex items-center gap-3"><span class="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${bus.routeno}</span><div><span class="text-sm font-bold text-main">${bus.routeno}번</span><span class="text-[10px] text-sub ml-1">${bus.endnodenm} 방면</span></div></div>${renderBadge(arrSeconds, timeStr)}</div>`;
             });
@@ -838,7 +798,6 @@
             card.classList.remove('animate-pulse'); card.classList.add('!bg-white/70');
         };
 
-        // [신규] 노선 선택 배지 렌더링 함수
         window.renderSubwayLineBadges = function() {
             const container = document.getElementById('subway-line-badges');
             container.innerHTML = '';
@@ -870,7 +829,6 @@
                 container.appendChild(btn);
             });
 
-            // [신규] 대경선 공지사항 표시 로직
             const noticeEl = document.getElementById('subway-notice');
             if (currentSubwayBroadRegion === 'daegu' && currentSubwayLine === 'daegyeong') {
                 noticeEl.classList.remove('hidden');
@@ -882,47 +840,39 @@
         window.renderSubwayStations = function() {
             const listContainer = document.getElementById('subway-station-list'); listContainer.innerHTML = '';
             
-            // [신규] 양산선 선택 시 개통 예정 문구 표시
             if (currentSubwayLine === 'yangsan_line') {
                 listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs flex flex-col items-center gap-2"><i class="fa-solid fa-person-digging text-2xl mb-1"></i><p>2026년 개통 예정입니다.</p></div>`;
                 return;
             }
 
-            // [신규] 광주 2호선 선택 시 개통 예정 문구 표시
             if (currentSubwayLine === 'gwangju2') {
                 listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs flex flex-col items-center gap-2"><i class="fa-solid fa-person-digging text-2xl mb-1"></i><p>2027년 12월 이후 언젠간 개통 예정입니다.</p></div>`;
                 return;
             }
 
-            // [신규] 대전 2호선 상태 표시
             if (currentSubwayLine === 'daejeon2') {
                 listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs flex flex-col items-center gap-2"><i class="fa-solid fa-person-digging text-2xl mb-1"></i><p>공사 진행중, 2028년 하반기 개통 예정입니다.</p></div>`;
                 return;
             }
 
-            // [신규] 충청권 광역철도 상태 표시 (문구 수정됨)
             if (currentSubwayLine === 'chungcheong_wide') {
                 listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs flex flex-col items-center gap-2"><i class="fa-solid fa-person-digging text-2xl mb-1"></i><p>공사 진행중, 2027년 6월 부터 순차적 개통 예정입니다.</p></div>`;
                 return;
             }
 
-            // [수정] 대구권 외에는 '지원 예정' 표시하고 함수 종료
             if (currentSubwayBroadRegion !== 'daegu') {
                  listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs flex flex-col items-center gap-2"><i class="fa-solid fa-person-digging text-2xl mb-1"></i><p>지원 예정입니다.</p></div>`; 
                  return;
             }
 
-            // [수정] 지원 예정 노선 안내 문구 변경
             if (currentSubwayLine !== 'daegyeong') { 
                 listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs flex flex-col items-center gap-2"><i class="fa-solid fa-person-digging text-2xl mb-1"></i><p>지원 예정입니다.</p></div>`; 
                 return; 
             }
             
-            // [수정] 사용자 추가 지하철 역 로드
             const userStations = JSON.parse(localStorage.getItem('my_subway_stations_v1')) || {};
             const userAdded = userStations[currentSubwayRegion] || [];
             
-            // 기본 역 목록 + 사용자 추가 목록 병합 (중복 제거)
             const defaultStations = SUBWAY_DATA['daegyeong'].stations[currentSubwayRegion] || [];
             const allStations = [...new Set([...defaultStations, ...userAdded])];
 
@@ -930,20 +880,17 @@
             
             allStations.forEach((stationName, index) => {
                 let cardContent = '';
-
-                // 환승 배지 생성 로직 (알약 -> 원형 변경)
                 let transferBadge = '';
+                
                 if (stationName === '원대(달성공원)') {
                     transferBadge = `<span class="w-5 h-5 flex items-center justify-center rounded-full text-white font-bold ml-1 shadow-sm text-[10px]" style="background-color: #FFB100;">3</span>`;
                 } else if (stationName === '대구역' || stationName === '동대구역') {
                     transferBadge = `<span class="w-5 h-5 flex items-center justify-center rounded-full text-white font-bold ml-1 shadow-sm text-[10px]" style="background-color: #D93F5C;">1</span>`;
                 }
                 
-                // 사용자 추가 역 삭제 버튼
                 const isUserAdded = userAdded.includes(stationName) && !defaultStations.includes(stationName);
-                const deleteBtn = isUserAdded ? `<button onclick="removeSubwayStation('${currentSubwayRegion}', '${stationName}')" class="text-gray-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>` : '';
+                const deleteBtn = isUserAdded ? `<button onclick="removeSubwayStation('${currentSubwayRegion}', '${stationName}')" class="absolute top-5 right-5 text-gray-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>` : '';
                 
-                // [수정] 시간표 버튼 추가 (기본 역 + 사용자 추가 역 모두)
                 const timetableBtn = `<button onclick="openTimetable('${stationName}', '${stationName}')" class="text-gray-400 hover:text-blue-500 transition-colors"><i class="fa-regular fa-calendar-days"></i></button>`;
 
                 if (stationName === '북삼' || stationName === '원대(달성공원)') {
@@ -994,13 +941,11 @@
             });
         };
 
-        // [신규] 시간표 모달 기능
         window.openTimetable = function(stationKey, stationName) {
             currentTimetableKey = stationKey;
             document.getElementById('timetable-title').innerText = stationName;
             document.getElementById('timetable-modal').classList.remove('hidden');
             
-            // 현재 요일 자동 선택
             const day = new Date().getDay();
             const dayType = (day === 0) ? 'holiday' : (day === 6 ? 'saturday' : 'weekday');
             window.switchTimetableTab(dayType);
@@ -1013,7 +958,6 @@
         window.switchTimetableTab = function(dayKey) {
             currentTimetableDay = dayKey;
             
-            // 탭 스타일 변경
             ['weekday', 'saturday', 'holiday'].forEach(k => {
                 const btn = document.getElementById('tab-' + k);
                 if (k === dayKey) {
@@ -1045,7 +989,6 @@
 
             const now = new Date();
             const nowMinutes = now.getHours() * 60 + now.getMinutes();
-            // 오늘 요일과 보고있는 탭 요일이 같은지 확인 (같아야 현재시간 하이라이팅)
             const todayDay = now.getDay();
             const todayKey = (todayDay === 0) ? 'holiday' : (todayDay === 6 ? 'saturday' : 'weekday');
             const isToday = (todayKey === currentTimetableDay);
@@ -1062,9 +1005,8 @@
                     let chipClass = 'time-chip';
                     if (isToday) {
                         if (tMinutes < nowMinutes) chipClass += ' past';
-                        else if (tMinutes >= nowMinutes && !timeChips.includes('future')) chipClass += ' future'; // 첫 번째 미래 시간만 강조하려면 로직 수정 필요하나 일단 다름
+                        else if (tMinutes >= nowMinutes && !timeChips.includes('future')) chipClass += ' future'; 
                     }
-                    // 가장 가까운 미래 시간 하나만 강조하고 싶다면 별도 로직 필요. 여기선 단순히 지나간것/안지나간것 구분
                     if (isToday && tMinutes >= nowMinutes) chipClass = 'time-chip future'; 
                     else if (isToday && tMinutes < nowMinutes) chipClass = 'time-chip past';
 
@@ -1090,11 +1032,59 @@
             });
         };
 
-        // [신규] 대권역 선택 함수
+        window.renderList = function() {
+            const container = document.getElementById('dynamic-list-container'); 
+            const empty = document.getElementById('empty-state');
+            container.innerHTML = ''; 
+            empty.classList.add('hidden');
+            
+            if (!apiKey && currentRegion !== 'andong') { 
+                empty.classList.remove('hidden'); 
+                return; 
+            }
+            
+            const regions = BROAD_REGION_DATA_BUS[currentBusBroadRegion];
+            const currentRegionData = regions ? regions.find(r => r.id === currentRegion) : null;
+            
+            if (currentRegionData && currentRegionData.isPlanned) {
+                container.innerHTML = `<div class="flex flex-col items-center justify-center py-10 text-gray-400 gap-3">
+                    <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-2xl text-gray-300">
+                        <i class="fa-solid fa-person-digging"></i>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm font-bold text-gray-500">서비스 준비중입니다</p>
+                        <p class="text-xs text-gray-400 mt-1">곧 지원될 예정입니다.</p>
+                    </div>
+                </div>`;
+                return;
+            }
+
+            const cityCode = CITY_CODES[currentRegion]; 
+            const targets = stationConfig[currentRegion];
+            
+            if (!targets || targets.length === 0) { 
+                if (!BROAD_REGION_DATA_BUS[currentBusBroadRegion]) {
+                    container.innerHTML = `<div class="text-center py-10 text-gray-400">지원 예정 지역입니다.</div>`;
+                } else {
+                    container.innerHTML = `<div class="text-center py-10 text-gray-400">등록된 정류장이 없습니다.<br>상단 '+ 정류장 추가' 버튼을 눌러보세요!</div>`; 
+                }
+                return; 
+            }
+            
+            targets.forEach((station, index) => {
+                if(currentRegion === 'andong') { 
+                    window.renderStaticCard(index, station); 
+                } else {
+                    const skeletonHtml = `<div id="station-card-${index}" class="toss-card p-5 mb-4 !bg-white/50 animate-pulse relative"><div class="flex justify-between items-start mb-4"><div class="flex items-center gap-2.5"><div class="w-10 h-10 rounded-[16px] bg-gray-200"></div><div><div class="h-4 w-32 bg-gray-200 rounded mb-1.5"></div><div class="h-3 w-20 bg-gray-200 rounded"></div></div></div></div><div class="space-y-2"><div class="h-12 bg-gray-200 rounded-xl"></div></div></div>`;
+                    container.insertAdjacentHTML('beforeend', skeletonHtml); 
+                    window.loadStationData(index, cityCode, station);
+                }
+            });
+        };
+
         window.selectBroadRegion = function(broadId) {
             currentSubwayBroadRegion = broadId;
             
-            // 1. 상단 버튼 스타일 업데이트
             const broadIds = ['daegu', 'busan', 'chungcheong', 'gwangju'];
             broadIds.forEach(id => {
                 const btn = document.getElementById('broad-btn-' + id);
@@ -1111,30 +1101,25 @@
                 }
             });
 
-            // 2. 하단 세부 지역 렌더링
             window.renderSubwaySpecificRegions();
 
-            // [신규] 권역 변경 시 해당 권역의 첫 번째 지역 자동 선택
             const regions = BROAD_REGION_DATA[broadId];
             if (regions && regions.length > 0) {
                 const currentInList = regions.find(r => r.id === currentSubwayRegion);
                 if (!currentInList) {
                     window.selectSubwayRegion(regions[0].id);
-                    return; // selectSubwayRegion에서 렌더링 호출함
+                    return; 
                 }
             }
 
-            // 3. 역 목록 초기화 (대구권 아니면 지원예정 표시됨)
             window.renderSubwayLineBadges();
             window.renderSubwayStations();
         };
 
-        // [신규] 세부 지역 렌더링 함수
         window.renderSubwaySpecificRegions = function() {
             const container = document.getElementById('subway-specific-region-container');
             container.innerHTML = '';
 
-            // [수정] 동적 데이터 기반 렌더링
             const regions = BROAD_REGION_DATA[currentSubwayBroadRegion];
 
             if (regions) {
@@ -1158,7 +1143,6 @@
         window.selectSubwayRegion = function(region) {
             currentSubwayRegion = region;
             
-            // [수정] 동적으로 생성된 버튼들의 스타일 업데이트
             const regions = BROAD_REGION_DATA[currentSubwayBroadRegion];
             if (regions) {
                 regions.forEach(r => {
@@ -1174,9 +1158,8 @@
                 });
             }
             
-            // [신규] 지역 변경 시 유효하지 않은 노선이면 초기화
             const allowed = REGION_LINES[region] || ['daegyeong'];
-            if(!allowed.includes(currentSubwayLine)) currentSubwayLine = allowed[0]; // 기본값 혹은 없는 경우 유지
+            if(!allowed.includes(currentSubwayLine)) currentSubwayLine = allowed[0]; 
 
             window.renderSubwayLineBadges();
             window.renderSubwayStations();
@@ -1188,28 +1171,24 @@
                 document.getElementById('nav-bus').className = 'nav-pill-active rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300';
                 document.getElementById('nav-subway').className = 'nav-pill-inactive rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300 hover:bg-gray-100';
                 
-                // [신규] 버스 탭 전환 시 UI 초기화
                 window.renderBusSpecificRegions();
                 window.renderList();
+                window.startAutoRefresh(); 
             } else {
                 document.getElementById('view-bus').classList.add('hidden'); document.getElementById('view-subway').classList.remove('hidden');
                 document.getElementById('nav-subway').className = 'nav-pill-active rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300';
                 document.getElementById('nav-bus').className = 'nav-pill-inactive rounded-full px-6 py-2.5 text-sm font-bold flex items-center gap-2 transition-all duration-300 hover:bg-gray-100';
                 
-                // [신규] 탭 전환 시 UI 초기화 및 렌더링
                 window.renderSubwaySpecificRegions(); 
                 window.renderSubwayLineBadges();
                 window.renderSubwayStations();
+                if(refreshInterval) clearInterval(refreshInterval); 
             }
         };
 
-        // 6. UI 제어 함수들 (Global)
-        
-        // [신규] 버스 대권역 선택 함수
         window.selectBusBroadRegion = function(broadId) {
             currentBusBroadRegion = broadId;
             
-            // 1. 상단 버튼 스타일 업데이트
             const broadIds = ['daegu', 'busan', 'chungcheong', 'gwangju', 'gyeongbuk', 'gyeongnam', 'jeonju'];
             broadIds.forEach(id => {
                 const btn = document.getElementById('bus-broad-btn-' + id);
@@ -1226,30 +1205,26 @@
                 }
             });
 
-            // 2. 하단 세부 지역 렌더링
             window.renderBusSpecificRegions();
 
-            // 3. [신규] 권역 변경 시 해당 권역의 첫 번째 지역 자동 선택
             const regions = BROAD_REGION_DATA_BUS[broadId];
             if (regions && regions.length > 0) {
-                // 현재 선택된 지역이 새 권역 목록에 없으면 첫 번째 지역으로 변경
                 const currentInNewList = regions.find(r => r.id === currentRegion);
                 if (!currentInNewList) {
                     window.selectRegion(regions[0].id);
                 } else {
-                    window.renderList(); // 이미 유효하다면 목록만 갱신
+                    window.renderList(); 
                 }
             } else {
-                window.renderList(); // 지원 예정 지역 등
+                window.renderList(); 
             }
+            window.startAutoRefresh();
         };
 
-        // [신규] 버스 세부 지역 렌더링 함수
         window.renderBusSpecificRegions = function() {
             const container = document.getElementById('bus-specific-region-container');
             container.innerHTML = '';
 
-            // [수정] 데이터가 있는 경우 렌더링, 없으면 지원 예정 표시
             const regions = BROAD_REGION_DATA_BUS[currentBusBroadRegion];
             
             if (regions) {
@@ -1273,166 +1248,39 @@
         window.selectRegion = function(region) {
             currentRegion = region;
             
-            // [수정] 동적으로 생성된 버튼들의 스타일 업데이트 (요소가 존재할 때만 처리)
-            ['andong', 'gumi', 'chilgok'].forEach(id => {
+            const label = document.getElementById('region-status-label');
+            if (label && CITY_NAMES[region]) {
+                label.innerText = CITY_NAMES[region];
+            }
+
+            ['andong', 'gumi', 'chilgok', 'daegu'].forEach(id => {
                 const el = document.getElementById('btn-' + id);
                 if (!el) return;
                 if (id === region) { el.classList.add('region-card-selected'); el.querySelector('.status-text').innerText = '선택됨'; }
                 else { el.classList.remove('region-card-selected'); el.querySelector('.status-text').innerText = '선택하기'; }
             });
             window.renderList();
+            
+            window.startAutoRefresh();
         };
 
-        window.renderList = function() {
-            const container = document.getElementById('dynamic-list-container'); const empty = document.getElementById('empty-state');
-            container.innerHTML = ''; empty.classList.add('hidden');
-            if (!apiKey && currentRegion !== 'andong') { empty.classList.remove('hidden'); return; }
+        window.startAutoRefresh = function() {
+            if (refreshInterval) clearInterval(refreshInterval);
             
-            // [신규] 지원 예정 지역 체크
-            const regions = BROAD_REGION_DATA_BUS[currentBusBroadRegion];
-            const currentRegionData = regions ? regions.find(r => r.id === currentRegion) : null;
-            
-            if (currentRegionData && currentRegionData.isPlanned) {
-                container.innerHTML = `<div class="flex flex-col items-center justify-center py-10 text-gray-400 gap-3">
-                    <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-2xl text-gray-300">
-                        <i class="fa-solid fa-person-digging"></i>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-sm font-bold text-gray-500">서비스 준비중입니다</p>
-                        <p class="text-xs text-gray-400 mt-1">곧 지원될 예정입니다.</p>
-                    </div>
-                </div>`;
-                return;
-            }
+            if (currentRegion === 'andong' && document.getElementById('view-bus').classList.contains('hidden') === false) return;
 
-            const cityCode = CITY_CODES[currentRegion]; const targets = stationConfig[currentRegion];
-            if (!targets || targets.length === 0) { 
-                // [수정] 현재 권역에 데이터가 있는지 확인
-                if (!BROAD_REGION_DATA_BUS[currentBusBroadRegion]) {
-                    container.innerHTML = `<div class="text-center py-10 text-gray-400">지원 예정 지역입니다.</div>`;
-                } else {
-                    container.innerHTML = `<div class="text-center py-10 text-gray-400">등록된 정류장이 없습니다.<br>상단 '+ 정류장 추가' 버튼을 눌러보세요!</div>`; 
+            refreshInterval = setInterval(() => {
+                if (!document.getElementById('view-bus').classList.contains('hidden') && currentRegion !== 'andong') {
+                    const targets = stationConfig[currentRegion];
+                    const cityCode = CITY_CODES[currentRegion];
+                    if (targets && targets.length > 0) {
+                        targets.forEach((station, index) => {
+                            window.loadStationData(index, cityCode, station);
+                        });
+                    }
                 }
-                return; 
-            }
-            
-            targets.forEach((station, index) => {
-                if(currentRegion === 'andong') { window.renderStaticCard(index, station); } 
-                else {
-                    const skeletonHtml = `<div id="station-card-${index}" class="toss-card p-5 mb-4 !bg-white/50 animate-pulse relative"><div class="flex justify-between items-start mb-4"><div class="flex items-center gap-2.5"><div class="w-10 h-10 rounded-[16px] bg-gray-200"></div><div><div class="h-4 w-32 bg-gray-200 rounded mb-1.5"></div><div class="h-3 w-20 bg-gray-200 rounded"></div></div></div></div><div class="space-y-2"><div class="h-12 bg-gray-200 rounded-xl"></div></div></div>`;
-                    container.insertAdjacentHTML('beforeend', skeletonHtml); window.loadStationData(index, cityCode, station);
-                }
-            });
+            }, 20000); 
         };
-
-        // 모달 및 설정
-        window.openSearchModal = () => {
-            const modal = document.getElementById('search-modal');
-            const regionLabel = document.getElementById('search-modal-region');
-            const isSubway = !document.getElementById('view-subway').classList.contains('hidden');
-            
-            // [수정] 모달 오픈 시 현재 모드(버스/지하철)에 따라 라벨 변경
-            if (isSubway) {
-                const subRegionNames = { 'gumi': '경북 구미시', 'chilgok': '경북 칠곡군', 'daegu': '대구광역시', 'gyeongsan': '경북 경산시' };
-                regionLabel.innerText = subRegionNames[currentSubwayRegion] || currentSubwayRegion;
-                regionLabel.className = "text-xs font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-md inline-block mt-1";
-            } else {
-                regionLabel.innerText = CITY_NAMES[currentRegion];
-                regionLabel.className = "text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md inline-block mt-1";
-            }
-            
-            document.getElementById('add-station-input').value = '';
-            document.getElementById('add-station-results').innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">검색 결과가 여기에 표시됩니다.</p>';
-            modal.classList.remove('hidden');
-        };
-
-        window.closeSearchModal = () => document.getElementById('search-modal').classList.add('hidden');
-        window.openSettings = () => document.getElementById('settings-modal').classList.remove('hidden');
-        window.closeSettings = () => document.getElementById('settings-modal').classList.add('hidden');
-        
-        window.doSearchStation = async () => {
-            const query = document.getElementById('add-station-input').value; if(!query) return;
-            const resBox = document.getElementById('add-station-results'); 
-            const isSubway = !document.getElementById('view-subway').classList.contains('hidden');
-
-            // [수정] 지하철 모드일 경우 CSV 데이터에서 검색
-            if (isSubway) {
-                if (!GLOBAL_TIMETABLE || GLOBAL_TIMETABLE === "ERROR") {
-                    resBox.innerHTML = '<p class="text-center text-red-500 text-xs py-4">시간표 파일이 로드되지 않았습니다.</p>'; return;
-                }
-                const results = Object.keys(GLOBAL_TIMETABLE).filter(key => key.includes(query) && isNaN(key)); // 숫자가 아닌 키(역명)만 검색
-                
-                if (results.length === 0) {
-                    resBox.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">결과 없음</p>'; return;
-                }
-                
-                resBox.innerHTML = results.map(name => `
-                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl mb-2">
-                        <div><p class="text-sm font-bold text-main">${name}</p><p class="text-[10px] text-gray-400">지하철/기차</p></div>
-                        <button onclick="addSubwayStation('${name}')" class="text-xs bg-orange-100 text-orange-600 font-bold px-3 py-1.5 rounded-lg">추가</button>
-                    </div>
-                `).join('');
-                return;
-            }
-
-            // 기존 버스 검색 로직
-            resBox.innerHTML = '<div class="text-center py-4"><i class="fa-solid fa-spinner fa-spin text-blue-500"></i></div>';
-            const results = await window.searchStationAPI(query);
-            if(results.error) { resBox.innerHTML = `<p class="text-center text-red-500 text-xs py-4">${results.error}</p>`; return; }
-            if(!results || results.length === 0) { resBox.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">결과 없음</p>'; return; }
-            
-            // [수정] 대소문자 호환성 처리 강화 (칠곡 등 일부 지역 대응)
-            resBox.innerHTML = results.map(item => {
-                // 가능한 모든 대소문자 조합 확인
-                const nodeNm = item.nodenm || item.nodeNm || item.nodeNM || item.NODE_NM;
-                const nodeId = item.nodeid || item.nodeId || item.nodeID || item.NODE_ID;
-                
-                // ID가 없는 데이터는 제외
-                if (!nodeId) return '';
-
-                return `<div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl mb-2"><div><p class="text-sm font-bold text-main">${nodeNm}</p><p class="text-[10px] text-gray-400">ID: ${nodeId}</p></div><button onclick="addStation('${nodeNm}', '${nodeId}')" class="text-xs bg-blue-100 text-blue-600 font-bold px-3 py-1.5 rounded-lg">추가</button></div>`;
-            }).join('');
-        };
-
-        // [수정] ID 공백 제거 등 안전성 강화
-        window.addStation = (name, id) => { 
-            if (!id || id === 'undefined') { alert('잘못된 정류장 ID입니다.'); return; }
-            const cleanId = String(id).trim(); // 공백 제거
-            const cleanName = String(name).trim();
-            stationConfig[currentRegion].push({ name: cleanName, nodeId: cleanId, sub: '사용자 추가' }); 
-            localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig)); 
-            alert('추가되었습니다.'); 
-            window.closeSearchModal(); 
-            window.renderList(); 
-        };
-        
-        // [신규] 지하철 역 추가 함수
-        window.addSubwayStation = (name) => {
-            const userStations = JSON.parse(localStorage.getItem('my_subway_stations_v1')) || {};
-            if (!userStations[currentSubwayRegion]) userStations[currentSubwayRegion] = [];
-            
-            if (userStations[currentSubwayRegion].includes(name)) { alert('이미 추가된 역입니다.'); return; }
-            
-            userStations[currentSubwayRegion].push(name);
-            localStorage.setItem('my_subway_stations_v1', JSON.stringify(userStations));
-            alert('추가되었습니다.'); window.closeSearchModal(); window.renderSubwayStations();
-        };
-
-        // [신규] 지하철 역 삭제 함수
-        window.removeSubwayStation = (region, name) => {
-            if(!confirm('삭제하시겠습니까?')) return;
-            const userStations = JSON.parse(localStorage.getItem('my_subway_stations_v1')) || {};
-            if (userStations[region]) {
-                userStations[region] = userStations[region].filter(s => s !== name);
-                localStorage.setItem('my_subway_stations_v1', JSON.stringify(userStations));
-                window.renderSubwayStations();
-            }
-        };
-
-        window.removeStation = (region, idx) => { if(confirm('삭제하시겠습니까?')) { stationConfig[region].splice(idx, 1); localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig)); window.renderList(); } };
-        window.saveSettings = () => { const key = document.getElementById('api-key-input').value; const type = document.querySelector('input[name="key-type"]:checked').value; if(key) { apiKey = key; keyType = type; localStorage.setItem('toss_bus_api_key', key); localStorage.setItem('toss_bus_key_type', type); alert('저장됨'); window.closeSettings(); window.renderList(); } };
-        window.resetData = () => { if(confirm('초기화하시겠습니까?')) { localStorage.removeItem('my_station_config_v40'); localStorage.removeItem('my_subway_stations_v1'); location.reload(); } };
-        window.testConnection = async () => { alert("테스트 시작: 결과를 기다려주세요..."); const res = await window.fetchBusArrival('37010', 'DJB8001793'); document.getElementById('test-result').innerHTML = (typeof res === 'string') ? `<span class='text-red-500'>실패: ${res}</span>` : "<span class='text-green-500'>성공!</span>"; };
 
         // 초기화
         document.addEventListener('DOMContentLoaded', () => {
@@ -1440,12 +1288,12 @@
             window.loadTimetable();
             window.selectRegion('andong');
             
-            // [신규] 버스/지하철 초기 렌더링 준비
             window.renderBusSpecificRegions();
             window.renderSubwaySpecificRegions();
             
-            // [IMPORTANT] Start live updates once
             startLiveUpdates();
+            
+            window.startAutoRefresh();
         });
 
         // 스크롤
