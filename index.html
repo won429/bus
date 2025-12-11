@@ -486,16 +486,17 @@
             return keyType === 'encoding' ? apiKey : encodeURIComponent(apiKey);
         }
 
+        // [수정] 정규화 함수 보강 (대소문자 이슈 등)
         function normalizeBusData(bus) {
             if (!bus) return null;
             return {
                 ...bus,
                 routeno: (bus.routeno || bus.routeNo || '?').toString(),
-                endnodenm: bus.endnodenm || bus.endNodeNm || '',
+                endnodenm: bus.endnodenm || bus.endNodeNm || '종점미상',
                 arrtime: bus.arrtime || bus.arrTime,
                 arrprevstationcnt: bus.arrprevstationcnt || bus.arrPrevStationCnt,
-                // [신규] 노선 유형(급행, 간선 등) 정보 추가
-                routeTp: bus.routeTp || bus.routeType || '' 
+                // [신규] routeTp, routeType 등 다양한 케이스 대응
+                routeTp: bus.routeTp || bus.routeType || bus.ROUTETP || '' 
             };
         }
 
@@ -720,6 +721,7 @@
             return { diff: bestDiff, html: renderBadge(bestDiff, bestTime) };
         };
 
+        // 5. 렌더링 함수들
         window.renderStaticCard = function(index, station) {
             const container = document.getElementById('dynamic-list-container');
             if (GLOBAL_TIMETABLE === "ERROR") { container.innerHTML = `<div class="p-4 bg-red-50 text-red-500 text-center text-xs rounded-xl">시간표 파일을 불러오지 못했습니다.</div>`; return; }
@@ -729,9 +731,6 @@
             let contentHtml = '';
             
             if (stationData) {
-                const now = new Date();
-                const nowTotalSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-
                 const routes = stationData.map(r => { 
                     const times = r.times[dayKey] || [];
                     let bestDiff = 999999; 
@@ -786,32 +785,30 @@
             let errorMsg = null;
 
             try {
-                // [수정] 칠곡군(37380)일 경우 구미시(37030) 데이터도 무조건 같이 조회하여 병합
+                // [수정] 칠곡군(37380)일 경우 구미시(37030) 먼저 조회 (칠곡 버스 대부분이 구미 관할)
                 if (cityCode === '37380') {
-                    const [resChilgok, resGumi] = await Promise.all([
-                        window.fetchBusArrival('37380', station.nodeId),
-                        window.fetchBusArrival('37030', station.nodeId)
-                    ]);
+                    // 구미시(37030) 먼저 조회
+                    const resGumi = await window.fetchBusArrival('37030', station.nodeId);
+                    if (Array.isArray(resGumi)) {
+                        arrivals = [...resGumi];
+                    }
                     
-                    const listChilgok = Array.isArray(resChilgok) ? resChilgok : [];
-                    const listGumi = Array.isArray(resGumi) ? resGumi : [];
-                    
-                    // 칠곡 데이터 + 구미 데이터 병합 (중복 키 방지)
-                    arrivals = [...listChilgok];
-                    const existingKeys = new Set(arrivals.map(b => `${b.routeno}_${b.arrtime}`));
-                    
-                    listGumi.forEach(b => {
-                        const key = `${b.routeno}_${b.arrtime}`;
-                        if (!existingKeys.has(key)) {
-                            arrivals.push(b);
-                        }
-                    });
-
-                    // 둘 다 조회 실패했을 경우에만 에러 메시지 설정
-                    if (typeof resChilgok === 'string' && typeof resGumi === 'string' && arrivals.length === 0) {
-                        errorMsg = resChilgok; 
+                    // 칠곡군(37380) 추가 조회 (독자 노선)
+                    const resChilgok = await window.fetchBusArrival('37380', station.nodeId);
+                    if (Array.isArray(resChilgok)) {
+                        const existingKeys = new Set(arrivals.map(b => `${b.routeno}_${b.arrtime}`));
+                        resChilgok.forEach(b => {
+                            const key = `${b.routeno}_${b.arrtime}`;
+                            if (!existingKeys.has(key)) {
+                                arrivals.push(b);
+                            }
+                        });
                     }
 
+                    // 둘 다 데이터가 없고 에러 메시지만 있으면 에러 처리
+                    if (arrivals.length === 0 && typeof resGumi === 'string') {
+                        errorMsg = resGumi;
+                    }
                 } else {
                     // 일반 지역 처리
                     const res = await window.fetchBusArrival(cityCode, station.nodeId);
@@ -838,7 +835,7 @@
                 return; 
             }
 
-            // [수정] NaN 방어 로직: 도착시간이 유효한 숫자인 경우만 필터링
+            // [수정] NaN 방어 로직
             arrivals = arrivals.filter(b => b.arrtime && !isNaN(parseInt(b.arrtime)));
             arrivals.sort((a, b) => parseInt(a.arrtime) - parseInt(b.arrtime));
             
@@ -850,9 +847,15 @@
                 const arrivalDate = new Date(now.getTime() + arrSeconds * 1000);
                 const timeStr = `${arrivalDate.getHours()}:${arrivalDate.getMinutes().toString().padStart(2,'0')}`;
                 
-                // [신규] 버스 유형 배지 (급행, 간선 등)
+                // [신규] 버스 유형 배지 생성 로직 (API 데이터 없으면 번호로 추론)
                 let typeBadge = '';
-                const type = bus.routeTp;
+                let type = bus.routeTp;
+                
+                if (!type) {
+                     if (bus.routeno.includes('급행')) type = '급행';
+                     else if (bus.routeno.includes('좌석')) type = '좌석';
+                }
+
                 if (type) {
                     let badgeColor = 'bg-gray-500';
                     if (type.includes('급행') || type.includes('좌석')) badgeColor = 'bg-red-500';
@@ -861,10 +864,22 @@
                     typeBadge = `<span class="${badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[30px] text-center ml-1 shadow-sm">${type}</span>`;
                 }
 
-                contentHtml += `<div class="glass-item p-3 mb-2 flex items-center justify-between"><div class="flex items-center gap-2"><span class="bg-blue-50 text-blue-600 text-[11px] font-bold px-2 py-1 rounded-lg min-w-[40px] text-center shadow-sm border border-blue-100">${bus.routeno}</span>${typeBadge}<div><div class="text-[10px] text-sub ml-1 flex items-center gap-1"><i class="fa-solid fa-arrow-right text-[8px]"></i>${bus.endnodenm}</div></div></div>${renderBadge(arrSeconds, timeStr)}</div>`;
+                contentHtml += `
+                <div class="glass-item p-3 mb-2 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-blue-50 text-blue-600 text-[11px] font-bold px-2 py-1 rounded-lg min-w-[40px] text-center shadow-sm border border-blue-100">${bus.routeno}</span>
+                        ${typeBadge}
+                        <div>
+                            <div class="text-[12px] font-bold text-gray-700 ml-1 flex items-center gap-1">
+                                <i class="fa-solid fa-arrow-right text-[10px] text-gray-400"></i>
+                                ${bus.endnodenm}
+                            </div>
+                        </div>
+                    </div>
+                    ${renderBadge(arrSeconds, timeStr)}
+                </div>`;
             });
             
-            // 기존 카드 내용 교체
             card.innerHTML = `
                 <div class="flex justify-between items-start mb-4">
                     <div class="flex items-center gap-2.5">
