@@ -619,9 +619,18 @@
         window.renderSubwayStations = function() {
             const listContainer = document.getElementById('subway-station-list'); listContainer.innerHTML = '';
             if (currentSubwayLine !== 'daegyeong') { listContainer.innerHTML = `<div class="p-8 text-center text-gray-400 text-xs">준비중입니다.</div>`; return; }
-            const stations = SUBWAY_DATA['daegyeong'].stations[currentSubwayRegion] || [];
+            
+            // [수정] 사용자 추가 지하철 역 로드
+            const userStations = JSON.parse(localStorage.getItem('my_subway_stations_v1')) || {};
+            const userAdded = userStations[currentSubwayRegion] || [];
+            
+            // 기본 역 목록 + 사용자 추가 목록 병합 (중복 제거)
+            const defaultStations = SUBWAY_DATA['daegyeong'].stations[currentSubwayRegion] || [];
+            const allStations = [...new Set([...defaultStations, ...userAdded])];
+
             const day = new Date().getDay(); const dayKey = (day === 0) ? 'holiday' : (day === 6 ? 'saturday' : 'weekday');
-            stations.forEach(stationName => {
+            
+            allStations.forEach((stationName, index) => {
                 let cardContent = '';
 
                 // 환승 배지 생성 로직 (알약 -> 원형 변경)
@@ -631,10 +640,16 @@
                 } else if (stationName === '대구역' || stationName === '동대구역') {
                     transferBadge = `<span class="w-5 h-5 flex items-center justify-center rounded-full text-white font-bold ml-1 shadow-sm text-[10px]" style="background-color: #D93F5C;">1</span>`;
                 }
+                
+                // 사용자 추가 역 삭제 버튼 (기본 역은 삭제 불가)
+                const isUserAdded = userAdded.includes(stationName) && !defaultStations.includes(stationName);
+                const deleteBtn = isUserAdded ? `<button onclick="removeSubwayStation('${currentSubwayRegion}', '${stationName}')" class="absolute top-5 right-5 text-gray-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>` : '';
 
                 if (stationName === '북삼' || stationName === '원대(달성공원)') {
-                    const status = stationName === '북삼' ? '미개통' : '착공 예정'; const icon = stationName === '북삼' ? '🚧' : '🏗️';
-                    cardContent = `<div class="toss-card p-5 !bg-[#E6F0FA]/90 border border-blue-100"><div class="flex items-center gap-2.5 mb-4"><span class="badge-daegyeong text-[10px] px-2 py-1 rounded-full text-white font-bold">대경선</span><h4 class="text-base font-bold text-main">${stationName}</h4>${transferBadge}<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-1.5 py-0.5 rounded ml-auto">${status}</span></div><div class="text-center p-4"><div class="text-2xl mb-1">${icon}</div><p class="text-sm font-bold text-main">현재 ${status} 단계입니다</p></div></div>`;
+                    // [수정] 북삼 개통 예정 문구 변경
+                    const status = stationName === '북삼' ? '2026년 2월 개통 예정' : '착공 예정'; 
+                    const icon = stationName === '북삼' ? '🚧' : '🏗️';
+                    cardContent = `<div class="toss-card p-5 !bg-[#E6F0FA]/90 border border-blue-100 relative"><div class="flex items-center gap-2.5 mb-4"><span class="badge-daegyeong text-[10px] px-2 py-1 rounded-full text-white font-bold">대경선</span><h4 class="text-base font-bold text-main">${stationName}</h4>${transferBadge}<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-1.5 py-0.5 rounded ml-auto">${status}</span></div><div class="text-center p-4"><div class="text-2xl mb-1">${icon}</div><p class="text-sm font-bold text-main">현재 ${status} 단계입니다</p></div>${deleteBtn}</div>`;
                 } else {
                     const upData = window.getNextTimeFromFile(stationName, ['구미'], dayKey);
                     const downDataKyong = window.getNextTimeFromFile(stationName, ['경산'], dayKey);
@@ -645,7 +660,7 @@
                         downHtml += `<div class="glass-item p-3 flex items-center justify-between mb-2"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold">하행</div><span class="text-sm font-bold text-main">경산 방면</span></div>${downDataKyong.html}</div>`;
                         if (stationName !== '동대구역') downHtml += `<div class="glass-item p-3 flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold">하행</div><span class="text-sm font-bold text-main">동대구 방면</span></div>${downDataDong.html}</div>`;
                     }
-                    cardContent = `<div class="toss-card p-5 !bg-[#E6F0FA]/90 relative border border-blue-100"><div class="flex items-center gap-2.5 mb-4"><span class="badge-daegyeong text-[10px] px-2 py-1 rounded-full text-white font-bold shadow-sm">대경선</span><h4 class="text-base font-bold text-main">${stationName}</h4>${transferBadge}</div><div class="space-y-1">${upHtml}${downHtml}</div></div>`;
+                    cardContent = `<div class="toss-card p-5 !bg-[#E6F0FA]/90 relative border border-blue-100"><div class="flex items-center gap-2.5 mb-4"><span class="badge-daegyeong text-[10px] px-2 py-1 rounded-full text-white font-bold shadow-sm">대경선</span><h4 class="text-base font-bold text-main">${stationName}</h4>${transferBadge}</div><div class="space-y-1">${upHtml}${downHtml}</div>${deleteBtn}</div>`;
                 }
                 listContainer.insertAdjacentHTML('beforeend', cardContent);
             });
@@ -703,14 +718,57 @@
         };
 
         // 모달 및 설정
-        window.openSearchModal = () => document.getElementById('search-modal').classList.remove('hidden');
+        window.openSearchModal = () => {
+            const modal = document.getElementById('search-modal');
+            const regionLabel = document.getElementById('search-modal-region');
+            const isSubway = !document.getElementById('view-subway').classList.contains('hidden');
+            
+            // [수정] 모달 오픈 시 현재 모드(버스/지하철)에 따라 라벨 변경
+            if (isSubway) {
+                const subRegionNames = { 'gumi': '경북 구미시', 'chilgok': '경북 칠곡군', 'daegu': '대구광역시', 'gyeongsan': '경북 경산시' };
+                regionLabel.innerText = subRegionNames[currentSubwayRegion] || currentSubwayRegion;
+                regionLabel.className = "text-xs font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-md inline-block mt-1";
+            } else {
+                regionLabel.innerText = CITY_NAMES[currentRegion];
+                regionLabel.className = "text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md inline-block mt-1";
+            }
+            
+            document.getElementById('add-station-input').value = '';
+            document.getElementById('add-station-results').innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">검색 결과가 여기에 표시됩니다.</p>';
+            modal.classList.remove('hidden');
+        };
+
         window.closeSearchModal = () => document.getElementById('search-modal').classList.add('hidden');
         window.openSettings = () => document.getElementById('settings-modal').classList.remove('hidden');
         window.closeSettings = () => document.getElementById('settings-modal').classList.add('hidden');
         
         window.doSearchStation = async () => {
             const query = document.getElementById('add-station-input').value; if(!query) return;
-            const resBox = document.getElementById('add-station-results'); resBox.innerHTML = '<div class="text-center py-4"><i class="fa-solid fa-spinner fa-spin text-blue-500"></i></div>';
+            const resBox = document.getElementById('add-station-results'); 
+            const isSubway = !document.getElementById('view-subway').classList.contains('hidden');
+
+            // [수정] 지하철 모드일 경우 CSV 데이터에서 검색
+            if (isSubway) {
+                if (!GLOBAL_TIMETABLE || GLOBAL_TIMETABLE === "ERROR") {
+                    resBox.innerHTML = '<p class="text-center text-red-500 text-xs py-4">시간표 파일이 로드되지 않았습니다.</p>'; return;
+                }
+                const results = Object.keys(GLOBAL_TIMETABLE).filter(key => key.includes(query) && isNaN(key)); // 숫자가 아닌 키(역명)만 검색
+                
+                if (results.length === 0) {
+                    resBox.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">결과 없음</p>'; return;
+                }
+                
+                resBox.innerHTML = results.map(name => `
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl mb-2">
+                        <div><p class="text-sm font-bold text-main">${name}</p><p class="text-[10px] text-gray-400">지하철/기차</p></div>
+                        <button onclick="addSubwayStation('${name}')" class="text-xs bg-orange-100 text-orange-600 font-bold px-3 py-1.5 rounded-lg">추가</button>
+                    </div>
+                `).join('');
+                return;
+            }
+
+            // 기존 버스 검색 로직
+            resBox.innerHTML = '<div class="text-center py-4"><i class="fa-solid fa-spinner fa-spin text-blue-500"></i></div>';
             const results = await window.searchStationAPI(query);
             if(results.error) { resBox.innerHTML = `<p class="text-center text-red-500 text-xs py-4">${results.error}</p>`; return; }
             if(!results || results.length === 0) { resBox.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">결과 없음</p>'; return; }
@@ -718,9 +776,33 @@
         };
 
         window.addStation = (name, id) => { stationConfig[currentRegion].push({ name: name, nodeId: id, sub: '사용자 추가' }); localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig)); alert('추가되었습니다.'); window.closeSearchModal(); window.renderList(); };
+        
+        // [신규] 지하철 역 추가 함수
+        window.addSubwayStation = (name) => {
+            const userStations = JSON.parse(localStorage.getItem('my_subway_stations_v1')) || {};
+            if (!userStations[currentSubwayRegion]) userStations[currentSubwayRegion] = [];
+            
+            if (userStations[currentSubwayRegion].includes(name)) { alert('이미 추가된 역입니다.'); return; }
+            
+            userStations[currentSubwayRegion].push(name);
+            localStorage.setItem('my_subway_stations_v1', JSON.stringify(userStations));
+            alert('추가되었습니다.'); window.closeSearchModal(); window.renderSubwayStations();
+        };
+
+        // [신규] 지하철 역 삭제 함수
+        window.removeSubwayStation = (region, name) => {
+            if(!confirm('삭제하시겠습니까?')) return;
+            const userStations = JSON.parse(localStorage.getItem('my_subway_stations_v1')) || {};
+            if (userStations[region]) {
+                userStations[region] = userStations[region].filter(s => s !== name);
+                localStorage.setItem('my_subway_stations_v1', JSON.stringify(userStations));
+                window.renderSubwayStations();
+            }
+        };
+
         window.removeStation = (region, idx) => { if(confirm('삭제하시겠습니까?')) { stationConfig[region].splice(idx, 1); localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig)); window.renderList(); } };
         window.saveSettings = () => { const key = document.getElementById('api-key-input').value; const type = document.querySelector('input[name="key-type"]:checked').value; if(key) { apiKey = key; keyType = type; localStorage.setItem('toss_bus_api_key', key); localStorage.setItem('toss_bus_key_type', type); alert('저장됨'); window.closeSettings(); window.renderList(); } };
-        window.resetData = () => { if(confirm('초기화하시겠습니까?')) { localStorage.removeItem('my_station_config_v40'); location.reload(); } };
+        window.resetData = () => { if(confirm('초기화하시겠습니까?')) { localStorage.removeItem('my_station_config_v40'); localStorage.removeItem('my_subway_stations_v1'); location.reload(); } };
         window.testConnection = async () => { alert("테스트 시작: 결과를 기다려주세요..."); const res = await window.fetchBusArrival('37010', 'DJB8001793'); document.getElementById('test-result').innerHTML = (typeof res === 'string') ? `<span class='text-red-500'>실패: ${res}</span>` : "<span class='text-green-500'>성공!</span>"; };
 
         // 초기화
