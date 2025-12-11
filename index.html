@@ -44,7 +44,8 @@
             width: 140px !important; background-color: #191F28 !important; border-radius: 9999px !important;
             margin-top: 10px; padding: 8px 16px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
         }
-        .island-active .header-title { width: 0; opacity: 0; margin: 0; overflow: hidden; transform: scale(0.8); }
+        /* .header-title 대신 .header-left-group을 숨김 처리하여 뒤로가기 버튼도 같이 숨김 */
+        .island-active .header-left-group { width: 0; opacity: 0; margin: 0; overflow: hidden; transform: scale(0.8); }
         .island-active .icon-container { width: 100%; justify-content: center; gap: 24px !important; }
         .island-active .icon-bg { background-color: transparent !important; width: auto !important; height: auto !important; box-shadow: none !important; color: white !important; }
         
@@ -73,7 +74,14 @@
     <!-- 헤더 -->
     <header class="fixed top-0 left-0 w-full z-50 flex justify-center pt-safe pointer-events-none">
         <div id="dynamic-island" class="pointer-events-auto w-full max-w-md px-5 py-2 flex items-center justify-between bg-transparent mx-auto origin-top mt-2">
-            <h1 class="header-title text-xl font-bold text-main whitespace-nowrap transition-all duration-300 origin-left">대중교통</h1>
+            <!-- 좌측 그룹 (뒤로가기 + 타이틀) -->
+            <div class="header-left-group flex items-center gap-3 transition-all duration-300 origin-left">
+                <a href="https://won429.github.io/enjoysite/" class="text-main text-lg p-1 hover:opacity-60 transition-opacity">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+                <h1 class="header-title text-xl font-bold text-main whitespace-nowrap">대중교통</h1>
+            </div>
+            
             <div class="icon-container flex gap-2 transition-all duration-300">
                 <div class="icon-bg w-9 h-9 rounded-full bg-white/50 flex items-center justify-center text-main shadow-sm backdrop-blur-sm cursor-pointer hover:bg-white/80 transition-colors" onclick="openSearchModal()">
                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
@@ -348,34 +356,70 @@
             return { type: 'error', msg: '알 수 없는 응답 형식' };
         }
 
+        // [MODIFIED] renderBadge now sets a data-target for live updates
         function renderBadge(diffSeconds, timeStr) {
+            const now = Date.now();
+            const targetTime = now + (diffSeconds * 1000);
             const min = Math.floor(diffSeconds / 60);
             const sec = diffSeconds % 60;
             
-            let badgeClass = "";
-            let timeText = "";
+            let badgeClass = "bg-gray-100 text-gray-500 border border-gray-200";
+            let timeText = `${min}분 후 도착`;
             
             if (min < 5) { 
                 badgeClass = "bg-red-50 text-red-600 border border-red-100";
-                if (min === 0) { timeText = `${sec}초 후 도착`; } else { timeText = `${min}분 후 도착`; }
-            } else { 
-                badgeClass = "bg-gray-100 text-gray-500 border border-gray-200";
-                timeText = `${min}분 후 도착`;
+                if (min === 0) { timeText = `${sec}초 후 도착`; }
             }
 
             const timeHtml = timeStr ? `<span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">(${timeStr})</span>` : '';
 
+            // Added 'live-badge' class and 'data-target' attribute
             return `
                 <div class="flex items-center justify-end gap-2 shrink-0 ml-auto">
                     ${timeHtml}
-                    <span class="${badgeClass} px-2 py-0.5 rounded-md text-xs font-bold shadow-sm whitespace-nowrap">${timeText}</span>
+                    <span class="${badgeClass} live-badge px-2 py-0.5 rounded-md text-xs font-bold shadow-sm whitespace-nowrap" data-target="${targetTime}">${timeText}</span>
                 </div>
             `;
         }
 
+        // [NEW] Live countdown function
+        function startLiveUpdates() {
+            setInterval(() => {
+                const now = Date.now();
+                document.querySelectorAll('.live-badge').forEach(el => {
+                    const target = parseInt(el.getAttribute('data-target'));
+                    if (!target) return;
+
+                    const diffMs = target - now;
+                    const diffSec = Math.ceil(diffMs / 1000);
+
+                    // Constants for classes
+                    const baseClasses = "live-badge px-2 py-0.5 rounded-md text-xs font-bold shadow-sm whitespace-nowrap";
+                    const redClasses = "bg-red-50 text-red-600 border border-red-100";
+                    const grayClasses = "bg-gray-100 text-gray-500 border border-gray-200";
+
+                    if (diffSec <= 0) {
+                        el.innerText = "곧 도착";
+                        el.className = `${baseClasses} ${redClasses}`;
+                    } else if (diffSec < 60) {
+                        el.innerText = `${diffSec}초 후 도착`;
+                        el.className = `${baseClasses} ${redClasses}`;
+                    } else {
+                        const min = Math.floor(diffSec / 60);
+                        el.innerText = `${min}분 후 도착`;
+                        if (min < 5) {
+                            el.className = `${baseClasses} ${redClasses}`;
+                        } else {
+                            el.className = `${baseClasses} ${grayClasses}`;
+                        }
+                    }
+                });
+            }, 1000);
+        }
+
         // 3. API 통신 및 데이터 로드
         window.fetchWithFallback = async function(targetUrl) {
-            const timestamp = `&_=${Date.now()}`; // Cache busting
+            const timestamp = `&_=${Date.now()}`; 
             const proxies = [
                 url => `https://corsproxy.io/?${encodeURIComponent(url + timestamp)}`,
                 url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url + timestamp)}`
@@ -645,6 +689,9 @@
             if(apiKey) document.getElementById('api-key-input').value = apiKey;
             window.loadTimetable();
             window.selectRegion('andong');
+            
+            // [IMPORTANT] Start live updates once
+            startLiveUpdates();
         });
 
         // 스크롤
