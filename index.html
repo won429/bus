@@ -507,7 +507,9 @@
                 endnodenm: bus.endnodenm || bus.endNodeNm || '종점미상',
                 arrtime: bus.arrtime || bus.arrTime,
                 arrprevstationcnt: bus.arrprevstationcnt || bus.arrPrevStationCnt,
-                routeTp: type
+                routeTp: type,
+                routeid: bus.routeid || bus.routeId,
+                vehicleno: bus.vehicleno || bus.vehicleNo
             };
         }
 
@@ -608,6 +610,20 @@
                 const list = Array.isArray(items) ? items : [items];
                 return list.map(normalizeBusData);
             } catch (error) { return "NETWORK_ERROR"; }
+        };
+
+        window.fetchBusLocation = async function(cityCode, routeId) {
+            if (!apiKey || !routeId) return null;
+            const serviceKey = getEncodedKey();
+            const targetUrl = `http://apis.data.go.kr/1613000/BusLhcisonInfoInqireService/getBusPosByRoutSttnList?serviceKey=${serviceKey}&cityCode=${cityCode}&routeId=${routeId}&numOfRows=100&pageNo=1&_type=json`;
+            try {
+                const text = await window.fetchWithFallback(targetUrl);
+                const result = parseHybrid(text);
+                if (result.type === 'error') return null;
+                const items = result.data.response.body.items?.item;
+                if (!items) return [];
+                return Array.isArray(items) ? items : [items];
+            } catch (e) { return null; }
         };
 
         window.searchStationAPI = async function(keyword) {
@@ -867,6 +883,33 @@
                 return; 
             }
 
+            // [신규] 버스 위치 정보 API 연동 (정확도 향상)
+            if (arrivals.length > 0 && cityCode) {
+                try {
+                    // [강화] 조회 제한 20개 -> 50개로 확장하여 누락 최소화
+                    const routeIds = [...new Set(arrivals.map(b => b.routeid || b.routeId).filter(id => id))].slice(0, 50); 
+                    
+                    if (routeIds.length > 0) {
+                        // [수정] 칠곡군(37380)의 경우 대부분 구미(37030) 버스이므로 위치 조회 시 구미 코드로 조회 (정확도 향상)
+                        const searchCityCode = (cityCode === '37380') ? '37030' : cityCode;
+                        
+                        const locResults = await Promise.all(routeIds.map(id => window.fetchBusLocation(searchCityCode, id)));
+                        const locMap = {};
+                        locResults.forEach(list => {
+                            if (list) list.forEach(l => {
+                                const vNo = l.vehicleno || l.vehicleNo;
+                                const nNm = l.nodenm || l.nodeNm;
+                                if (vNo && nNm) locMap[vNo] = nNm;
+                            });
+                        });
+                        arrivals.forEach(b => {
+                            const vNo = b.vehicleno || b.vehicleNo;
+                            if (vNo && locMap[vNo]) b.nowStationNm = locMap[vNo];
+                        });
+                    }
+                } catch(e) { console.log("Location enhance failed", e); }
+            }
+
             // [수정] NaN 방어 로직
             arrivals = arrivals.filter(b => b.arrtime && !isNaN(parseInt(b.arrtime)));
             arrivals.sort((a, b) => parseInt(a.arrtime) - parseInt(b.arrtime));
@@ -896,16 +939,27 @@
                     typeBadge = `<span class="${badgeColor} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[30px] text-center ml-1 shadow-sm">${type}</span>`;
                 }
 
+                let currentLocBadge = '';
+                if (bus.nowStationNm) {
+                    currentLocBadge = `<div class="text-[11px] text-[#191F28] bg-gray-50 mt-1.5 px-2 py-1 rounded-lg flex items-center w-fit border border-gray-100">
+                        <div class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5 animate-pulse"></div>
+                        <span class="text-gray-400 mr-1 text-[10px]">현재</span>
+                        <span class="font-bold text-indigo-600">${bus.nowStationNm}</span>
+                    </div>`;
+                }
+
                 contentHtml += `
                 <div class="glass-item p-3 mb-2 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <span class="bg-blue-50 text-blue-600 text-[11px] font-bold px-2 py-1 rounded-lg min-w-[40px] text-center shadow-sm border border-blue-100">${bus.routeno}</span>
                         ${typeBadge}
-                        <div>
+                        <div class="flex flex-col">
                             <div class="text-[12px] font-bold text-gray-700 ml-1 flex items-center gap-1">
                                 <i class="fa-solid fa-arrow-right text-[10px] text-gray-400"></i>
                                 ${bus.endnodenm}
+                                ${bus.arrprevstationcnt ? `<span class="text-[10px] text-gray-400 font-normal">(${bus.arrprevstationcnt}번째 전)</span>` : ''}
                             </div>
+                            ${currentLocBadge}
                         </div>
                     </div>
                     ${renderBadge(arrSeconds, timeStr)}
