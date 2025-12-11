@@ -77,6 +77,18 @@
             display: inline-block;
             animation: marquee 15s linear infinite; 
         }
+
+        /* [신규] 시간표 그리드 스타일 */
+        .timetable-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+        .time-chip { 
+            background: #F2F4F6; padding: 6px 2px; border-radius: 8px; 
+            text-align: center; font-size: 13px; font-weight: 500; color: #4E5968; 
+            letter-spacing: -0.5px;
+        }
+        .time-chip.past { color: #ADB5BD; background: #F9FAFB; font-weight: 400; }
+        .time-chip.future { color: #1B64DA; background: #E8F3FF; font-weight: 700; }
+        .timetable-tab-active { background-color: #ffffff; color: #191F28; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .timetable-tab-inactive { background-color: transparent; color: #8B95A1; }
     </style>
 </head>
 <body class="w-full h-[100dvh] flex flex-col overflow-hidden bg-toss-gradient">
@@ -260,6 +272,31 @@
                 <p class="text-center text-gray-400 mt-10 text-sm">
                     검색 결과가 여기에 표시됩니다.
                 </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- [신규] 시간표 모달 -->
+    <div id="timetable-modal" class="hidden fixed inset-0 z-[80] bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-5">
+        <div class="bg-white w-full max-w-sm h-[85vh] sm:h-[80vh] sm:rounded-[32px] rounded-t-[32px] p-6 shadow-2xl scale-100 transition-all flex flex-col">
+            <div class="flex justify-between items-center mb-4 flex-none">
+                <div>
+                    <h3 class="text-xl font-bold text-main" id="timetable-title">정류장명</h3>
+                    <p class="text-xs text-gray-500">전체 시간표 조회</p>
+                </div>
+                <button onclick="closeTimetableModal()" class="text-gray-400 hover:text-gray-600 bg-gray-100 w-8 h-8 rounded-full"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <!-- 요일 탭 -->
+            <div class="flex p-1 bg-gray-100 rounded-2xl mb-4 flex-none">
+                <button onclick="switchTimetableTab('weekday')" id="tab-weekday" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all timetable-tab-active">평일</button>
+                <button onclick="switchTimetableTab('saturday')" id="tab-saturday" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all timetable-tab-inactive">토요일</button>
+                <button onclick="switchTimetableTab('holiday')" id="tab-holiday" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all timetable-tab-inactive">휴일</button>
+            </div>
+
+            <!-- 시간표 내용 -->
+            <div id="timetable-content" class="flex-1 overflow-y-auto space-y-6 min-h-0 pb-10 pr-1 custom-scrollbar">
+                <!-- JS로 동적 생성됨 -->
             </div>
         </div>
     </div>
@@ -448,6 +485,10 @@
         const TIMETABLE_URL = "./timetable.csv"; 
         
         let GLOBAL_TIMETABLE = null; 
+        
+        // [신규] 시간표 모달 관련 변수
+        let currentTimetableKey = null;
+        let currentTimetableDay = 'weekday';
 
         // 2. 유틸리티 함수 (Utility Functions)
         function getEncodedKey() {
@@ -715,7 +756,22 @@
                     }); 
                 }
             } else { contentHtml = `<div class="text-center text-gray-400 text-xs py-2">데이터 로딩중...</div>`; }
-            const cardHtml = `<div class="toss-card p-5 mb-4 !bg-white/70 animate-[fadeInUp_0.4s_ease-out] relative"><div class="flex justify-between items-start mb-4"><div class="flex items-center gap-2.5"><div class="w-10 h-10 rounded-[16px] bg-gray-100 flex items-center justify-center text-gray-500 text-lg shadow-sm"><i class="${iconClass}"></i></div><div><h4 class="text-base font-bold text-main">${station.name}</h4><p class="text-xs text-sub text-[10px]">ID: ${station.nodeId}</p></div></div><button onclick="removeStation('${currentRegion}', ${index})" class="text-gray-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></div><div class="space-y-1">${contentHtml}</div></div>`;
+            
+            // [수정] 시간표 보기 버튼 추가 (우측 상단 삭제 버튼 옆)
+            const cardHtml = `
+            <div class="toss-card p-5 mb-4 !bg-white/70 animate-[fadeInUp_0.4s_ease-out] relative">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-10 h-10 rounded-[16px] bg-gray-100 flex items-center justify-center text-gray-500 text-lg shadow-sm"><i class="${iconClass}"></i></div>
+                        <div><h4 class="text-base font-bold text-main">${station.name}</h4><p class="text-xs text-sub text-[10px]">ID: ${station.nodeId}</p></div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="openTimetable('${station.nodeId}', '${station.name}')" class="text-gray-400 hover:text-blue-500 transition-colors"><i class="fa-regular fa-calendar-days"></i></button>
+                        <button onclick="removeStation('${currentRegion}', ${index})" class="text-gray-300 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                </div>
+                <div class="space-y-1">${contentHtml}</div>
+            </div>`;
             container.insertAdjacentHTML('beforeend', cardHtml);
         };
 
@@ -836,15 +892,31 @@
                     transferBadge = `<span class="w-5 h-5 flex items-center justify-center rounded-full text-white font-bold ml-1 shadow-sm text-[10px]" style="background-color: #D93F5C;">1</span>`;
                 }
                 
-                // 사용자 추가 역 삭제 버튼 (기본 역은 삭제 불가)
+                // 사용자 추가 역 삭제 버튼
                 const isUserAdded = userAdded.includes(stationName) && !defaultStations.includes(stationName);
-                const deleteBtn = isUserAdded ? `<button onclick="removeSubwayStation('${currentSubwayRegion}', '${stationName}')" class="absolute top-5 right-5 text-gray-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>` : '';
+                const deleteBtn = isUserAdded ? `<button onclick="removeSubwayStation('${currentSubwayRegion}', '${stationName}')" class="text-gray-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>` : '';
+                
+                // [수정] 시간표 버튼 추가 (기본 역 + 사용자 추가 역 모두)
+                const timetableBtn = `<button onclick="openTimetable('${stationName}', '${stationName}')" class="text-gray-400 hover:text-blue-500 transition-colors"><i class="fa-regular fa-calendar-days"></i></button>`;
 
                 if (stationName === '북삼' || stationName === '원대(달성공원)') {
-                    // [수정] 북삼 개통 예정 문구 변경
                     const status = stationName === '북삼' ? '2026년 2월 개통 예정' : '착공 예정'; 
                     const icon = stationName === '북삼' ? '🚧' : '🏗️';
-                    cardContent = `<div class="toss-card p-5 !bg-[#E6F0FA]/90 border border-blue-100 relative"><div class="flex items-center gap-2.5 mb-4"><span class="badge-daegyeong text-[10px] px-2 py-1 rounded-full text-white font-bold">대경선</span><h4 class="text-base font-bold text-main">${stationName}</h4>${transferBadge}<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-1.5 py-0.5 rounded ml-auto">${status}</span></div><div class="text-center p-4"><div class="text-2xl mb-1">${icon}</div><p class="text-sm font-bold text-main">현재 ${status} 단계입니다</p></div>${deleteBtn}</div>`;
+                    cardContent = `<div class="toss-card p-5 !bg-[#E6F0FA]/90 border border-blue-100 relative">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="badge-daegyeong text-[10px] px-2 py-1 rounded-full text-white font-bold">대경선</span>
+                                <h4 class="text-base font-bold text-main">${stationName}</h4>
+                                ${transferBadge}
+                                <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-1.5 py-0.5 rounded ml-auto">${status}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                ${timetableBtn}
+                                ${deleteBtn}
+                            </div>
+                        </div>
+                        <div class="text-center p-4"><div class="text-2xl mb-1">${icon}</div><p class="text-sm font-bold text-main">현재 ${status} 단계입니다</p></div>
+                    </div>`;
                 } else {
                     const upData = window.getNextTimeFromFile(stationName, ['구미'], dayKey);
                     const downDataKyong = window.getNextTimeFromFile(stationName, ['경산'], dayKey);
@@ -855,9 +927,119 @@
                         downHtml += `<div class="glass-item p-3 flex items-center justify-between mb-2"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold">하행</div><span class="text-sm font-bold text-main">경산 방면</span></div>${downDataKyong.html}</div>`;
                         if (stationName !== '동대구역') downHtml += `<div class="glass-item p-3 flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold">하행</div><span class="text-sm font-bold text-main">동대구 방면</span></div>${downDataDong.html}</div>`;
                     }
-                    cardContent = `<div class="toss-card p-5 !bg-[#E6F0FA]/90 relative border border-blue-100"><div class="flex items-center gap-2.5 mb-4"><span class="badge-daegyeong text-[10px] px-2 py-1 rounded-full text-white font-bold shadow-sm">대경선</span><h4 class="text-base font-bold text-main">${stationName}</h4>${transferBadge}</div><div class="space-y-1">${upHtml}${downHtml}</div>${deleteBtn}</div>`;
+                    cardContent = `
+                    <div class="toss-card p-5 !bg-[#E6F0FA]/90 relative border border-blue-100">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-2.5">
+                                <span class="badge-daegyeong text-[10px] px-2 py-1 rounded-full text-white font-bold shadow-sm">대경선</span>
+                                <h4 class="text-base font-bold text-main">${stationName}</h4>
+                                ${transferBadge}
+                            </div>
+                            <div class="flex items-center gap-3">
+                                ${timetableBtn}
+                                ${deleteBtn}
+                            </div>
+                        </div>
+                        <div class="space-y-1">${upHtml}${downHtml}</div>
+                    </div>`;
                 }
                 listContainer.insertAdjacentHTML('beforeend', cardContent);
+            });
+        };
+
+        // [신규] 시간표 모달 기능
+        window.openTimetable = function(stationKey, stationName) {
+            currentTimetableKey = stationKey;
+            document.getElementById('timetable-title').innerText = stationName;
+            document.getElementById('timetable-modal').classList.remove('hidden');
+            
+            // 현재 요일 자동 선택
+            const day = new Date().getDay();
+            const dayType = (day === 0) ? 'holiday' : (day === 6 ? 'saturday' : 'weekday');
+            window.switchTimetableTab(dayType);
+        };
+
+        window.closeTimetableModal = function() {
+            document.getElementById('timetable-modal').classList.add('hidden');
+        };
+
+        window.switchTimetableTab = function(dayKey) {
+            currentTimetableDay = dayKey;
+            
+            // 탭 스타일 변경
+            ['weekday', 'saturday', 'holiday'].forEach(k => {
+                const btn = document.getElementById('tab-' + k);
+                if (k === dayKey) {
+                    btn.classList.add('timetable-tab-active');
+                    btn.classList.remove('timetable-tab-inactive');
+                } else {
+                    btn.classList.remove('timetable-tab-active');
+                    btn.classList.add('timetable-tab-inactive');
+                }
+            });
+
+            window.renderTimetableContent();
+        };
+
+        window.renderTimetableContent = function() {
+            const container = document.getElementById('timetable-content');
+            container.innerHTML = '';
+
+            if (!GLOBAL_TIMETABLE || GLOBAL_TIMETABLE === "ERROR") {
+                container.innerHTML = '<div class="text-center py-10 text-gray-400 text-xs">시간표 데이터가 없습니다.</div>';
+                return;
+            }
+
+            const stationData = GLOBAL_TIMETABLE[currentTimetableKey];
+            if (!stationData || stationData.length === 0) {
+                container.innerHTML = '<div class="text-center py-10 text-gray-400 text-xs">시간표 정보가 없습니다.</div>';
+                return;
+            }
+
+            const now = new Date();
+            const nowMinutes = now.getHours() * 60 + now.getMinutes();
+            // 오늘 요일과 보고있는 탭 요일이 같은지 확인 (같아야 현재시간 하이라이팅)
+            const todayDay = now.getDay();
+            const todayKey = (todayDay === 0) ? 'holiday' : (todayDay === 6 ? 'saturday' : 'weekday');
+            const isToday = (todayKey === currentTimetableDay);
+
+            stationData.forEach(route => {
+                const times = route.times[currentTimetableDay] || [];
+                if (times.length === 0) return;
+
+                let timeChips = '';
+                times.forEach(t => {
+                    const [h, m] = t.split(':').map(Number);
+                    const tMinutes = h * 60 + m;
+                    
+                    let chipClass = 'time-chip';
+                    if (isToday) {
+                        if (tMinutes < nowMinutes) chipClass += ' past';
+                        else if (tMinutes >= nowMinutes && !timeChips.includes('future')) chipClass += ' future'; // 첫 번째 미래 시간만 강조하려면 로직 수정 필요하나 일단 다름
+                    }
+                    // 가장 가까운 미래 시간 하나만 강조하고 싶다면 별도 로직 필요. 여기선 단순히 지나간것/안지나간것 구분
+                    if (isToday && tMinutes >= nowMinutes) chipClass = 'time-chip future'; 
+                    else if (isToday && tMinutes < nowMinutes) chipClass = 'time-chip past';
+
+                    timeChips += `<div class="${chipClass}">${t}</div>`;
+                });
+
+                const isExpress = route.routeNo && route.routeNo.includes('급행');
+                const badge = isExpress ? '<span class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded ml-2">급행</span>' : '';
+                const routeNameDisplay = route.routeNo || '노선';
+
+                const html = `
+                <div class="mb-4">
+                    <div class="flex items-center mb-2 px-1">
+                        <span class="text-sm font-bold text-main mr-1">${routeNameDisplay}</span>
+                        <span class="text-xs text-gray-500 flex items-center"><i class="fa-solid fa-arrow-right mx-1 text-[10px]"></i> ${route.dest}</span>
+                        ${badge}
+                    </div>
+                    <div class="timetable-grid">
+                        ${timeChips}
+                    </div>
+                </div>`;
+                container.insertAdjacentHTML('beforeend', html);
             });
         };
 
