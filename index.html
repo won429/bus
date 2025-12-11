@@ -486,17 +486,28 @@
             return keyType === 'encoding' ? apiKey : encodeURIComponent(apiKey);
         }
 
-        // [수정] 정규화 함수 보강 (대소문자 이슈 등)
+        // [수정] 정규화 함수 보강: routeTp(종류) 강제 추론 로직 추가
         function normalizeBusData(bus) {
             if (!bus) return null;
+            
+            let type = bus.routeTp || bus.routeType || bus.ROUTETP || '';
+            const routeNoStr = (bus.routeno || bus.routeNo || '?').toString();
+            
+            // API가 type을 안 주면 번호에서 추론
+            if (!type) {
+                if (routeNoStr.includes('급행')) type = '급행';
+                else if (routeNoStr.includes('좌석')) type = '좌석';
+                else if (routeNoStr.includes('순환')) type = '순환';
+                else if (routeNoStr.includes('마을')) type = '마을';
+            }
+
             return {
                 ...bus,
-                routeno: (bus.routeno || bus.routeNo || '?').toString(),
+                routeno: routeNoStr,
                 endnodenm: bus.endnodenm || bus.endNodeNm || '종점미상',
                 arrtime: bus.arrtime || bus.arrTime,
                 arrprevstationcnt: bus.arrprevstationcnt || bus.arrPrevStationCnt,
-                // [신규] routeTp, routeType 등 다양한 케이스 대응
-                routeTp: bus.routeTp || bus.routeType || bus.ROUTETP || '' 
+                routeTp: type
             };
         }
 
@@ -721,7 +732,7 @@
             return { diff: bestDiff, html: renderBadge(bestDiff, bestTime) };
         };
 
-        // 5. 렌더링 함수들
+        // 5. 렌더링 함수들 (안동 버스 - 정적)
         window.renderStaticCard = function(index, station) {
             const container = document.getElementById('dynamic-list-container');
             if (GLOBAL_TIMETABLE === "ERROR") { container.innerHTML = `<div class="p-4 bg-red-50 text-red-500 text-center text-xs rounded-xl">시간표 파일을 불러오지 못했습니다.</div>`; return; }
@@ -731,6 +742,9 @@
             let contentHtml = '';
             
             if (stationData) {
+                const now = new Date();
+                const nowTotalSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+
                 const routes = stationData.map(r => { 
                     const times = r.times[dayKey] || [];
                     let bestDiff = 999999; 
@@ -749,18 +763,35 @@
                     if (!bestTime) html = `<span class="text-gray-400 text-xs">운행 종료</span>`;
                     else html = renderBadge(bestDiff, bestTime);
                     
-                    return { ...r, diff: bestDiff, html: html };
+                    // [수정] 정적 데이터용 배지 생성
+                    let typeBadge = '';
+                    if(r.routeNo.includes('급행')) typeBadge = `<span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[30px] text-center ml-1 shadow-sm">급행</span>`;
+
+                    return { ...r, diff: bestDiff, html: html, typeBadge: typeBadge };
                 }).filter(r => r.diff !== 999999).sort((a, b) => a.diff - b.diff);
 
                 if (routes.length === 0) { contentHtml = `<div class="text-center text-gray-400 text-xs py-2">운행 종료</div>`; } 
                 else { 
                     routes.forEach(r => { 
-                        const isExpress = r.routeNo.includes("급행"); 
-                        contentHtml += `<div class="glass-item p-3 mb-2 flex items-center justify-between"><div class="flex items-center gap-3"><span class="${isExpress ? 'bg-red-500' : 'bg-blue-500'} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${isExpress ? '급행' : '일반'}</span><div><span class="text-sm font-bold text-main">${r.routeNo}</span><span class="text-[10px] text-sub ml-1">${r.dest} 방면</span></div></div>${r.html}</div>`; 
+                        contentHtml += `
+                        <div class="glass-item p-3 mb-2 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-blue-50 text-blue-600 text-[11px] font-bold px-2 py-1 rounded-lg min-w-[40px] text-center shadow-sm border border-blue-100">${r.routeNo}</span>
+                                ${r.typeBadge}
+                                <div>
+                                    <div class="text-[12px] font-bold text-gray-700 ml-1 flex items-center gap-1">
+                                        <i class="fa-solid fa-arrow-right text-[10px] text-gray-400"></i>
+                                        ${r.dest}
+                                    </div>
+                                </div>
+                            </div>
+                            ${r.html}
+                        </div>`; 
                     }); 
                 }
             } else { contentHtml = `<div class="text-center text-gray-400 text-xs py-2">데이터 로딩중...</div>`; }
             
+            // [복구] 안동시 시간표 버튼 추가
             const cardHtml = `
             <div class="toss-card p-5 mb-4 !bg-white/70 animate-[fadeInUp_0.4s_ease-out] relative">
                 <div class="flex justify-between items-start mb-4">
@@ -778,6 +809,7 @@
             container.insertAdjacentHTML('beforeend', cardHtml);
         };
 
+        // API 연동 지역 (구미, 칠곡, 대전 등)
         window.loadStationData = async function(index, cityCode, station) {
             const cardId = `station-card-${index}`; const card = document.getElementById(cardId); if (!card) return;
             
