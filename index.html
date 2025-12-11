@@ -1334,15 +1334,27 @@
             if(results.error) { resBox.innerHTML = `<p class="text-center text-red-500 text-xs py-4">${results.error}</p>`; return; }
             if(!results || results.length === 0) { resBox.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">결과 없음</p>'; return; }
             
-            // [수정] 대소문자 호환성 처리 (nodeid vs nodeId)
+            // [수정] 대소문자 호환성 처리 강화 (칠곡 등 일부 지역 대응)
             resBox.innerHTML = results.map(item => {
-                const nodeNm = item.nodenm || item.nodeNm;
-                const nodeId = item.nodeid || item.nodeId;
+                // 가능한 모든 대소문자 조합 확인
+                const nodeNm = item.nodenm || item.nodeNm || item.nodeNM || item.NODE_NM;
+                const nodeId = item.nodeid || item.nodeId || item.nodeID || item.NODE_ID;
+                
+                // ID가 없는 데이터는 제외
+                if (!nodeId) return '';
+
                 return `<div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl mb-2"><div><p class="text-sm font-bold text-main">${nodeNm}</p><p class="text-[10px] text-gray-400">ID: ${nodeId}</p></div><button onclick="addStation('${nodeNm}', '${nodeId}')" class="text-xs bg-blue-100 text-blue-600 font-bold px-3 py-1.5 rounded-lg">추가</button></div>`;
             }).join('');
         };
 
-        window.addStation = (name, id) => { stationConfig[currentRegion].push({ name: name, nodeId: id, sub: '사용자 추가' }); localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig)); alert('추가되었습니다.'); window.closeSearchModal(); window.renderList(); };
+        window.addStation = (name, id) => { 
+            if (!id || id === 'undefined') { alert('잘못된 정류장 ID입니다.'); return; }
+            stationConfig[currentRegion].push({ name: name, nodeId: id, sub: '사용자 추가' }); 
+            localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig)); 
+            alert('추가되었습니다.'); 
+            window.closeSearchModal(); 
+            window.renderList(); 
+        };
         
         // [신규] 지하철 역 추가 함수
         window.addSubwayStation = (name) => {
