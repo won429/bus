@@ -101,6 +101,10 @@
             </div>
             
             <div class="icon-container flex gap-2 transition-all duration-300">
+                <!-- [신규] 상단 도시코드 동기화 버튼 -->
+                <div class="icon-bg w-9 h-9 rounded-full bg-white/50 flex items-center justify-center text-main shadow-sm backdrop-blur-sm cursor-pointer hover:bg-white/80 transition-colors" onclick="initCityCodes(false)">
+                    <i class="fa-solid fa-arrows-rotate text-sm"></i>
+                </div>
                 <div class="icon-bg w-9 h-9 rounded-full bg-white/50 flex items-center justify-center text-main shadow-sm backdrop-blur-sm cursor-pointer hover:bg-white/80 transition-colors" onclick="openSearchModal()">
                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
                 </div>
@@ -147,7 +151,7 @@
                     <!-- JS 렌더링 -->
                 </div>
 
-                <p id="city-code-status" class="text-[10px] text-gray-400 mt-2 px-1 text-right">도시 코드 조회 대기중...</p>
+                <p id="city-code-status" class="text-[10px] text-gray-400 mt-2 px-1 text-right cursor-pointer hover:text-blue-500" onclick="initCityCodes(false)">도시 코드 조회 대기중...</p>
             </div>
 
             <div class="mb-4 fade-in-up delay-200">
@@ -316,7 +320,7 @@
             </div>
 
             <div class="space-y-2 mb-4">
-                <button onclick="initCityCodes()" class="w-full bg-orange-50 text-orange-600 font-bold py-3 rounded-2xl hover:bg-orange-100 transition-colors text-sm">
+                <button onclick="initCityCodes(false)" class="w-full bg-orange-50 text-orange-600 font-bold py-3 rounded-2xl hover:bg-orange-100 transition-colors text-sm">
                     <i class="fa-solid fa-sync"></i> 도시 코드 API로 가져오기 (필수)
                 </button>
                 <button onclick="testConnection()" class="w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-2xl hover:bg-gray-200 transition-colors text-sm">
@@ -335,7 +339,12 @@
     </div>
 
     <script>
-        const MANUAL_API_KEY = "61a63f368537b5e5660bb073ed3d610de59c4982ec365edafebcfd749b87bc93"; // 여기에 공공데이터포털 인증키(Decoding)를 입력하세요
+        // =================================================================================
+        // [필수] API 인증키 입력란 (아래 따옴표 사이에 Decoding 키를 붙여넣으세요)
+        // =================================================================================
+        const MANUAL_API_KEY = "61a63f368537b5e5660bb073ed3d610de59c4982ec365edafebcfd749b87bc93"; 
+        // =================================================================================
+
         const ANDONG_DEFAULT_STATIONS = [
             { name: "국립안동대학교", nodeId: "370000023", arsNo: "-", sub: "주요 정류장" },
             { name: "CGV 건너", nodeId: "370000998", arsNo: "-", sub: "주요 정류장" }, 
@@ -343,12 +352,16 @@
         ];
         
         let stationConfig = JSON.parse(localStorage.getItem('my_station_config_v40')) || { 
-            andong: ANDONG_DEFAULT_STATIONS, gumi: [], chilgok: [] 
+            andong: ANDONG_DEFAULT_STATIONS, gumi: [], chilgok: [], daejeon: [] 
         };
+        // 기존 사용자 데이터에 daejeon 키가 없을 경우를 대비한 방어 코드
+        if (!stationConfig.daejeon) stationConfig.daejeon = [];
+        
         if(!stationConfig.andong || stationConfig.andong.length === 0) stationConfig.andong = ANDONG_DEFAULT_STATIONS;
         localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig));
 
-        let CITY_CODES = { 'andong': '37010', 'gumi': '37030', 'chilgok': '37380' };
+        // [수정] 대전광역시 도시코드(25) 추가
+        let CITY_CODES = { 'andong': '37010', 'gumi': '37030', 'chilgok': '37380', 'daejeon': '25' };
         
         const CITY_NAMES = { 
             'andong': '안동시', 
@@ -426,7 +439,8 @@
                 { id: 'busan_city', name: '부산광역시', icon: 'fa-ship', color: 'blue', isPlanned: true }
             ],
             'chungcheong': [
-                { id: 'daejeon', name: '대전광역시', icon: 'fa-flask', color: 'cyan', isPlanned: true }
+                // [수정] 대전광역시 지원 예정(isPlanned) 제거 -> API 연동 활성화
+                { id: 'daejeon', name: '대전광역시', icon: 'fa-flask', color: 'cyan' }
             ],
             'gwangju': [
                 { id: 'gwangju_city', name: '광주광역시', icon: 'fa-building', color: 'teal', isPlanned: true }
@@ -601,28 +615,50 @@
             } catch (e) { return { error: "NETWORK_ERROR" }; }
         };
 
-        window.initCityCodes = async function() {
-            if (!apiKey) { alert("API 키를 먼저 저장하세요."); return; }
+        // [수정] initCityCodes 함수 수정 (silent 모드 지원)
+        window.initCityCodes = async function(isSilent = false) {
             const resultBox = document.getElementById('test-result');
-            resultBox.classList.remove('hidden');
-            resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 도시 코드 스캔 중...';
+            const statusText = document.getElementById('city-code-status');
+            
+            if (!apiKey) { 
+                if(!isSilent) alert("API 키를 먼저 저장하세요."); 
+                return; 
+            }
+            
+            if(!isSilent) {
+                resultBox.classList.remove('hidden');
+                resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 도시 코드 스캔 중...';
+            } else {
+                if(statusText) statusText.innerText = "도시 코드 갱신 중...";
+            }
+
             const serviceKey = getEncodedKey();
             const targetUrl = `http://apis.data.go.kr/1613000/BusSttnInfoInqireService/getCtyCodeList?serviceKey=${serviceKey}&_type=json`;
 
             try {
                 const text = await window.fetchWithFallback(targetUrl);
                 const result = parseHybrid(text);
-                if (result.type === 'error') { resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ ${result.msg}</span>`; return; }
+                if (result.type === 'error') { 
+                    if(!isSilent) resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ ${result.msg}</span>`; 
+                    if(statusText) statusText.innerText = "코드 갱신 실패";
+                    return; 
+                }
                 const items = result.data.response.body.items.item;
                 const list = Array.isArray(items) ? items : [items];
                 list.forEach(city => {
                     if (city.cityname.includes('안동')) CITY_CODES.andong = city.citycode;
                     if (city.cityname.includes('구미')) CITY_CODES.gumi = city.citycode;
                     if (city.cityname.includes('칠곡')) CITY_CODES.chilgok = city.citycode;
+                    if (city.cityname.includes('대전')) CITY_CODES.daejeon = city.citycode;
                 });
                 localStorage.setItem('my_city_codes', JSON.stringify(CITY_CODES));
-                resultBox.innerHTML = `<span class="text-green-600 font-bold">✅ 도시 코드 갱신 완료!</span>`;
-            } catch (e) { resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ 네트워크 오류</span>`; }
+                
+                if(!isSilent) resultBox.innerHTML = `<span class="text-green-600 font-bold">✅ 도시 코드 갱신 완료!</span>`;
+                if(statusText) statusText.innerText = "최신 도시 코드 사용 중";
+            } catch (e) { 
+                if(!isSilent) resultBox.innerHTML = `<span class="text-red-500 font-bold">❌ 네트워크 오류</span>`; 
+                if(statusText) statusText.innerText = "네트워크 오류";
+            }
         };
 
         window.loadTimetable = async function() {
@@ -1253,7 +1289,7 @@
                 label.innerText = CITY_NAMES[region];
             }
 
-            ['andong', 'gumi', 'chilgok', 'daegu'].forEach(id => {
+            ['andong', 'gumi', 'chilgok', 'daegu', 'daejeon'].forEach(id => {
                 const el = document.getElementById('btn-' + id);
                 if (!el) return;
                 if (id === region) { el.classList.add('region-card-selected'); el.querySelector('.status-text').innerText = '선택됨'; }
@@ -1282,104 +1318,6 @@
             }, 20000); 
         };
 
-        // 모달 및 설정
-        window.openSearchModal = () => {
-            const modal = document.getElementById('search-modal');
-            const regionLabel = document.getElementById('search-modal-region');
-            const isSubway = !document.getElementById('view-subway').classList.contains('hidden');
-            
-            if (isSubway) {
-                const subRegionNames = { 'gumi': '경북 구미시', 'chilgok': '경북 칠곡군', 'daegu': '대구광역시', 'gyeongsan': '경북 경산시' };
-                regionLabel.innerText = subRegionNames[currentSubwayRegion] || currentSubwayRegion;
-                regionLabel.className = "text-xs font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-md inline-block mt-1";
-            } else {
-                regionLabel.innerText = CITY_NAMES[currentRegion];
-                regionLabel.className = "text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md inline-block mt-1";
-            }
-            
-            document.getElementById('add-station-input').value = '';
-            document.getElementById('add-station-results').innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">검색 결과가 여기에 표시됩니다.</p>';
-            modal.classList.remove('hidden');
-        };
-
-        window.closeSearchModal = () => document.getElementById('search-modal').classList.add('hidden');
-        
-        // [신규] 설정 모달 열기/닫기 함수 복구
-        window.openSettings = () => document.getElementById('settings-modal').classList.remove('hidden');
-        window.closeSettings = () => document.getElementById('settings-modal').classList.add('hidden');
-        
-        window.doSearchStation = async () => {
-            const query = document.getElementById('add-station-input').value; if(!query) return;
-            const resBox = document.getElementById('add-station-results'); 
-            const isSubway = !document.getElementById('view-subway').classList.contains('hidden');
-
-            if (isSubway) {
-                if (!GLOBAL_TIMETABLE || GLOBAL_TIMETABLE === "ERROR") {
-                    resBox.innerHTML = '<p class="text-center text-red-500 text-xs py-4">시간표 파일이 로드되지 않았습니다.</p>'; return;
-                }
-                const results = Object.keys(GLOBAL_TIMETABLE).filter(key => key.includes(query) && isNaN(key)); 
-                
-                if (results.length === 0) {
-                    resBox.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">결과 없음</p>'; return;
-                }
-                
-                resBox.innerHTML = results.map(name => `
-                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl mb-2">
-                        <div><p class="text-sm font-bold text-main">${name}</p><p class="text-[10px] text-gray-400">지하철/기차</p></div>
-                        <button onclick="addSubwayStation('${name}')" class="text-xs bg-orange-100 text-orange-600 font-bold px-3 py-1.5 rounded-lg">추가</button>
-                    </div>
-                `).join('');
-                return;
-            }
-
-            resBox.innerHTML = '<div class="text-center py-4"><i class="fa-solid fa-spinner fa-spin text-blue-500"></i></div>';
-            const results = await window.searchStationAPI(query);
-            if(results.error) { resBox.innerHTML = `<p class="text-center text-red-500 text-xs py-4">${results.error}</p>`; return; }
-            if(!results || results.length === 0) { resBox.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">결과 없음</p>'; return; }
-            
-            resBox.innerHTML = results.map(item => {
-                const nodeNm = item.nodenm || item.nodeNm || item.nodeNM || item.NODE_NM;
-                const nodeId = item.nodeid || item.nodeId || item.nodeID || item.NODE_ID;
-                if (!nodeId) return '';
-                return `<div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl mb-2"><div><p class="text-sm font-bold text-main">${nodeNm}</p><p class="text-[10px] text-gray-400">ID: ${nodeId}</p></div><button onclick="addStation('${nodeNm}', '${nodeId}')" class="text-xs bg-blue-100 text-blue-600 font-bold px-3 py-1.5 rounded-lg">추가</button></div>`;
-            }).join('');
-        };
-
-        window.addStation = (name, id) => { 
-            if (!id || id === 'undefined') { alert('잘못된 정류장 ID입니다.'); return; }
-            const cleanId = String(id).trim(); 
-            const cleanName = String(name).trim();
-            stationConfig[currentRegion].push({ name: cleanName, nodeId: cleanId, sub: '사용자 추가' }); 
-            localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig)); 
-            alert('추가되었습니다.'); 
-            window.closeSearchModal(); 
-            window.renderList(); 
-        };
-        
-        window.addSubwayStation = (name) => {
-            const userStations = JSON.parse(localStorage.getItem('my_subway_stations_v1')) || {};
-            if (!userStations[currentSubwayRegion]) userStations[currentSubwayRegion] = [];
-            if (userStations[currentSubwayRegion].includes(name)) { alert('이미 추가된 역입니다.'); return; }
-            userStations[currentSubwayRegion].push(name);
-            localStorage.setItem('my_subway_stations_v1', JSON.stringify(userStations));
-            alert('추가되었습니다.'); window.closeSearchModal(); window.renderSubwayStations();
-        };
-
-        window.removeSubwayStation = (region, name) => {
-            if(!confirm('삭제하시겠습니까?')) return;
-            const userStations = JSON.parse(localStorage.getItem('my_subway_stations_v1')) || {};
-            if (userStations[region]) {
-                userStations[region] = userStations[region].filter(s => s !== name);
-                localStorage.setItem('my_subway_stations_v1', JSON.stringify(userStations));
-                window.renderSubwayStations();
-            }
-        };
-
-        window.removeStation = (region, idx) => { if(confirm('삭제하시겠습니까?')) { stationConfig[region].splice(idx, 1); localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig)); window.renderList(); } };
-        window.saveSettings = () => { const key = document.getElementById('api-key-input').value; const type = document.querySelector('input[name="key-type"]:checked').value; if(key) { apiKey = key; keyType = type; localStorage.setItem('toss_bus_api_key', key); localStorage.setItem('toss_bus_key_type', type); alert('저장됨'); window.closeSettings(); window.renderList(); } };
-        window.resetData = () => { if(confirm('초기화하시겠습니까?')) { localStorage.removeItem('my_station_config_v40'); localStorage.removeItem('my_subway_stations_v1'); location.reload(); } };
-        window.testConnection = async () => { alert("테스트 시작: 결과를 기다려주세요..."); const res = await window.fetchBusArrival('37010', 'DJB8001793'); document.getElementById('test-result').innerHTML = (typeof res === 'string') ? `<span class='text-red-500'>실패: ${res}</span>` : "<span class='text-green-500'>성공!</span>"; };
-
         // 초기화
         document.addEventListener('DOMContentLoaded', () => {
             if(apiKey) document.getElementById('api-key-input').value = apiKey;
@@ -1390,6 +1328,9 @@
             window.renderSubwaySpecificRegions();
             
             startLiveUpdates();
+            
+            // [신규] 앱 시작 시 자동 도시코드 갱신 (Silent mode)
+            window.initCityCodes(true);
             
             window.startAutoRefresh();
         });
