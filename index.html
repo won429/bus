@@ -561,10 +561,40 @@
             const stationData = GLOBAL_TIMETABLE ? GLOBAL_TIMETABLE[station.nodeId] : null;
             let iconClass = "fa-solid fa-bus"; if (station.name.includes("대학교")) iconClass = "fa-solid fa-school"; if (station.name.includes("CGV")) iconClass = "fa-solid fa-film";
             let contentHtml = '';
+            
             if (stationData) {
-                const routes = stationData.map(r => { const next = window.getNextTimeFromFile(station.nodeId, [r.dest], dayKey); return { ...r, ...next }; }).filter(r => r.diff !== 999999).sort((a, b) => a.diff - b.diff);
+                const now = new Date();
+                const nowTotalSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+
+                // [수정됨] 기존 getNextTimeFromFile 대신 각 노선(r)의 시간표를 직접 참조하여 정확도 향상
+                const routes = stationData.map(r => { 
+                    const times = r.times[dayKey] || [];
+                    let bestDiff = 999999; 
+                    let bestTime = null;
+                    
+                    times.forEach(time => {
+                        const [h, m, s=0] = time.split(':').map(Number); 
+                        const timeSec = h * 3600 + m * 60 + s;
+                        if (timeSec > nowTotalSec) { 
+                            const diff = timeSec - nowTotalSec; 
+                            if (diff < bestDiff) { bestDiff = diff; bestTime = time; } 
+                        }
+                    });
+
+                    let html = '';
+                    if (!bestTime) html = `<span class="text-gray-400 text-xs">운행 종료</span>`;
+                    else html = renderBadge(bestDiff, bestTime);
+                    
+                    return { ...r, diff: bestDiff, html: html };
+                }).filter(r => r.diff !== 999999).sort((a, b) => a.diff - b.diff);
+
                 if (routes.length === 0) { contentHtml = `<div class="text-center text-gray-400 text-xs py-2">운행 종료</div>`; } 
-                else { routes.forEach(r => { const isExpress = r.routeNo.includes("급행"); contentHtml += `<div class="glass-item p-3 mb-2 flex items-center justify-between"><div class="flex items-center gap-3"><span class="${isExpress ? 'bg-red-500' : 'bg-blue-500'} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${isExpress ? '급행' : '일반'}</span><div><span class="text-sm font-bold text-main">${r.routeNo}</span><span class="text-[10px] text-sub ml-1">${r.dest} 방면</span></div></div>${r.html}</div>`; }); }
+                else { 
+                    routes.forEach(r => { 
+                        const isExpress = r.routeNo.includes("급행"); 
+                        contentHtml += `<div class="glass-item p-3 mb-2 flex items-center justify-between"><div class="flex items-center gap-3"><span class="${isExpress ? 'bg-red-500' : 'bg-blue-500'} text-white text-[10px] font-bold px-1.5 py-0.5 rounded min-w-[36px] text-center">${isExpress ? '급행' : '일반'}</span><div><span class="text-sm font-bold text-main">${r.routeNo}</span><span class="text-[10px] text-sub ml-1">${r.dest} 방면</span></div></div>${r.html}</div>`; 
+                    }); 
+                }
             } else { contentHtml = `<div class="text-center text-gray-400 text-xs py-2">데이터 로딩중...</div>`; }
             const cardHtml = `<div class="toss-card p-5 mb-4 !bg-white/70 animate-[fadeInUp_0.4s_ease-out] relative"><div class="flex justify-between items-start mb-4"><div class="flex items-center gap-2.5"><div class="w-10 h-10 rounded-[16px] bg-gray-100 flex items-center justify-center text-gray-500 text-lg shadow-sm"><i class="${iconClass}"></i></div><div><h4 class="text-base font-bold text-main">${station.name}</h4><p class="text-xs text-sub text-[10px]">ID: ${station.nodeId}</p></div></div><button onclick="removeStation('${currentRegion}', ${index})" class="text-gray-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></div><div class="space-y-1">${contentHtml}</div></div>`;
             container.insertAdjacentHTML('beforeend', cardHtml);
