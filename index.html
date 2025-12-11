@@ -623,9 +623,18 @@
             const day = new Date().getDay(); const dayKey = (day === 0) ? 'holiday' : (day === 6 ? 'saturday' : 'weekday');
             stations.forEach(stationName => {
                 let cardContent = '';
+
+                // 환승 배지 생성 로직 (알약 -> 원형 변경)
+                let transferBadge = '';
+                if (stationName === '원대(달성공원)') {
+                    transferBadge = `<span class="w-5 h-5 flex items-center justify-center rounded-full text-white font-bold ml-1 shadow-sm text-[10px]" style="background-color: #FFB100;">3</span>`;
+                } else if (stationName === '대구역' || stationName === '동대구역') {
+                    transferBadge = `<span class="w-5 h-5 flex items-center justify-center rounded-full text-white font-bold ml-1 shadow-sm text-[10px]" style="background-color: #D93F5C;">1</span>`;
+                }
+
                 if (stationName === '북삼' || stationName === '원대(달성공원)') {
                     const status = stationName === '북삼' ? '미개통' : '착공 예정'; const icon = stationName === '북삼' ? '🚧' : '🏗️';
-                    cardContent = `<div class="toss-card p-5 !bg-[#E6F0FA]/90 border border-blue-100"><div class="flex items-center gap-2.5 mb-4"><span class="badge-daegyeong text-[10px] px-2 py-1 rounded-full text-white font-bold">대경선</span><h4 class="text-base font-bold text-main">${stationName}</h4><span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-1.5 py-0.5 rounded ml-auto">${status}</span></div><div class="text-center p-4"><div class="text-2xl mb-1">${icon}</div><p class="text-sm font-bold text-main">현재 ${status} 단계입니다</p></div></div>`;
+                    cardContent = `<div class="toss-card p-5 !bg-[#E6F0FA]/90 border border-blue-100"><div class="flex items-center gap-2.5 mb-4"><span class="badge-daegyeong text-[10px] px-2 py-1 rounded-full text-white font-bold">대경선</span><h4 class="text-base font-bold text-main">${stationName}</h4>${transferBadge}<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-1.5 py-0.5 rounded ml-auto">${status}</span></div><div class="text-center p-4"><div class="text-2xl mb-1">${icon}</div><p class="text-sm font-bold text-main">현재 ${status} 단계입니다</p></div></div>`;
                 } else {
                     const upData = window.getNextTimeFromFile(stationName, ['구미'], dayKey);
                     const downDataKyong = window.getNextTimeFromFile(stationName, ['경산'], dayKey);
@@ -636,7 +645,7 @@
                         downHtml += `<div class="glass-item p-3 flex items-center justify-between mb-2"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold">하행</div><span class="text-sm font-bold text-main">경산 방면</span></div>${downDataKyong.html}</div>`;
                         if (stationName !== '동대구역') downHtml += `<div class="glass-item p-3 flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold">하행</div><span class="text-sm font-bold text-main">동대구 방면</span></div>${downDataDong.html}</div>`;
                     }
-                    cardContent = `<div class="toss-card p-5 !bg-[#E6F0FA]/90 relative border border-blue-100"><div class="flex items-center gap-2.5 mb-4"><span class="badge-daegyeong text-[10px] px-2 py-1 rounded-full text-white font-bold shadow-sm">대경선</span><h4 class="text-base font-bold text-main">${stationName}</h4></div><div class="space-y-1">${upHtml}${downHtml}</div></div>`;
+                    cardContent = `<div class="toss-card p-5 !bg-[#E6F0FA]/90 relative border border-blue-100"><div class="flex items-center gap-2.5 mb-4"><span class="badge-daegyeong text-[10px] px-2 py-1 rounded-full text-white font-bold shadow-sm">대경선</span><h4 class="text-base font-bold text-main">${stationName}</h4>${transferBadge}</div><div class="space-y-1">${upHtml}${downHtml}</div></div>`;
                 }
                 listContainer.insertAdjacentHTML('beforeend', cardContent);
             });
