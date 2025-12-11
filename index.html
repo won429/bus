@@ -1333,7 +1333,13 @@
             const results = await window.searchStationAPI(query);
             if(results.error) { resBox.innerHTML = `<p class="text-center text-red-500 text-xs py-4">${results.error}</p>`; return; }
             if(!results || results.length === 0) { resBox.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">결과 없음</p>'; return; }
-            resBox.innerHTML = results.map(item => `<div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl mb-2"><div><p class="text-sm font-bold text-main">${item.nodenm}</p><p class="text-[10px] text-gray-400">ID: ${item.nodeid}</p></div><button onclick="addStation('${item.nodenm}', '${item.nodeid}')" class="text-xs bg-blue-100 text-blue-600 font-bold px-3 py-1.5 rounded-lg">추가</button></div>`).join('');
+            
+            // [수정] 대소문자 호환성 처리 (nodeid vs nodeId)
+            resBox.innerHTML = results.map(item => {
+                const nodeNm = item.nodenm || item.nodeNm;
+                const nodeId = item.nodeid || item.nodeId;
+                return `<div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl mb-2"><div><p class="text-sm font-bold text-main">${nodeNm}</p><p class="text-[10px] text-gray-400">ID: ${nodeId}</p></div><button onclick="addStation('${nodeNm}', '${nodeId}')" class="text-xs bg-blue-100 text-blue-600 font-bold px-3 py-1.5 rounded-lg">추가</button></div>`;
+            }).join('');
         };
 
         window.addStation = (name, id) => { stationConfig[currentRegion].push({ name: name, nodeId: id, sub: '사용자 추가' }); localStorage.setItem('my_station_config_v40', JSON.stringify(stationConfig)); alert('추가되었습니다.'); window.closeSearchModal(); window.renderList(); };
