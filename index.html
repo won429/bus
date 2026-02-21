@@ -125,6 +125,7 @@
                         <div class="w-6 h-6 rounded-full busan-line-1 flex items-center justify-center text-[11px] font-bold border border-[#F06A00]/30">1</div>
                         <span class="font-bold text-white text-lg">서면역</span>
                     </div>
+                    <button onclick="openTimetableModal('서면역', '노포 방면', null, '다대포항 방면', null)" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-black/40 rounded-xl p-3 border border-white/5">
@@ -167,6 +168,7 @@
                         <div class="w-6 h-6 rounded-full daegu-line-1 flex items-center justify-center text-[11px] font-bold border border-[#D93F5C]/30">1</div>
                         <span class="font-bold text-white text-lg">중앙로역</span>
                     </div>
+                    <button onclick="openTimetableModal('중앙로역', '설화명곡 방면', null, '안심 방면', null)" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-black/40 rounded-xl p-3 border border-white/5">
@@ -195,6 +197,7 @@
                         <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
                         <span class="font-bold text-white text-lg">구미역</span>
                     </div>
+                    <button onclick="openTimetableModal('구미역', '경산 방면', 'time-daegyeong-gumi-down', null, null)" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-black/40 rounded-xl p-3 border border-white/5">
@@ -223,6 +226,7 @@
                         <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
                         <span class="font-bold text-white text-lg">사곡역</span>
                     </div>
+                    <button onclick="openTimetableModal('사곡역', '경산 방면', 'time-daegyeong-sagok-down', '구미 방면', 'time-daegyeong-sagok-up')" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-black/40 rounded-xl p-3 border border-white/5">
@@ -251,6 +255,7 @@
                         <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
                         <span class="font-bold text-white text-lg">왜관역</span>
                     </div>
+                    <button onclick="openTimetableModal('왜관역', '경산 방면', 'time-daegyeong-waegwan-down', '구미 방면', 'time-daegyeong-waegwan-up')" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-black/40 rounded-xl p-3 border border-white/5">
@@ -279,6 +284,7 @@
                         <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
                         <span class="font-bold text-white text-lg">서대구역</span>
                     </div>
+                    <button onclick="openTimetableModal('서대구역', '경산 방면', 'time-daegyeong-seodaegu-down', '구미 방면', 'time-daegyeong-seodaegu-up')" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-black/40 rounded-xl p-3 border border-white/5">
@@ -307,6 +313,7 @@
                         <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
                         <span class="font-bold text-white text-lg">대구역</span>
                     </div>
+                    <button onclick="openTimetableModal('대구역', '경산 방면', 'time-daegyeong-daegu-down', '구미 방면', 'time-daegyeong-daegu-up')" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-black/40 rounded-xl p-3 border border-white/5">
@@ -335,6 +342,7 @@
                         <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
                         <span class="font-bold text-white text-lg">동대구역</span>
                     </div>
+                    <button onclick="openTimetableModal('동대구역', '경산 방면', 'time-daegyeong-dongdaegu-down', '구미 방면', 'time-daegyeong-dongdaegu-up')" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-black/40 rounded-xl p-3 border border-white/5">
@@ -363,6 +371,7 @@
                         <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
                         <span class="font-bold text-white text-lg">경산역</span>
                     </div>
+                    <button onclick="openTimetableModal('경산역', '구미 방면', 'time-daegyeong-gyeongsan-up', null, null)" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-black/40 rounded-xl p-3 border border-white/5">
@@ -491,6 +500,29 @@
         </div>
     </div>
 
+    <!-- 6. 시간표 전체보기 모달 (팝업) -->
+    <div id="timetable-modal" onclick="if(event.target.id === 'timetable-modal') closeTimetableModal()" class="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md hidden flex-col items-center justify-center p-5 opacity-0 transition-opacity duration-300">
+        <div id="timetable-modal-content" class="toss-card !bg-[#1C1C1E] w-full max-w-sm flex flex-col max-h-[80vh] transform scale-95 transition-transform duration-300 border border-white/10">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center relative">
+                <h3 class="text-lg font-bold text-white w-full text-center" id="modal-station-title">역 시간표</h3>
+                <button onclick="closeTimetableModal()" class="absolute right-4 w-8 h-8 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-gray-300 active:scale-90 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-4 overflow-y-auto flex-1 flex gap-3 pb-6 scrollbar-hide">
+                <!-- 상행 -->
+                <div class="flex-1 flex flex-col" id="modal-up-container">
+                    <h4 class="text-[11px] font-bold text-gray-400 mb-3 text-center bg-white/5 py-1.5 rounded-lg" id="modal-up-title">상행 방면</h4>
+                    <div id="modal-up-list" class="flex flex-col gap-1 text-center"></div>
+                </div>
+                <div class="w-[1px] bg-white/5" id="modal-divider"></div>
+                <!-- 하행 -->
+                <div class="flex-1 flex flex-col" id="modal-down-container">
+                    <h4 class="text-[11px] font-bold text-gray-400 mb-3 text-center bg-white/5 py-1.5 rounded-lg" id="modal-down-title">하행 방면</h4>
+                    <div id="modal-down-list" class="flex flex-col gap-1 text-center"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 하단 플로팅 메뉴 -->
     <nav id="bottom-nav" class="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-full max-w-[360px] px-2 touch-pan-x select-none">
         <div class="flex items-center justify-between bg-white/10 backdrop-blur-[4px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1.5 gap-0.5 ring-1 ring-white/30 relative mix-blend-difference">
@@ -539,6 +571,9 @@
         let map = null;
         let myLocationMarker = null;
         let isMapInitialized = false;
+        
+        // [신규] 전체 시간표 데이터를 임시 저장할 전역 객체
+        window.fullTimetables = {};
 
         // 지역 변경 로직
         function switchRegion(regionId, btnElement) {
@@ -694,7 +729,6 @@
             const el = document.getElementById(elementId);
             if (!el) return;
 
-            // 미리보기(blob/file) 환경에서는 fetch 에러가 나므로 시도하지 않고 우회 안내 표시
             if (window.location.protocol === 'blob:' || window.location.protocol === 'file:' || window.location.hostname === '') {
                 el.innerText = "CSV 업로드 대기중";
                 el.className = "text-[11px] font-bold text-gray-500 bg-white/5 px-2 py-0.5 rounded";
@@ -726,6 +760,14 @@
                     }
                 }
 
+                // [신규] 전체 시간표 데이터를 모달창을 위해 전역 변수에 저장
+                window.fullTimetables = window.fullTimetables || {};
+                window.fullTimetables[elementId] = times.map(t => {
+                    const h = Math.floor(t / 60).toString().padStart(2, '0');
+                    const m = (t % 60).toString().padStart(2, '0');
+                    return { totalMins: t, timeStr: `${h}:${m}` };
+                });
+
                 const now = new Date();
                 const currentMins = now.getHours() * 60 + now.getMinutes();
                 let upcoming = times.filter(t => t - currentMins >= 0).sort((a,b) => a - b);
@@ -745,46 +787,31 @@
             }
         }
 
-        // --- [신규] 공휴일 및 주말 자동 감지 로직 ---
-        // 대한민국의 주요 공휴일 목록 (필요에 따라 날짜를 추가/수정하시면 됩니다)
+        // --- 공휴일 및 주말 자동 감지 로직 ---
         const publicHolidays = [
-            '2024-12-25', // 성탄절
-            '2025-01-01', // 신정
-            '2025-01-28', '2025-01-29', '2025-01-30', // 설날 연휴
-            '2025-03-01', // 삼일절
-            '2025-05-05', // 어린이날
-            '2025-05-06', // 부처님 오신 날
-            '2025-06-06', // 현충일
-            '2025-08-15', // 광복절
-            '2025-10-03', // 개천절
-            '2025-10-06', '2025-10-07', '2025-10-08', // 추석 연휴
-            '2025-10-09', // 한글날
-            '2025-12-25'  // 성탄절
+            '2024-12-25', '2025-01-01', '2025-01-28', '2025-01-29', '2025-01-30',
+            '2025-03-01', '2025-05-05', '2025-05-06', '2025-06-06', '2025-08-15',
+            '2025-10-03', '2025-10-06', '2025-10-07', '2025-10-08', '2025-10-09', '2025-12-25'
         ];
 
         function checkIsHolidayOrWeekend(date) {
             const day = date.getDay();
-            // 0: 일요일, 6: 토요일
             if (day === 0 || day === 6) return true; 
             
-            // 날짜 포맷 맞추기 (YYYY-MM-DD)
             const yyyy = date.getFullYear();
             const mm = String(date.getMonth() + 1).padStart(2, '0');
             const dd = String(date.getDate()).padStart(2, '0');
             const dateString = `${yyyy}-${mm}-${dd}`;
             
-            // 지정한 공휴일 목록에 포함되어 있는지 확인
             return publicHolidays.includes(dateString);
         }
 
         function loadRealTimetable() {
             const now = new Date();
             const isWeekend = checkIsHolidayOrWeekend(now);
-            
-            // 주말/공휴일이면 'weekend', 평일이면 'weekday' 문자열을 변수에 저장
             const dayType = isWeekend ? 'weekend' : 'weekday'; 
 
-            // 하행 (파일 이름에 dayType 변수가 자동으로 들어갑니다)
+            // 하행
             fetchTimetable(`daegyeong_down_${dayType}.csv`, '구미', 'time-daegyeong-gumi-down');
             fetchTimetable(`daegyeong_down_${dayType}.csv`, '사곡', 'time-daegyeong-sagok-down');
             fetchTimetable(`daegyeong_down_${dayType}.csv`, '왜관', 'time-daegyeong-waegwan-down');
@@ -801,12 +828,103 @@
             fetchTimetable(`daegyeong_up_${dayType}.csv`, '사곡', 'time-daegyeong-sagok-up');
         }
 
+        // --- [신규] 시간표 모달 관련 기능 ---
+        function openTimetableModal(stationName, upTitle, upId, downTitle, downId) {
+            document.getElementById('modal-station-title').innerText = stationName + " 시간표";
+            
+            const upContainer = document.getElementById('modal-up-container');
+            const downContainer = document.getElementById('modal-down-container');
+            const divider = document.getElementById('modal-divider');
+
+            if (upTitle) {
+                upContainer.style.display = 'flex';
+                document.getElementById('modal-up-title').innerText = upTitle;
+                renderTimetableList(upId, 'modal-up-list');
+            } else {
+                upContainer.style.display = 'none';
+            }
+
+            if (downTitle) {
+                downContainer.style.display = 'flex';
+                document.getElementById('modal-down-title').innerText = downTitle;
+                renderTimetableList(downId, 'modal-down-list');
+            } else {
+                downContainer.style.display = 'none';
+            }
+
+            // 둘 다 있으면 구분선 보이기
+            if (upTitle && downTitle) divider.style.display = 'block';
+            else divider.style.display = 'none';
+
+            const modal = document.getElementById('timetable-modal');
+            const content = document.getElementById('timetable-modal-content');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function renderTimetableList(id, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            // 데이터가 없거나 로딩 실패한 역인 경우
+            const times = window.fullTimetables[id];
+            if (!times || times.length === 0) {
+                container.innerHTML = '<span class="text-gray-500 text-[11px] mt-4">데이터 없음</span>';
+                return;
+            }
+
+            const now = new Date();
+            const currentMins = now.getHours() * 60 + now.getMinutes();
+
+            times.forEach(t => {
+                const diff = t.totalMins - currentMins;
+                const isPast = diff < 0;
+                
+                const el = document.createElement('div');
+                el.className = `py-1.5 flex items-center justify-center gap-2 rounded-lg ${isPast ? 'text-gray-600' : 'text-gray-200 font-medium'}`;
+                
+                // 임박한 열차 강조
+                if (diff >= 0 && diff <= 5) el.classList.add('bg-white/5');
+
+                el.innerHTML = `
+                    <span class="${diff >= 0 && diff <= 5 ? 'text-white' : ''}">${t.timeStr}</span> 
+                    <span class="text-[10px] w-12 text-left ${isPast ? 'text-gray-700' : (diff === 0 ? 'text-red-400 font-bold' : (diff <= 5 ? 'text-red-400' : 'text-blue-400'))}">
+                        ${isPast ? '출발' : (diff === 0 ? '곧 도착' : `${diff}분`)}
+                    </span>
+                `;
+                container.appendChild(el);
+            });
+
+            // 스크롤이 자동으로 "현재 시점" 부근으로 이동
+            setTimeout(() => {
+                const firstUpcoming = Array.from(container.children).find(el => !el.classList.contains('text-gray-600'));
+                if (firstUpcoming) {
+                    container.scrollTop = firstUpcoming.offsetTop - container.offsetTop - 40;
+                }
+            }, 50);
+        }
+
+        function closeTimetableModal() {
+            const modal = document.getElementById('timetable-modal');
+            const content = document.getElementById('timetable-modal-content');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
         // 초기 실행
         window.onload = () => {
             switchTab(0);
             loadRealTimetable(); 
             
-            // 캔버스(미리보기) 환경이 아닐 때만 1분 단위 새로고침 작동
             if (window.location.protocol !== 'blob:' && window.location.protocol !== 'file:') {
                 setInterval(loadRealTimetable, 60000);
             }
