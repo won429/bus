@@ -1,239 +1,826 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NOVAFLIX</title>
-  <style>
-    :root {
-      --bg: #0f0f0f;
-      --card: #1c1c1c;
-      --text: #f5f5f5;
-      --sub: #b3b3b3;
-      --red: #e50914;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Toss Subway - 지하철 도착정보</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 폰트 및 아이콘 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- 네이버 지도 API (기존 map.html에 있던 키 사용) -->
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=9nl297jo77"></script>
 
-    * { box-sizing: border-box; }
+    <style>
+        body { 
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "sans-serif";
+            background-color: #000000;
+            color: #FFFFFF;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+            touch-action: pan-y;
+        }
 
-    body {
-      margin: 0;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
+        /* 유리 재질 공통 클래스 */
+        .toss-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4); 
+            transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.1s;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+        .toss-card:active {
+            transform: scale(0.96);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+            filter: brightness(1.1);
+        }
 
-    .hero {
-      min-height: 70vh;
-      padding: 24px 5vw 60px;
-      background:
-        linear-gradient(to top, rgba(15,15,15,1), rgba(15,15,15,0.25) 50%, rgba(15,15,15,0.9)),
-        radial-gradient(circle at 80% 20%, rgba(229,9,20,0.35), transparent 40%),
-        linear-gradient(120deg, #111, #2f2f2f);
-    }
+        .text-main { color: #F2F4F6; }
+        .text-sub { color: #A1A1A6; }
+        
+        /* 지하철 호선 색상 */
+        .line-1 { color: #0052A4; background: rgba(0, 82, 164, 0.15); border-color: rgba(0, 82, 164, 0.3); }
+        .line-2 { color: #00A84D; background: rgba(0, 168, 77, 0.15); border-color: rgba(0, 168, 77, 0.3); }
+        .line-3 { color: #EF7C1C; background: rgba(239, 124, 28, 0.15); border-color: rgba(239, 124, 28, 0.3); }
+        .line-4 { color: #00A5DE; background: rgba(0, 165, 222, 0.15); border-color: rgba(0, 165, 222, 0.3); }
+        .line-9 { color: #BDB092; background: rgba(189, 176, 146, 0.15); border-color: rgba(189, 176, 146, 0.3); }
+        .line-sinbundang { color: #D4003B; background: rgba(212, 0, 59, 0.15); border-color: rgba(212, 0, 59, 0.3); }
 
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 70px;
-    }
+        /* 지역별 지하철 호선 색상 */
+        .busan-line-1 { color: #F06A00; background: rgba(240, 106, 0, 0.15); border-color: rgba(240, 106, 0, 0.3); }
+        .busan-line-2 { color: #81BF48; background: rgba(129, 191, 72, 0.15); border-color: rgba(129, 191, 72, 0.3); }
+        .busan-line-3 { color: #C89E78; background: rgba(200, 158, 120, 0.15); border-color: rgba(200, 158, 120, 0.3); }
+        .busan-line-4 { color: #217BCE; background: rgba(33, 123, 206, 0.15); border-color: rgba(33, 123, 206, 0.3); }
+        .busan-bgl { color: #8652A1; background: rgba(134, 82, 161, 0.15); border-color: rgba(134, 82, 161, 0.3); }
+        .busan-donghae { color: #0052A4; background: rgba(0, 82, 164, 0.15); border-color: rgba(0, 82, 164, 0.3); }
 
-    .logo {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--red);
-      letter-spacing: 1px;
-    }
+        .daegu-line-1 { color: #D93F5C; background: rgba(217, 63, 92, 0.15); border-color: rgba(217, 63, 92, 0.3); }
+        .daegu-line-2 { color: #00AA80; background: rgba(0, 170, 128, 0.15); border-color: rgba(0, 170, 128, 0.3); }
+        .daegu-line-3 { color: #FFB300; background: rgba(255, 179, 0, 0.15); border-color: rgba(255, 179, 0, 0.3); }
+        .daegu-daegyeong { color: #0052A4; background: rgba(0, 82, 164, 0.15); border-color: rgba(0, 82, 164, 0.3); }
 
-    .nav {
-      display: flex;
-      gap: 18px;
-      color: var(--sub);
-      font-size: 0.95rem;
-    }
+        .daejeon-line-1 { color: #007448; background: rgba(0, 116, 72, 0.15); border-color: rgba(0, 116, 72, 0.3); }
+        .gwangju-line-1 { color: #009088; background: rgba(0, 144, 136, 0.15); border-color: rgba(0, 144, 136, 0.3); }
 
-    .hero h1 {
-      font-size: clamp(2rem, 4vw, 3.2rem);
-      margin: 0 0 10px;
-      max-width: 700px;
-      line-height: 1.15;
-    }
-
-    .hero p {
-      max-width: 620px;
-      color: #e0e0e0;
-      line-height: 1.6;
-      margin-bottom: 28px;
-    }
-
-    .cta {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border: none;
-      border-radius: 6px;
-      padding: 11px 20px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 0.95rem;
-    }
-
-    .btn-primary {
-      background: var(--red);
-      color: white;
-    }
-
-    .btn-secondary {
-      background: rgba(109, 109, 110, 0.75);
-      color: white;
-    }
-
-    main {
-      padding: 0 5vw 50px;
-      margin-top: -40px;
-    }
-
-    .row {
-      margin: 34px 0;
-    }
-
-    .row h2 {
-      margin: 0 0 14px;
-      font-size: 1.25rem;
-    }
-
-    .cards {
-      display: grid;
-      gap: 14px;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    }
-
-    .card {
-      background: linear-gradient(180deg, #313131, #1b1b1b);
-      border-radius: 10px;
-      min-height: 220px;
-      overflow: hidden;
-      position: relative;
-      transition: transform 0.2s ease;
-      cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .card:hover {
-      transform: translateY(-6px) scale(1.02);
-    }
-
-    .thumb {
-      height: 65%;
-      background: linear-gradient(130deg, #444, #222);
-      display: flex;
-      align-items: end;
-      padding: 10px;
-      font-size: 0.75rem;
-      color: #ddd;
-    }
-
-    .meta {
-      padding: 10px;
-    }
-
-    .title {
-      font-weight: 700;
-      margin-bottom: 4px;
-      font-size: 0.93rem;
-    }
-
-    .desc {
-      color: var(--sub);
-      font-size: 0.82rem;
-      line-height: 1.35;
-    }
-
-    footer {
-      color: #8f8f8f;
-      font-size: 0.85rem;
-      padding: 25px 5vw 40px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-    }
-  </style>
+        .fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(15px); }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        
+        .pt-safe { padding-top: max(20px, env(safe-area-inset-top)); }
+        
+        #nav-indicator { will-change: transform, width; }
+        .nav-transition { transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .nmap-logo-align { margin-bottom: 80px !important; }
+    </style>
 </head>
-<body>
-  <section class="hero">
-    <div class="topbar">
-      <div class="logo">NOVAFLIX</div>
-      <div class="nav">
-        <span>홈</span>
-        <span>시리즈</span>
-        <span>영화</span>
-        <span>내가 찜한 콘텐츠</span>
-      </div>
+<body class="w-full h-[100dvh] flex flex-col overflow-hidden bg-black" ontouchstart="">
+
+    <!-- 1. 홈 화면 -->
+    <main id="home-screen" class="flex-1 overflow-y-auto scrollbar-hide w-full max-w-md mx-auto relative min-h-full pb-24">
+        
+        <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
+            <div class="px-5 pt-3 pb-2 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-main drop-shadow-sm">지하철 도착</h2>
+            </div>
+            
+            <!-- 지역 선택 탭 -->
+            <div class="px-5 pb-3 pt-2 flex gap-2 overflow-x-auto scrollbar-hide">
+                <button onclick="alert('수도권은 현재 미지원입니다.')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-[#1C1C1E] text-gray-500 border border-white/5 transition-colors whitespace-nowrap active:scale-95 opacity-50">수도권</button>
+                <button onclick="switchRegion('busan', this)" class="region-btn px-4 py-1.5 rounded-full text-sm font-bold bg-white text-black transition-colors whitespace-nowrap active:scale-95">부산권</button>
+                <button onclick="switchRegion('daegu', this)" class="region-btn px-4 py-1.5 rounded-full text-sm font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">대구권</button>
+                <button onclick="switchRegion('daejeon', this)" class="region-btn px-4 py-1.5 rounded-full text-sm font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">대전</button>
+                <button onclick="switchRegion('gwangju', this)" class="region-btn px-4 py-1.5 rounded-full text-sm font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">광주</button>
+            </div>
+        </header>
+
+        <!-- 부산권 컨텐츠 -->
+        <div id="region-busan" class="region-content px-5 pt-4 fade-in-up">
+            <!-- 노선 선택 탭 -->
+            <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
+                <button onclick="switchLine('busan', 'all', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-bold bg-white/20 text-white transition-colors whitespace-nowrap active:scale-95">전체</button>
+                <button onclick="switchLine('busan', 'line1', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">1호선</button>
+                <button onclick="switchLine('busan', 'line2', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">2호선</button>
+                <button onclick="switchLine('busan', 'line3', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">3호선</button>
+                <button onclick="switchLine('busan', 'line4', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">4호선</button>
+                <button onclick="switchLine('busan', 'bgl', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">부산김해</button>
+                <button onclick="switchLine('busan', 'donghae', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">동해선</button>
+            </div>
+
+            <!-- 1호선 서면역 -->
+            <div class="line-content-busan line-all line-line1 toss-card p-5 !bg-[#1C1C1E] mb-3">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full busan-line-1 flex items-center justify-center text-[11px] font-bold border border-[#F06A00]/30">1</div>
+                        <span class="font-bold text-white text-lg">서면역</span>
+                    </div>
+                    <button class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-arrows-rotate"></i></button>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">노포 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-red-400">전역 도착</span>
+                                <span class="text-[10px] text-gray-500 bg-white/5 px-1.5 py-0.5 rounded">범내골</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">다대포항 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">3분 후</span>
+                                <span class="text-[10px] text-gray-500 bg-white/5 px-1.5 py-0.5 rounded">부전</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2호선 센텀시티역 -->
+            <div class="line-content-busan line-all line-line2 toss-card p-5 !bg-[#1C1C1E] mb-3">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full busan-line-2 flex items-center justify-center text-[11px] font-bold border border-[#81BF48]/30">2</div>
+                        <span class="font-bold text-white text-lg">센텀시티역</span>
+                    </div>
+                    <button class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-arrows-rotate"></i></button>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">장산 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-blue-400">이번 열차</span>
+                                <span class="text-[10px] text-gray-500 bg-white/5 px-1.5 py-0.5 rounded">벡스코</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">양산 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">4분 후</span>
+                                <span class="text-[10px] text-gray-500 bg-white/5 px-1.5 py-0.5 rounded">민락</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3호선 연산역 -->
+            <div class="line-content-busan line-all line-line3 toss-card p-5 !bg-[#1C1C1E] mb-3">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full busan-line-3 flex items-center justify-center text-[11px] font-bold border border-[#C89E78]/30">3</div>
+                        <span class="font-bold text-white text-lg">연산역</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">수영 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-red-400">곧 도착</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">대저 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">5분 후</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4호선 동래역 -->
+            <div class="line-content-busan line-all line-line4 toss-card p-5 !bg-[#1C1C1E] mb-3">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full busan-line-4 flex items-center justify-center text-[11px] font-bold border border-[#217BCE]/30">4</div>
+                        <span class="font-bold text-white text-lg">동래역</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">미남 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-blue-400">이번 열차</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">안평 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">4분 후</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 부산김해경전철 사상역 -->
+            <div class="line-content-busan line-all line-bgl toss-card p-5 !bg-[#1C1C1E] mb-3">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="px-2 h-6 rounded-full busan-bgl flex items-center justify-center text-[10px] font-bold border border-[#8652A1]/30">김해</div>
+                        <span class="font-bold text-white text-lg">사상역</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">가야대 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">3분 후</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 동해선 벡스코역 -->
+            <div class="line-content-busan line-all line-donghae toss-card p-5 !bg-[#1C1C1E] mb-3">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="px-2 h-6 rounded-full busan-donghae flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">동해</div>
+                        <span class="font-bold text-white text-lg">벡스코역</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">부전 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-red-400">곧 도착</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">태화강 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">12분 후</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 대구권 컨텐츠 -->
+        <div id="region-daegu" class="region-content px-5 pt-4 hidden fade-in-up">
+            <!-- 노선 선택 탭 -->
+            <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
+                <button onclick="switchLine('daegu', 'all', this)" class="line-btn-daegu px-3 py-1.5 rounded-[12px] text-xs font-bold bg-white/20 text-white transition-colors whitespace-nowrap active:scale-95">전체</button>
+                <button onclick="switchLine('daegu', 'line1', this)" class="line-btn-daegu px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">1호선</button>
+                <button onclick="switchLine('daegu', 'line2', this)" class="line-btn-daegu px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">2호선</button>
+                <button onclick="switchLine('daegu', 'line3', this)" class="line-btn-daegu px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">3호선</button>
+                <button onclick="switchLine('daegu', 'daegyeong', this)" class="line-btn-daegu px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">대경선</button>
+            </div>
+
+            <!-- 1호선 중앙로역 -->
+            <div class="line-content-daegu line-all line-line1 toss-card p-5 !bg-[#1C1C1E] mb-3">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full daegu-line-1 flex items-center justify-center text-[11px] font-bold border border-[#D93F5C]/30">1</div>
+                        <span class="font-bold text-white text-lg">중앙로역</span>
+                    </div>
+                    <button class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-arrows-rotate"></i></button>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">설화명곡 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-red-400">곧 도착</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">안심 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">3분 후</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2호선 반월당역 -->
+            <div class="line-content-daegu line-all line-line2 toss-card p-5 !bg-[#1C1C1E] mb-3">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full daegu-line-2 flex items-center justify-center text-[11px] font-bold border border-[#00AA80]/30">2</div>
+                        <span class="font-bold text-white text-lg">반월당역</span>
+                    </div>
+                    <button class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-arrows-rotate"></i></button>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">문양 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-blue-400">이번 열차</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">영남대 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">5분 후</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3호선 명덕역 -->
+            <div class="line-content-daegu line-all line-line3 toss-card p-5 !bg-[#1C1C1E] mb-3">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full daegu-line-3 flex items-center justify-center text-[11px] font-bold border border-[#FFB300]/30 text-black">3</div>
+                        <span class="font-bold text-white text-lg">명덕역</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">칠곡경대병원 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">4분 후</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">용지 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-red-400">전역 도착</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 대경선 구미역 -->
+            <div class="line-content-daegu line-all line-daegyeong toss-card p-5 !bg-[#1C1C1E] mb-3">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
+                        <span class="font-bold text-white text-lg">구미역</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">15분 후</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 대전 컨텐츠 -->
+        <div id="region-daejeon" class="region-content px-5 pt-4 hidden fade-in-up">
+            <!-- 노선 선택 탭 -->
+            <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
+                <button onclick="switchLine('daejeon', 'all', this)" class="line-btn-daejeon px-3 py-1.5 rounded-[12px] text-xs font-bold bg-white/20 text-white transition-colors whitespace-nowrap active:scale-95">전체</button>
+                <button onclick="switchLine('daejeon', 'line1', this)" class="line-btn-daejeon px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">1호선</button>
+            </div>
+
+            <!-- 1호선 대전역 -->
+            <div class="line-content-daejeon line-all line-line1 toss-card p-5 !bg-[#1C1C1E] mb-3">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full daejeon-line-1 flex items-center justify-center text-[11px] font-bold border border-[#007448]/30">1</div>
+                        <span class="font-bold text-white text-lg">대전역</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">판암 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-red-400">곧 도착</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">반석 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">4분 후</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 광주 컨텐츠 -->
+        <div id="region-gwangju" class="region-content px-5 pt-4 hidden fade-in-up">
+            <!-- 노선 선택 탭 -->
+            <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
+                <button onclick="switchLine('gwangju', 'all', this)" class="line-btn-gwangju px-3 py-1.5 rounded-[12px] text-xs font-bold bg-white/20 text-white transition-colors whitespace-nowrap active:scale-95">전체</button>
+                <button onclick="switchLine('gwangju', 'line1', this)" class="line-btn-gwangju px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">1호선</button>
+            </div>
+
+            <!-- 1호선 금남로4가역 -->
+            <div class="line-content-gwangju line-all line-line1 toss-card p-5 !bg-[#1C1C1E] mb-3">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full gwangju-line-1 flex items-center justify-center text-[11px] font-bold border border-[#009088]/30">1</div>
+                        <span class="font-bold text-white text-lg">금남로4가역</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">녹동 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">7분 후</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
+                        <p class="text-[10px] text-gray-400 font-bold mb-2">평동 방면</p>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-white">2분 후</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 2. 검색 화면 (신규 탭) -->
+    <div id="search-screen" class="hidden fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 flex-col overflow-hidden bg-black">
+        <header class="flex-none pt-safe px-5 pb-4 flex flex-col bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
+            <h2 class="text-2xl font-bold text-main drop-shadow-sm mb-4 mt-2">어느 역으로 가시나요?</h2>
+            
+            <div class="relative group">
+                <input type="text" placeholder="지하철역 이름 검색" class="w-full bg-[#1C1C1E] border border-white/10 rounded-2xl px-10 py-3.5 text-base font-medium text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:bg-[#2C2C2E] transition-all shadow-inner">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-500 transition-colors"></i>
+            </div>
+        </header>
+        
+        <div class="flex-1 overflow-y-auto p-5 text-center flex flex-col items-center justify-center text-gray-500 pb-24">
+            <i class="fa-solid fa-keyboard text-4xl mb-4 text-gray-600"></i>
+            <p class="text-sm">도착 정보나 경로를 확인할<br>지하철역 이름을 검색해주세요.</p>
+        </div>
     </div>
 
-    <h1>오늘 밤, 몰아보기 딱 좋은 콘텐츠를 만나보세요.</h1>
-    <p>
-      넷플릭스 스타일로 구성한 스트리밍 UI 데모입니다. 히어로 배너, 콘텐츠 행, 카드 호버 효과까지 포함되어
-      있어 포트폴리오/프로토타입으로 바로 활용할 수 있습니다.
-    </p>
-    <div class="cta">
-      <button class="btn btn-primary">▶ 지금 재생</button>
-      <button class="btn btn-secondary">ℹ 상세 정보</button>
+    <!-- 3. 주변 지하철역 (실제 지도 연동) -->
+    <div id="nearby-screen" class="hidden fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 flex-col overflow-hidden bg-black">
+        
+        <!-- 지도 컨테이너 -->
+        <div class="flex-1 relative w-full h-full bg-[#111]">
+            <div id="map" class="absolute inset-0 z-0"></div>
+            
+            <header class="absolute top-0 left-0 right-0 pt-safe px-5 pb-2 z-10 pointer-events-none">
+                <div class="flex justify-between items-center mt-2">
+                    <div class="bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-auto shadow-lg">
+                        <h2 class="text-sm font-bold text-main">내 주변 지하철역</h2>
+                    </div>
+                </div>
+            </header>
+
+            <button onclick="moveToMyLocation()" class="absolute bottom-28 right-5 w-12 h-12 bg-gray-900/90 backdrop-blur-md border border-white/10 rounded-2xl flex items-center justify-center text-white shadow-xl z-10 active:scale-90 transition-transform">
+                <i class="fa-solid fa-location-crosshairs text-lg text-blue-400"></i>
+            </button>
+            
+            <div id="map-loader" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-20 flex flex-col items-center justify-center hidden">
+                <i class="fa-solid fa-spinner fa-spin text-3xl text-blue-500 mb-3"></i>
+                <span class="text-sm font-bold text-white">위치를 찾고 있습니다...</span>
+            </div>
+        </div>
     </div>
-  </section>
 
-  <main id="content"></main>
+    <!-- 4. 길찾기 화면 -->
+    <div id="route-screen" class="hidden fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 flex-col overflow-hidden bg-black">
+        <header class="flex-none pt-safe px-5 pb-4 flex flex-col bg-black/80 backdrop-blur-md border-b border-white/10 z-10 sticky top-0">
+            <h2 class="text-xl font-bold text-main drop-shadow-sm mb-4 mt-2">경로 탐색</h2>
+            
+            <div class="bg-[#1C1C1E] p-1 rounded-2xl border border-white/10 flex flex-col gap-1 relative shadow-inner">
+                <button class="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black border border-white/10 flex items-center justify-center text-gray-400 z-10 hover:text-white transition-colors">
+                    <i class="fa-solid fa-arrows-up-down text-xs"></i>
+                </button>
+                
+                <div class="flex items-center px-4 py-3 bg-[#2C2C2E] rounded-xl border border-transparent focus-within:border-blue-500/50 transition-colors">
+                    <div class="w-2 h-2 rounded-full bg-blue-500 mr-3"></div>
+                    <input type="text" placeholder="출발역" value="현재 위치" class="bg-transparent border-none text-white text-sm outline-none flex-1 font-medium">
+                </div>
+                <div class="flex items-center px-4 py-3 bg-[#2C2C2E] rounded-xl border border-transparent focus-within:border-red-500/50 transition-colors">
+                    <div class="w-2 h-2 rounded-full bg-red-500 mr-3"></div>
+                    <input type="text" placeholder="도착역" class="bg-transparent border-none text-white text-sm outline-none flex-1 font-medium">
+                </div>
+            </div>
+        </header>
 
-  <footer>
-    NOVAFLIX UI Demo · 실제 서비스가 아닌 샘플 페이지입니다.
-  </footer>
+        <div class="flex-1 overflow-y-auto p-5 text-center flex flex-col items-center justify-center text-gray-500 pb-24">
+            <i class="fa-solid fa-train-subway text-4xl mb-4 text-gray-600"></i>
+            <p class="text-sm">도착역을 입력하면<br>지하철 최적 경로와 소요시간을 안내해 드립니다.</p>
+        </div>
+    </div>
 
-  <script>
-    const rows = [
-      {
-        title: "요즘 인기 콘텐츠",
-        items: ["서울의 밤", "코드 브레이커", "호라이즌", "제로타임", "스카이 라인", "심해 9층"]
-      },
-      {
-        title: "한국 시리즈 TOP 10",
-        items: ["광장", "런웨이", "미드나잇 레코드", "파랑", "불꽃", "나이트콜"]
-      },
-      {
-        title: "몰아보기 추천",
-        items: ["데이터 시티", "얼음별", "그레이존", "고스트 라인", "디스트릭트 7", "우리의 내일"]
-      }
-    ];
+    <!-- 5. 설정 화면 -->
+    <div id="settings-screen" class="hidden fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 flex-col overflow-hidden bg-black">
+        <header class="flex-none pt-safe px-5 pb-2 flex justify-between items-center bg-black/80 backdrop-blur-md border-b border-white/10 z-10 sticky top-0">
+            <h2 class="text-xl font-bold text-main drop-shadow-sm mt-2">설정</h2>
+        </header>
+        <div class="flex-1 overflow-y-auto p-5 pb-24">
+            <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">알림 및 표시</h4>
+            <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
+                <div class="w-full flex justify-between items-center p-4 border-b border-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-[10px] bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fa-solid fa-bell"></i></div>
+                        <span class="text-sm font-bold text-gray-200">하차/환승 알림</span>
+                    </div>
+                    <div class="w-10 h-6 bg-blue-500 rounded-full relative"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></div>
+                </div>
+                <div class="w-full flex justify-between items-center p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-[10px] bg-purple-500/20 text-purple-400 flex items-center justify-center"><i class="fa-solid fa-location-arrow"></i></div>
+                        <span class="text-sm font-bold text-gray-200">항상 내 위치 사용</span>
+                    </div>
+                    <div class="w-10 h-6 bg-gray-600 rounded-full relative"><div class="absolute left-1 top-1 w-4 h-4 bg-gray-300 rounded-full"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    const content = document.getElementById("content");
+    <!-- 하단 플로팅 메뉴 (5개 탭으로 구성) -->
+    <nav id="bottom-nav" class="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-full max-w-[360px] px-2 touch-pan-x select-none">
+        <div class="flex items-center justify-between bg-white/10 backdrop-blur-[4px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1.5 gap-0.5 ring-1 ring-white/30 relative mix-blend-difference">
+            <!-- 활성화 표시 배경 -->
+            <div id="nav-indicator" class="absolute top-1.5 bottom-1.5 bg-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-full backdrop-blur-[2px] border border-white/20 z-0 nav-transition" style="left: 6px; width: 60px;"></div>
+            
+            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(0)">
+                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                    <i class="fa-solid fa-house text-base text-white transition-colors"></i>
+                    <span class="text-[10px] font-bold text-white whitespace-nowrap transition-colors">홈</span>
+                </div>
+            </button>
 
-    rows.forEach((row, idx) => {
-      const section = document.createElement("section");
-      section.className = "row";
+            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(1)">
+                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                    <i class="fa-solid fa-magnifying-glass text-base text-gray-300 group-hover:text-white transition-colors"></i>
+                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">검색</span>
+                </div>
+            </button>
+            
+            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(2)">
+                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                    <i class="fa-solid fa-map-location-dot text-base text-gray-300 group-hover:text-white transition-colors"></i>
+                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">주변</span>
+                </div>
+            </button>
 
-      const title = document.createElement("h2");
-      title.textContent = row.title;
+            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(3)">
+                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                    <i class="fa-solid fa-route text-base text-gray-300 group-hover:text-white transition-colors"></i>
+                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">길찾기</span>
+                </div>
+            </button>
+            
+            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(4)">
+                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                    <i class="fa-solid fa-gear text-base text-gray-300 group-hover:text-white transition-colors"></i>
+                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">설정</span>
+                </div>
+            </button>
+        </div>
+    </nav>
 
-      const cards = document.createElement("div");
-      cards.className = "cards";
+    <script>
+        // 전역 변수
+        let map = null;
+        let myLocationMarker = null;
+        let isMapInitialized = false;
 
-      row.items.forEach((name, i) => {
-        const card = document.createElement("article");
-        card.className = "card";
-        card.innerHTML = `
-          <div class="thumb">NOVAFLIX ORIGINAL</div>
-          <div class="meta">
-            <div class="title">${name}</div>
-            <div class="desc">시즌 ${((i + idx) % 4) + 1} · 스릴러/드라마</div>
-          </div>
-        `;
-        cards.appendChild(card);
-      });
+        // 지역 변경 로직 추가
+        function switchRegion(regionId, btnElement) {
+            // 모든 지역 컨텐츠 숨기기
+            document.querySelectorAll('.region-content').forEach(el => {
+                el.classList.add('hidden');
+            });
+            
+            // 선택한 지역 보이기
+            const targetRegion = document.getElementById('region-' + regionId);
+            if (targetRegion) {
+                targetRegion.classList.remove('hidden');
+                targetRegion.classList.remove('fade-in-up');
+                void targetRegion.offsetWidth; // 리플로우 강제 (애니메이션 재시작)
+                targetRegion.classList.add('fade-in-up');
+            }
 
-      section.appendChild(title);
-      section.appendChild(cards);
-      content.appendChild(section);
-    });
-  </script>
+            // 버튼 스타일 업데이트
+            document.querySelectorAll('.region-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-black', 'font-bold');
+                btn.classList.add('bg-[#1C1C1E]', 'text-gray-400', 'font-medium', 'border-white/10');
+            });
+            
+            btnElement.classList.remove('bg-[#1C1C1E]', 'text-gray-400', 'font-medium', 'border-white/10');
+            btnElement.classList.add('bg-white', 'text-black', 'font-bold');
+        }
+
+        // 지역별 노선 필터링 로직 추가
+        function switchLine(region, lineId, btnElement) {
+            // 해당 지역의 모든 노선 카드 숨기기
+            document.querySelectorAll('.line-content-' + region).forEach(el => {
+                el.classList.add('hidden');
+            });
+            
+            // 선택한 노선 카드만 보이기
+            document.querySelectorAll('.line-content-' + region + '.line-' + lineId).forEach(el => {
+                el.classList.remove('hidden');
+                // 부드러운 전환 애니메이션 효과 재적용
+                el.classList.remove('fade-in-up');
+                void el.offsetWidth;
+                el.classList.add('fade-in-up');
+            });
+
+            // 선택한 탭 버튼 디자인 활성화
+            document.querySelectorAll('.line-btn-' + region).forEach(btn => {
+                btn.classList.remove('bg-white/20', 'text-white', 'font-bold');
+                btn.classList.add('bg-[#1C1C1E]', 'text-gray-400', 'font-medium', 'border-white/10');
+            });
+            
+            btnElement.classList.remove('bg-[#1C1C1E]', 'text-gray-400', 'font-medium', 'border-white/10');
+            btnElement.classList.add('bg-white/20', 'text-white', 'font-bold');
+        }
+
+        // 탭 전환 로직
+        function switchTab(index) {
+            if (navigator.vibrate) navigator.vibrate(10);
+
+            const screens = [
+                document.getElementById('home-screen'),
+                document.getElementById('search-screen'), // 1번 탭 (검색 추가)
+                document.getElementById('nearby-screen'), // 2번 탭
+                document.getElementById('route-screen'),  // 3번 탭
+                document.getElementById('settings-screen')// 4번 탭
+            ];
+            
+            screens.forEach((screen, i) => {
+                if (i === index) {
+                    screen.classList.remove('hidden');
+                    if (screen.id !== 'home-screen') screen.classList.add('flex');
+                } else {
+                    screen.classList.add('hidden');
+                    screen.classList.remove('flex');
+                }
+            });
+
+            const navButtons = document.querySelectorAll('#bottom-nav button');
+            const indicator = document.getElementById('nav-indicator');
+
+            if(navButtons[index] && indicator) {
+                indicator.style.width = `${navButtons[index].offsetWidth}px`;
+                indicator.style.transform = `translateX(${navButtons[index].offsetLeft - 6}px)`;
+            }
+
+            navButtons.forEach((btn, i) => {
+                const icon = btn.querySelector('i');
+                const label = btn.querySelector('span');
+                
+                if (i === index) {
+                    icon.className = icon.className.replace('text-gray-300', 'text-white');
+                    label.className = label.className.replace('text-gray-300', 'text-white').replace('font-medium', 'font-bold');
+                } else {
+                    icon.className = icon.className.replace('text-white', 'text-gray-300');
+                    label.className = label.className.replace('text-white', 'text-gray-300').replace('font-bold', 'font-medium');
+                }
+            });
+
+            // '주변' 탭(index === 2) 클릭 시 지도 초기화
+            if (index === 2 && !isMapInitialized) {
+                initMap();
+            } else if (index === 2 && map) {
+                window.dispatchEvent(new Event('resize'));
+            }
+        }
+
+        // 지도 초기화 함수
+        function initMap() {
+            if (typeof naver === 'undefined') {
+                console.error("네이버 지도 API를 불러올 수 없습니다.");
+                return;
+            }
+
+            const defaultLocation = new naver.maps.LatLng(37.5666805, 126.9784147);
+            const mapOptions = {
+                center: defaultLocation,
+                zoom: 15,
+                scaleControl: false,
+                logoControl: true,
+                logoControlOptions: { position: naver.maps.Position.BOTTOM_LEFT },
+                mapDataControl: false,
+                zoomControl: false,
+            };
+
+            map = new naver.maps.Map('map', mapOptions);
+            isMapInitialized = true;
+            moveToMyLocation();
+        }
+
+        function moveToMyLocation() {
+            if (!map) return;
+            if (navigator.vibrate) navigator.vibrate(5);
+
+            const loader = document.getElementById('map-loader');
+            loader.classList.remove('hidden');
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        const myLatLng = new naver.maps.LatLng(lat, lng);
+
+                        map.setCenter(myLatLng);
+                        map.setZoom(16, true);
+
+                        if (myLocationMarker) {
+                            myLocationMarker.setPosition(myLatLng);
+                        } else {
+                            const markerHtml = `
+                                <div style="position:relative; display:flex; flex-direction:column; align-items:center; transform:translateY(-50%);">
+                                    <div style="background-color:#3182F6; border:3px solid white; width:20px; height:20px; border-radius:50%; box-shadow:0 4px 10px rgba(0,0,0,0.3); animation: pulse 2s infinite;"></div>
+                                </div>
+                                <style>
+                                    @keyframes pulse {
+                                        0% { box-shadow: 0 0 0 0 rgba(49, 130, 246, 0.7); }
+                                        70% { box-shadow: 0 0 0 10px rgba(49, 130, 246, 0); }
+                                        100% { box-shadow: 0 0 0 0 rgba(49, 130, 246, 0); }
+                                    }
+                                </style>
+                            `;
+
+                            myLocationMarker = new naver.maps.Marker({
+                                position: myLatLng,
+                                map: map,
+                                icon: {
+                                    content: markerHtml,
+                                    size: new naver.maps.Size(24, 24),
+                                    anchor: new naver.maps.Point(12, 12)
+                                }
+                            });
+                        }
+                        
+                        loader.classList.add('hidden');
+                    },
+                    (error) => {
+                        console.warn("위치 정보를 가져올 수 없습니다. 기본 위치로 이동합니다.", error);
+                        loader.classList.add('hidden');
+                        
+                        const fallbackLatLng = new naver.maps.LatLng(37.4979, 127.0276); 
+                        map.setCenter(fallbackLatLng);
+                        map.setZoom(15, true);
+                        
+                        alert("위치 정보를 가져올 수 없어 기본 위치(강남역)로 이동합니다. 브라우저의 위치 권한 설정과 기기 GPS를 확인해주세요.");
+                    },
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                loader.classList.add('hidden');
+                alert("이 브라우저에서는 위치 정보를 지원하지 않습니다.");
+            }
+        }
+
+        window.onload = () => {
+            switchTab(0);
+        };
+    </script>
 </body>
 </html>
