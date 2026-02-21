@@ -572,7 +572,7 @@
         let myLocationMarker = null;
         let isMapInitialized = false;
         
-        // [신규] 전체 시간표 데이터를 임시 저장할 전역 객체
+        // 전체 시간표 데이터를 임시 저장할 전역 객체
         window.fullTimetables = {};
 
         // 지역 변경 로직
@@ -760,7 +760,6 @@
                     }
                 }
 
-                // [신규] 전체 시간표 데이터를 모달창을 위해 전역 변수에 저장
                 window.fullTimetables = window.fullTimetables || {};
                 window.fullTimetables[elementId] = times.map(t => {
                     const h = Math.floor(t / 60).toString().padStart(2, '0');
@@ -774,8 +773,14 @@
 
                 if(upcoming.length > 0) {
                     const diff = upcoming[0] - currentMins;
-                    el.innerText = diff === 0 ? "곧 도착" : (diff <= 5 ? `곧 도착 (${diff}분)` : `${diff}분 후`);
-                    el.className = diff <= 5 ? "text-sm font-bold text-red-400" : "text-sm font-bold text-white";
+                    // [변경점] 남은 시간이 120분(2시간) 이하일 때만 시간을 표시하고, 넘어가면 '운행 종료'로 표시
+                    if (diff <= 120) {
+                        el.innerText = diff === 0 ? "곧 도착" : (diff <= 5 ? `곧 도착 (${diff}분)` : `${diff}분 후`);
+                        el.className = diff <= 5 ? "text-sm font-bold text-red-400" : "text-sm font-bold text-white";
+                    } else {
+                        el.innerText = "운행 종료";
+                        el.className = "text-sm font-bold text-gray-500";
+                    }
                 } else {
                     el.innerText = "운행 종료";
                     el.className = "text-sm font-bold text-gray-500";
@@ -828,7 +833,7 @@
             fetchTimetable(`daegyeong_up_${dayType}.csv`, '사곡', 'time-daegyeong-sagok-up');
         }
 
-        // --- [신규] 시간표 모달 관련 기능 ---
+        // --- 시간표 모달 관련 기능 ---
         function openTimetableModal(stationName, upTitle, upId, downTitle, downId) {
             document.getElementById('modal-station-title').innerText = stationName + " 시간표";
             
