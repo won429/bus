@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- 네이버 지도 API (기존 map.html에 있던 키 사용) -->
+    <!-- 네이버 지도 API -->
     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=9nl297jo77"></script>
 
     <style>
@@ -125,7 +125,6 @@
                         <div class="w-6 h-6 rounded-full busan-line-1 flex items-center justify-center text-[11px] font-bold border border-[#F06A00]/30">1</div>
                         <span class="font-bold text-white text-lg">서면역</span>
                     </div>
-                    <button class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-arrows-rotate"></i></button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-black/40 rounded-xl p-3 border border-white/5">
@@ -143,141 +142,6 @@
                             <div class="flex justify-between items-center">
                                 <span class="text-sm font-bold text-white">3분 후</span>
                                 <span class="text-[10px] text-gray-500 bg-white/5 px-1.5 py-0.5 rounded">부전</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2호선 센텀시티역 -->
-            <div class="line-content-busan line-all line-line2 toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full busan-line-2 flex items-center justify-center text-[11px] font-bold border border-[#81BF48]/30">2</div>
-                        <span class="font-bold text-white text-lg">센텀시티역</span>
-                    </div>
-                    <button class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-arrows-rotate"></i></button>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">장산 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-blue-400">이번 열차</span>
-                                <span class="text-[10px] text-gray-500 bg-white/5 px-1.5 py-0.5 rounded">벡스코</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">양산 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">4분 후</span>
-                                <span class="text-[10px] text-gray-500 bg-white/5 px-1.5 py-0.5 rounded">민락</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3호선 연산역 -->
-            <div class="line-content-busan line-all line-line3 toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full busan-line-3 flex items-center justify-center text-[11px] font-bold border border-[#C89E78]/30">3</div>
-                        <span class="font-bold text-white text-lg">연산역</span>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">수영 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-red-400">곧 도착</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">대저 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">5분 후</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4호선 동래역 -->
-            <div class="line-content-busan line-all line-line4 toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full busan-line-4 flex items-center justify-center text-[11px] font-bold border border-[#217BCE]/30">4</div>
-                        <span class="font-bold text-white text-lg">동래역</span>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">미남 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-blue-400">이번 열차</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">안평 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">4분 후</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 부산김해경전철 사상역 -->
-            <div class="line-content-busan line-all line-bgl toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="px-2 h-6 rounded-full busan-bgl flex items-center justify-center text-[10px] font-bold border border-[#8652A1]/30">김해</div>
-                        <span class="font-bold text-white text-lg">사상역</span>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">가야대 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">3분 후</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 동해선 벡스코역 -->
-            <div class="line-content-busan line-all line-donghae toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="px-2 h-6 rounded-full busan-donghae flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">동해</div>
-                        <span class="font-bold text-white text-lg">벡스코역</span>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">부전 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-red-400">곧 도착</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">태화강 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">12분 후</span>
                             </div>
                         </div>
                     </div>
@@ -303,7 +167,6 @@
                         <div class="w-6 h-6 rounded-full daegu-line-1 flex items-center justify-center text-[11px] font-bold border border-[#D93F5C]/30">1</div>
                         <span class="font-bold text-white text-lg">중앙로역</span>
                     </div>
-                    <button class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-arrows-rotate"></i></button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-black/40 rounded-xl p-3 border border-white/5">
@@ -325,63 +188,6 @@
                 </div>
             </div>
 
-            <!-- 2호선 반월당역 -->
-            <div class="line-content-daegu line-all line-line2 toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full daegu-line-2 flex items-center justify-center text-[11px] font-bold border border-[#00AA80]/30">2</div>
-                        <span class="font-bold text-white text-lg">반월당역</span>
-                    </div>
-                    <button class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-arrows-rotate"></i></button>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">문양 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-blue-400">이번 열차</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">영남대 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">5분 후</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3호선 명덕역 -->
-            <div class="line-content-daegu line-all line-line3 toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full daegu-line-3 flex items-center justify-center text-[11px] font-bold border border-[#FFB300]/30 text-black">3</div>
-                        <span class="font-bold text-white text-lg">명덕역</span>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">칠곡경대병원 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">4분 후</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">용지 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-red-400">전역 도착</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- 대경선 구미역 -->
             <div class="line-content-daegu line-all line-daegyeong toss-card p-5 !bg-[#1C1C1E] mb-3">
                 <div class="flex justify-between items-start mb-4">
@@ -395,7 +201,7 @@
                         <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
                         <div class="flex flex-col gap-1.5">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">15분 후</span>
+                                <span id="time-daegyeong-gumi-down" class="text-sm font-bold text-gray-500">시간 계산중...</span>
                             </div>
                         </div>
                     </div>
@@ -423,7 +229,7 @@
                         <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
                         <div class="flex flex-col gap-1.5">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">11분 후</span>
+                                <span id="time-daegyeong-sagok-down" class="text-sm font-bold text-gray-500">시간 계산중...</span>
                             </div>
                         </div>
                     </div>
@@ -431,7 +237,7 @@
                         <p class="text-[10px] text-gray-400 font-bold mb-2">구미 방면</p>
                         <div class="flex flex-col gap-1.5">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">4분 후</span>
+                                <span id="time-daegyeong-sagok-up" class="text-sm font-bold text-gray-500">시간 계산중...</span>
                             </div>
                         </div>
                     </div>
@@ -451,7 +257,7 @@
                         <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
                         <div class="flex flex-col gap-1.5">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">2분 후</span>
+                                <span id="time-daegyeong-waegwan-down" class="text-sm font-bold text-gray-500">시간 계산중...</span>
                             </div>
                         </div>
                     </div>
@@ -459,7 +265,7 @@
                         <p class="text-[10px] text-gray-400 font-bold mb-2">구미 방면</p>
                         <div class="flex flex-col gap-1.5">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">13분 후</span>
+                                <span id="time-daegyeong-waegwan-up" class="text-sm font-bold text-gray-500">시간 계산중...</span>
                             </div>
                         </div>
                     </div>
@@ -479,7 +285,7 @@
                         <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
                         <div class="flex flex-col gap-1.5">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-red-400">곧 도착</span>
+                                <span id="time-daegyeong-seodaegu-down" class="text-sm font-bold text-gray-500">시간 계산중...</span>
                             </div>
                         </div>
                     </div>
@@ -487,7 +293,7 @@
                         <p class="text-[10px] text-gray-400 font-bold mb-2">구미 방면</p>
                         <div class="flex flex-col gap-1.5">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">20분 후</span>
+                                <span id="time-daegyeong-seodaegu-up" class="text-sm font-bold text-gray-500">시간 계산중...</span>
                             </div>
                         </div>
                     </div>
@@ -507,7 +313,7 @@
                         <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
                         <div class="flex flex-col gap-1.5">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">5분 후</span>
+                                <span id="time-daegyeong-daegu-down" class="text-sm font-bold text-gray-500">시간 계산중...</span>
                             </div>
                         </div>
                     </div>
@@ -515,7 +321,7 @@
                         <p class="text-[10px] text-gray-400 font-bold mb-2">구미 방면</p>
                         <div class="flex flex-col gap-1.5">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-blue-400">이번 열차</span>
+                                <span id="time-daegyeong-daegu-up" class="text-sm font-bold text-gray-500">시간 계산중...</span>
                             </div>
                         </div>
                     </div>
@@ -535,7 +341,7 @@
                         <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
                         <div class="flex flex-col gap-1.5">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">9분 후</span>
+                                <span id="time-daegyeong-dongdaegu-down" class="text-sm font-bold text-gray-500">시간 계산중...</span>
                             </div>
                         </div>
                     </div>
@@ -543,7 +349,7 @@
                         <p class="text-[10px] text-gray-400 font-bold mb-2">구미 방면</p>
                         <div class="flex flex-col gap-1.5">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">1분 후</span>
+                                <span id="time-daegyeong-dongdaegu-up" class="text-sm font-bold text-gray-500">시간 계산중...</span>
                             </div>
                         </div>
                     </div>
@@ -571,7 +377,7 @@
                         <p class="text-[10px] text-gray-400 font-bold mb-2">구미 방면</p>
                         <div class="flex flex-col gap-1.5">
                             <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">10분 후</span>
+                                <span id="time-daegyeong-gyeongsan-up" class="text-sm font-bold text-gray-500">시간 계산중...</span>
                             </div>
                         </div>
                     </div>
@@ -581,81 +387,17 @@
 
         <!-- 대전 컨텐츠 -->
         <div id="region-daejeon" class="region-content px-5 pt-4 hidden fade-in-up">
-            <!-- 노선 선택 탭 -->
-            <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
-                <button onclick="switchLine('daejeon', 'all', this)" class="line-btn-daejeon px-3 py-1.5 rounded-[12px] text-xs font-bold bg-white/20 text-white transition-colors whitespace-nowrap active:scale-95">전체</button>
-                <button onclick="switchLine('daejeon', 'line1', this)" class="line-btn-daejeon px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">1호선</button>
-            </div>
-
-            <!-- 1호선 대전역 -->
-            <div class="line-content-daejeon line-all line-line1 toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full daejeon-line-1 flex items-center justify-center text-[11px] font-bold border border-[#007448]/30">1</div>
-                        <span class="font-bold text-white text-lg">대전역</span>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">판암 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-red-400">곧 도착</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">반석 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">4분 후</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <p class="text-center text-gray-500 text-sm py-10">대전 지역 임시 컨텐츠</p>
         </div>
 
         <!-- 광주 컨텐츠 -->
         <div id="region-gwangju" class="region-content px-5 pt-4 hidden fade-in-up">
-            <!-- 노선 선택 탭 -->
-            <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
-                <button onclick="switchLine('gwangju', 'all', this)" class="line-btn-gwangju px-3 py-1.5 rounded-[12px] text-xs font-bold bg-white/20 text-white transition-colors whitespace-nowrap active:scale-95">전체</button>
-                <button onclick="switchLine('gwangju', 'line1', this)" class="line-btn-gwangju px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">1호선</button>
-            </div>
-
-            <!-- 1호선 금남로4가역 -->
-            <div class="line-content-gwangju line-all line-line1 toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full gwangju-line-1 flex items-center justify-center text-[11px] font-bold border border-[#009088]/30">1</div>
-                        <span class="font-bold text-white text-lg">금남로4가역</span>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">녹동 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">7분 후</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">평동 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">2분 후</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <p class="text-center text-gray-500 text-sm py-10">광주 지역 임시 컨텐츠</p>
         </div>
 
     </main>
 
-    <!-- 2. 검색 화면 (신규 탭) -->
+    <!-- 2. 검색 화면 -->
     <div id="search-screen" class="hidden fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 flex-col overflow-hidden bg-black">
         <header class="flex-none pt-safe px-5 pb-4 flex flex-col bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
             <h2 class="text-2xl font-bold text-main drop-shadow-sm mb-4 mt-2">어느 역으로 가시나요?</h2>
@@ -674,8 +416,6 @@
 
     <!-- 3. 주변 지하철역 (실제 지도 연동) -->
     <div id="nearby-screen" class="hidden fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 flex-col overflow-hidden bg-black">
-        
-        <!-- 지도 컨테이너 -->
         <div class="flex-1 relative w-full h-full bg-[#111]">
             <div id="map" class="absolute inset-0 z-0"></div>
             
@@ -709,11 +449,11 @@
                 </button>
                 
                 <div class="flex items-center px-4 py-3 bg-[#2C2C2E] rounded-xl border border-transparent focus-within:border-blue-500/50 transition-colors">
-                    <div class="w-2 h-2 rounded-full bg-blue-500 mr-3"></div>
+                    <div class="w-2 h-2 rounded-full bg-blue-50 mr-3"></div>
                     <input type="text" placeholder="출발역" value="현재 위치" class="bg-transparent border-none text-white text-sm outline-none flex-1 font-medium">
                 </div>
                 <div class="flex items-center px-4 py-3 bg-[#2C2C2E] rounded-xl border border-transparent focus-within:border-red-500/50 transition-colors">
-                    <div class="w-2 h-2 rounded-full bg-red-500 mr-3"></div>
+                    <div class="w-2 h-2 rounded-full bg-red-50 mr-3"></div>
                     <input type="text" placeholder="도착역" class="bg-transparent border-none text-white text-sm outline-none flex-1 font-medium">
                 </div>
             </div>
@@ -751,7 +491,7 @@
         </div>
     </div>
 
-    <!-- 하단 플로팅 메뉴 (5개 탭으로 구성) -->
+    <!-- 하단 플로팅 메뉴 -->
     <nav id="bottom-nav" class="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-full max-w-[360px] px-2 touch-pan-x select-none">
         <div class="flex items-center justify-between bg-white/10 backdrop-blur-[4px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1.5 gap-0.5 ring-1 ring-white/30 relative mix-blend-difference">
             <!-- 활성화 표시 배경 -->
@@ -800,23 +540,20 @@
         let myLocationMarker = null;
         let isMapInitialized = false;
 
-        // 지역 변경 로직 추가
+        // 지역 변경 로직
         function switchRegion(regionId, btnElement) {
-            // 모든 지역 컨텐츠 숨기기
             document.querySelectorAll('.region-content').forEach(el => {
                 el.classList.add('hidden');
             });
             
-            // 선택한 지역 보이기
             const targetRegion = document.getElementById('region-' + regionId);
             if (targetRegion) {
                 targetRegion.classList.remove('hidden');
                 targetRegion.classList.remove('fade-in-up');
-                void targetRegion.offsetWidth; // 리플로우 강제 (애니메이션 재시작)
+                void targetRegion.offsetWidth;
                 targetRegion.classList.add('fade-in-up');
             }
 
-            // 버튼 스타일 업데이트
             document.querySelectorAll('.region-btn').forEach(btn => {
                 btn.classList.remove('bg-white', 'text-black', 'font-bold');
                 btn.classList.add('bg-[#1C1C1E]', 'text-gray-400', 'font-medium', 'border-white/10');
@@ -826,23 +563,19 @@
             btnElement.classList.add('bg-white', 'text-black', 'font-bold');
         }
 
-        // 지역별 노선 필터링 로직 추가
+        // 지역별 노선 필터링 로직
         function switchLine(region, lineId, btnElement) {
-            // 해당 지역의 모든 노선 카드 숨기기
             document.querySelectorAll('.line-content-' + region).forEach(el => {
                 el.classList.add('hidden');
             });
             
-            // 선택한 노선 카드만 보이기
             document.querySelectorAll('.line-content-' + region + '.line-' + lineId).forEach(el => {
                 el.classList.remove('hidden');
-                // 부드러운 전환 애니메이션 효과 재적용
                 el.classList.remove('fade-in-up');
                 void el.offsetWidth;
                 el.classList.add('fade-in-up');
             });
 
-            // 선택한 탭 버튼 디자인 활성화
             document.querySelectorAll('.line-btn-' + region).forEach(btn => {
                 btn.classList.remove('bg-white/20', 'text-white', 'font-bold');
                 btn.classList.add('bg-[#1C1C1E]', 'text-gray-400', 'font-medium', 'border-white/10');
@@ -858,10 +591,10 @@
 
             const screens = [
                 document.getElementById('home-screen'),
-                document.getElementById('search-screen'), // 1번 탭 (검색 추가)
-                document.getElementById('nearby-screen'), // 2번 탭
-                document.getElementById('route-screen'),  // 3번 탭
-                document.getElementById('settings-screen')// 4번 탭
+                document.getElementById('search-screen'),
+                document.getElementById('nearby-screen'),
+                document.getElementById('route-screen'), 
+                document.getElementById('settings-screen')
             ];
             
             screens.forEach((screen, i) => {
@@ -895,7 +628,6 @@
                 }
             });
 
-            // '주변' 탭(index === 2) 클릭 시 지도 초기화
             if (index === 2 && !isMapInitialized) {
                 initMap();
             } else if (index === 2 && map) {
@@ -905,22 +637,13 @@
 
         // 지도 초기화 함수
         function initMap() {
-            if (typeof naver === 'undefined') {
-                console.error("네이버 지도 API를 불러올 수 없습니다.");
-                return;
-            }
-
+            if (typeof naver === 'undefined') return;
             const defaultLocation = new naver.maps.LatLng(37.5666805, 126.9784147);
             const mapOptions = {
-                center: defaultLocation,
-                zoom: 15,
-                scaleControl: false,
-                logoControl: true,
+                center: defaultLocation, zoom: 15, scaleControl: false, logoControl: true,
                 logoControlOptions: { position: naver.maps.Position.BOTTOM_LEFT },
-                mapDataControl: false,
-                zoomControl: false,
+                mapDataControl: false, zoomControl: false,
             };
-
             map = new naver.maps.Map('map', mapOptions);
             isMapInitialized = true;
             moveToMyLocation();
@@ -946,133 +669,109 @@
                         if (myLocationMarker) {
                             myLocationMarker.setPosition(myLatLng);
                         } else {
-                            const markerHtml = `
-                                <div style="position:relative; display:flex; flex-direction:column; align-items:center; transform:translateY(-50%);">
-                                    <div style="background-color:#3182F6; border:3px solid white; width:20px; height:20px; border-radius:50%; box-shadow:0 4px 10px rgba(0,0,0,0.3); animation: pulse 2s infinite;"></div>
-                                </div>
-                                <style>
-                                    @keyframes pulse {
-                                        0% { box-shadow: 0 0 0 0 rgba(49, 130, 246, 0.7); }
-                                        70% { box-shadow: 0 0 0 10px rgba(49, 130, 246, 0); }
-                                        100% { box-shadow: 0 0 0 0 rgba(49, 130, 246, 0); }
-                                    }
-                                </style>
-                            `;
-
+                            const markerHtml = `<div style="position:relative; display:flex; flex-direction:column; align-items:center; transform:translateY(-50%);"><div style="background-color:#3182F6; border:3px solid white; width:20px; height:20px; border-radius:50%; box-shadow:0 4px 10px rgba(0,0,0,0.3); animation: pulse 2s infinite;"></div></div><style>@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(49, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(49, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(49, 130, 246, 0); } }</style>`;
                             myLocationMarker = new naver.maps.Marker({
-                                position: myLatLng,
-                                map: map,
-                                icon: {
-                                    content: markerHtml,
-                                    size: new naver.maps.Size(24, 24),
-                                    anchor: new naver.maps.Point(12, 12)
-                                }
+                                position: myLatLng, map: map,
+                                icon: { content: markerHtml, size: new naver.maps.Size(24, 24), anchor: new naver.maps.Point(12, 12) }
                             });
                         }
-                        
                         loader.classList.add('hidden');
                     },
                     (error) => {
-                        console.warn("위치 정보를 가져올 수 없습니다. 기본 위치로 이동합니다.", error);
+                        console.warn("위치 정보 에러.", error);
                         loader.classList.add('hidden');
-                        
-                        const fallbackLatLng = new naver.maps.LatLng(37.4979, 127.0276); 
-                        map.setCenter(fallbackLatLng);
-                        map.setZoom(15, true);
-                        
-                        alert("위치 정보를 가져올 수 없어 기본 위치(강남역)로 이동합니다. 브라우저의 위치 권한 설정과 기기 GPS를 확인해주세요.");
+                        alert("위치 정보를 가져올 수 없습니다.");
                     },
-                    {
-                        enableHighAccuracy: false,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
+                    { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
                 );
             } else {
                 loader.classList.add('hidden');
-                alert("이 브라우저에서는 위치 정보를 지원하지 않습니다.");
             }
         }
 
-        // --- [신규 기능] 엑셀(CSV) 시간표 연동 및 실시간 계산 로직 ---
-        
-        // 1. 시간표를 불러올 항목들을 묶어서 실행하는 함수
-        async function loadRealTimetable() {
-            // [사용 방법]
-            // HTML의 시간 표시 텍스트(예: <span class="text-sm font-bold...">5분 후</span>)에 
-            // id="gumi-time-1" 과 같이 ID를 부여한 뒤, 아래 주석을 풀고 사용하시면 됩니다.
-            // 
-            // fetchAndCalculateTimetable('daegyeong.csv', '구미', document.getElementById('gumi-time-1'), document.getElementById('gumi-time-2'));
-            // fetchAndCalculateTimetable('daegyeong.csv', '동대구', document.getElementById('dongdaegu-time-1'), document.getElementById('dongdaegu-time-2'));
-        }
+        // --- CSV 파일 실시간 연동 로직 ---
+        async function fetchTimetable(csvUrl, stationName, elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
 
-        // 2. CSV 파일을 읽고 현재 시간과 비교하여 '몇 분 후' 인지 계산하는 핵심 엔진
-        async function fetchAndCalculateTimetable(csvFileName, stationName, uiElement1, uiElement2) {
+            // 미리보기(blob/file) 환경에서는 fetch 에러가 나므로 시도하지 않고 우회 안내 표시
+            if (window.location.protocol === 'blob:' || window.location.protocol === 'file:' || window.location.hostname === '') {
+                el.innerText = "CSV 업로드 대기중";
+                el.className = "text-[11px] font-bold text-gray-500 bg-white/5 px-2 py-0.5 rounded";
+                return;
+            }
+
             try {
-                // 깃허브에 업로드된 CSV 파일 가져오기
-                const response = await fetch(csvFileName);
-                if (!response.ok) return; // 파일이 없으면 기존 하드코딩된 임시 텍스트를 그대로 유지합니다.
-                
-                const csvText = await response.text();
-                const rows = csvText.split('\n');
-                let stationRow = null;
-                
-                // 엑셀에서 요청한 '역 이름'(예: 구미, 동대구 등)이 적힌 행(Row) 찾기
-                for (let row of rows) {
-                    if (row.includes(stationName)) {
-                        stationRow = row.split(','); // 쉼표 단위로 쪼개기
-                        break;
-                    }
+                const response = await fetch(csvUrl);
+                if (!response.ok) {
+                    el.innerText = "파일 없음";
+                    el.className = "text-[11px] font-bold text-gray-500";
+                    return; 
                 }
-
-                if (!stationRow) return;
-
-                // 현재 스마트폰의 시간(분 단위) 계산
-                const now = new Date();
-                const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
-                let upcomingTrains = [];
-
-                // 해당 역의 행에서 시간 데이터(예: 05:30:00) 추출
-                for (let cell of stationRow) {
-                    cell = cell.trim();
-                    if (cell.match(/^\d{2}:\d{2}/)) {
-                        const [hours, minutes] = cell.split(':').map(Number);
-                        const trainTotalMinutes = hours * 60 + minutes;
-                        
-                        const diff = trainTotalMinutes - currentTotalMinutes;
-                        
-                        // 현재 시간보다 미래의 시간인 경우만 배열에 저장 (과거 시간 제외)
-                        if (diff >= 0) {
-                            upcomingTrains.push(diff);
+                
+                const text = await response.text();
+                const rows = text.split('\n');
+                let times = [];
+                
+                for(let row of rows) {
+                    if(row.includes(stationName)) {
+                        const cols = row.split(',');
+                        for(let col of cols) {
+                            const match = col.trim().match(/(\d{1,2}):(\d{2})/);
+                            if(match) {
+                                times.push(parseInt(match[1]) * 60 + parseInt(match[2]));
+                            }
                         }
+                        break; 
                     }
                 }
 
-                // 남은 시간이 적은 순(오름차순)으로 정렬
-                upcomingTrains.sort((a, b) => a - b);
+                const now = new Date();
+                const currentMins = now.getHours() * 60 + now.getMinutes();
+                let upcoming = times.filter(t => t - currentMins >= 0).sort((a,b) => a - b);
 
-                // 화면 UI(글자) 업데이트
-                if (upcomingTrains.length > 0 && uiElement1) {
-                    const diff1 = upcomingTrains[0];
-                    uiElement1.innerText = diff1 === 0 ? "곧 도착" : `${diff1}분 후`;
-                    uiElement1.className = diff1 === 0 ? "text-sm font-bold text-red-400" : "text-sm font-bold text-white";
+                if(upcoming.length > 0) {
+                    const diff = upcoming[0] - currentMins;
+                    el.innerText = diff === 0 ? "곧 도착" : (diff <= 5 ? `곧 도착 (${diff}분)` : `${diff}분 후`);
+                    el.className = diff <= 5 ? "text-sm font-bold text-red-400" : "text-sm font-bold text-white";
+                } else {
+                    el.innerText = "운행 종료";
+                    el.className = "text-sm font-bold text-gray-500";
                 }
-                
-                if (upcomingTrains.length > 1 && uiElement2) {
-                    const diff2 = upcomingTrains[1];
-                    uiElement2.innerText = `${diff2}분 후`;
-                    uiElement2.className = "text-sm font-bold text-white";
-                }
-
-            } catch (error) {
-                console.error('시간표 데이터 연동 에러:', error);
+            } catch(e) {
+                console.warn('CSV 연동 대기:', e);
+                el.innerText = "데이터 연결중...";
+                el.className = "text-[11px] font-bold text-gray-500";
             }
+        }
+
+        function loadRealTimetable() {
+            // 하행
+            fetchTimetable('daegyeong_down.csv', '구미', 'time-daegyeong-gumi-down');
+            fetchTimetable('daegyeong_down.csv', '사곡', 'time-daegyeong-sagok-down');
+            fetchTimetable('daegyeong_down.csv', '왜관', 'time-daegyeong-waegwan-down');
+            fetchTimetable('daegyeong_down.csv', '서대구', 'time-daegyeong-seodaegu-down');
+            fetchTimetable('daegyeong_down.csv', '대구', 'time-daegyeong-daegu-down');
+            fetchTimetable('daegyeong_down.csv', '동대구', 'time-daegyeong-dongdaegu-down');
+            
+            // 상행
+            fetchTimetable('daegyeong_up.csv', '경산', 'time-daegyeong-gyeongsan-up');
+            fetchTimetable('daegyeong_up.csv', '동대구', 'time-daegyeong-dongdaegu-up');
+            fetchTimetable('daegyeong_up.csv', '대구', 'time-daegyeong-daegu-up');
+            fetchTimetable('daegyeong_up.csv', '서대구', 'time-daegyeong-seodaegu-up');
+            fetchTimetable('daegyeong_up.csv', '왜관', 'time-daegyeong-waegwan-up');
+            fetchTimetable('daegyeong_up.csv', '사곡', 'time-daegyeong-sagok-up');
         }
 
         // 초기 실행
         window.onload = () => {
             switchTab(0);
-            loadRealTimetable(); // 화면이 켜질 때 시간표 데이터 연동을 시작합니다.
+            loadRealTimetable(); 
+            
+            // 캔버스(미리보기) 환경이 아닐 때만 1분 단위 새로고침 작동
+            if (window.location.protocol !== 'blob:' && window.location.protocol !== 'file:') {
+                setInterval(loadRealTimetable, 60000);
+            }
         };
     </script>
 </body>
