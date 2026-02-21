@@ -745,22 +745,60 @@
             }
         }
 
+        // --- [신규] 공휴일 및 주말 자동 감지 로직 ---
+        // 대한민국의 주요 공휴일 목록 (필요에 따라 날짜를 추가/수정하시면 됩니다)
+        const publicHolidays = [
+            '2024-12-25', // 성탄절
+            '2025-01-01', // 신정
+            '2025-01-28', '2025-01-29', '2025-01-30', // 설날 연휴
+            '2025-03-01', // 삼일절
+            '2025-05-05', // 어린이날
+            '2025-05-06', // 부처님 오신 날
+            '2025-06-06', // 현충일
+            '2025-08-15', // 광복절
+            '2025-10-03', // 개천절
+            '2025-10-06', '2025-10-07', '2025-10-08', // 추석 연휴
+            '2025-10-09', // 한글날
+            '2025-12-25'  // 성탄절
+        ];
+
+        function checkIsHolidayOrWeekend(date) {
+            const day = date.getDay();
+            // 0: 일요일, 6: 토요일
+            if (day === 0 || day === 6) return true; 
+            
+            // 날짜 포맷 맞추기 (YYYY-MM-DD)
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const dateString = `${yyyy}-${mm}-${dd}`;
+            
+            // 지정한 공휴일 목록에 포함되어 있는지 확인
+            return publicHolidays.includes(dateString);
+        }
+
         function loadRealTimetable() {
-            // 하행
-            fetchTimetable('daegyeong_down.csv', '구미', 'time-daegyeong-gumi-down');
-            fetchTimetable('daegyeong_down.csv', '사곡', 'time-daegyeong-sagok-down');
-            fetchTimetable('daegyeong_down.csv', '왜관', 'time-daegyeong-waegwan-down');
-            fetchTimetable('daegyeong_down.csv', '서대구', 'time-daegyeong-seodaegu-down');
-            fetchTimetable('daegyeong_down.csv', '대구', 'time-daegyeong-daegu-down');
-            fetchTimetable('daegyeong_down.csv', '동대구', 'time-daegyeong-dongdaegu-down');
+            const now = new Date();
+            const isWeekend = checkIsHolidayOrWeekend(now);
+            
+            // 주말/공휴일이면 'weekend', 평일이면 'weekday' 문자열을 변수에 저장
+            const dayType = isWeekend ? 'weekend' : 'weekday'; 
+
+            // 하행 (파일 이름에 dayType 변수가 자동으로 들어갑니다)
+            fetchTimetable(`daegyeong_down_${dayType}.csv`, '구미', 'time-daegyeong-gumi-down');
+            fetchTimetable(`daegyeong_down_${dayType}.csv`, '사곡', 'time-daegyeong-sagok-down');
+            fetchTimetable(`daegyeong_down_${dayType}.csv`, '왜관', 'time-daegyeong-waegwan-down');
+            fetchTimetable(`daegyeong_down_${dayType}.csv`, '서대구', 'time-daegyeong-seodaegu-down');
+            fetchTimetable(`daegyeong_down_${dayType}.csv`, '대구', 'time-daegyeong-daegu-down');
+            fetchTimetable(`daegyeong_down_${dayType}.csv`, '동대구', 'time-daegyeong-dongdaegu-down');
             
             // 상행
-            fetchTimetable('daegyeong_up.csv', '경산', 'time-daegyeong-gyeongsan-up');
-            fetchTimetable('daegyeong_up.csv', '동대구', 'time-daegyeong-dongdaegu-up');
-            fetchTimetable('daegyeong_up.csv', '대구', 'time-daegyeong-daegu-up');
-            fetchTimetable('daegyeong_up.csv', '서대구', 'time-daegyeong-seodaegu-up');
-            fetchTimetable('daegyeong_up.csv', '왜관', 'time-daegyeong-waegwan-up');
-            fetchTimetable('daegyeong_up.csv', '사곡', 'time-daegyeong-sagok-up');
+            fetchTimetable(`daegyeong_up_${dayType}.csv`, '경산', 'time-daegyeong-gyeongsan-up');
+            fetchTimetable(`daegyeong_up_${dayType}.csv`, '동대구', 'time-daegyeong-dongdaegu-up');
+            fetchTimetable(`daegyeong_up_${dayType}.csv`, '대구', 'time-daegyeong-daegu-up');
+            fetchTimetable(`daegyeong_up_${dayType}.csv`, '서대구', 'time-daegyeong-seodaegu-up');
+            fetchTimetable(`daegyeong_up_${dayType}.csv`, '왜관', 'time-daegyeong-waegwan-up');
+            fetchTimetable(`daegyeong_up_${dayType}.csv`, '사곡', 'time-daegyeong-sagok-up');
         }
 
         // 초기 실행
