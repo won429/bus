@@ -271,33 +271,33 @@
         </main>
 
         <!-- 하단 플로팅 메뉴 -->
-        <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[340px] px-2 touch-pan-x select-none">
-            <div class="flex items-center justify-between bg-white/10 backdrop-blur-[4px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1.5 gap-0.5 ring-1 ring-white/30 relative mix-blend-difference">
+        <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-[88%] max-w-[300px] px-2 touch-pan-x select-none">
+            <div class="flex items-center justify-between bg-white/10 backdrop-blur-[4px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1 gap-0.5 ring-1 ring-white/30 relative mix-blend-difference transition-all duration-300">
                 <!-- 활성화 표시 배경 -->
-                <div id="nav-indicator" class="absolute top-1.5 bottom-1.5 bg-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-full backdrop-blur-[2px] border border-white/20 z-0 nav-transition" style="left: 6px; width: 66px;"></div>
+                <div id="nav-indicator" class="absolute top-1 bottom-1 bg-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-full backdrop-blur-[2px] border border-white/20 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
                 
-                <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(0)">
+                <button class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(0)">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
                         <i class="fa-solid fa-map-location-dot text-base text-white transition-colors"></i>
                         <span class="text-[10px] font-bold text-white whitespace-nowrap transition-colors">지도</span>
                     </div>
                 </button>
 
-                <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(1)">
+                <button class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(1)">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
                         <i class="fa-solid fa-list-ul text-base text-gray-300 group-hover:text-white transition-colors"></i>
                         <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">목록</span>
                     </div>
                 </button>
                 
-                <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(2)">
+                <button class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(2)">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
                         <i class="fa-solid fa-chart-pie text-base text-gray-300 group-hover:text-white transition-colors"></i>
                         <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">통계</span>
                     </div>
                 </button>
                 
-                <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(3)">
+                <button class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(3)">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
                         <i class="fa-solid fa-gear text-base text-gray-300 group-hover:text-white transition-colors"></i>
                         <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">설정</span>
@@ -320,7 +320,7 @@
                 id: 1,
                 title: '진주, 과거와 현재 사이',
                 region: '경상남도 진주시',
-                date: '2025.08.29',
+                date: '2025.08.29 ~ 08.30',
                 emoji: '🏰',
                 color: 'purple',
                 desc: '진주성에서 역사를 느끼고, 귀여운 하모도 구경하며 힐링했던 시간들.',
@@ -331,7 +331,7 @@
                 id: 2,
                 title: '대구 맛집 탐방',
                 region: '대구광역시',
-                date: '2025.02.05',
+                date: '2025.02.05 ~ 02.07',
                 emoji: '🍎',
                 color: 'red',
                 desc: '끊임없이 먹고 또 먹었던 여행. 대구의 맛있는 음식들 완벽정복!',
@@ -342,7 +342,7 @@
                 id: 5,
                 title: '칠곡의 여유로움',
                 region: '경상북도 칠곡군',
-                date: '2025.02.05',
+                date: '2025.02.05 ~ 02.07',
                 emoji: '🌳',
                 color: 'blue',
                 desc: '자연과 함께하는 칠곡에서의 평화롭고 여유로운 시간.',
@@ -373,12 +373,12 @@
             },
             {
                 id: 3,
-                title: '출장엔조이 첫 여행',
+                title: '엔조이 첫 완전체 전역 여행',
                 region: '제주특별자치도',
-                date: '2024.08.15',
+                date: '2024.10.30 ~ 11.02',
                 emoji: '🍊',
                 color: 'orange',
-                desc: '우리의 첫 출장엔조이! 날씨가 완벽하진 않았지만 그래서 더 잊지 못할 추억이 된 제주도 풀빌라 여행.',
+                desc: '우리의 첫 완전체 여행! 날씨가 완벽하진 않았지만 그래서 더 잊지 못할 추억이 된 제주도 풀빌라 여행.',
                 lat: 33.4996,
                 lng: 126.5312
             },
@@ -386,7 +386,7 @@
                 id: 4,
                 title: '성심당 빵지순례',
                 region: '대전광역시',
-                date: '2024.05.10',
+                date: '2024.09.26 ~ 09.27',
                 emoji: '🍞',
                 color: 'yellow',
                 desc: '오직 빵을 위해 떠난 대전. 두 손 무겁게 돌아왔던 달콤한 하루.',
@@ -434,19 +434,45 @@
 
             if(navButtons[index] && indicator) {
                 indicator.style.width = `${navButtons[index].offsetWidth}px`;
-                indicator.style.transform = `translateX(${navButtons[index].offsetLeft - 6}px)`;
+                indicator.style.transform = `translateX(${navButtons[index].offsetLeft - 4}px)`;
+            }
+
+            // 지도 화면일 때 컨테이너 배경 및 mix-blend 모드 변경
+            const navContainer = document.querySelector('#bottom-nav > div');
+            if (index === 0) {
+                navContainer.classList.remove('mix-blend-difference', 'bg-white/10');
+                navContainer.classList.add('bg-white/80');
+            } else {
+                navContainer.classList.add('mix-blend-difference', 'bg-white/10');
+                navContainer.classList.remove('bg-white/80');
             }
 
             navButtons.forEach((btn, i) => {
                 const icon = btn.querySelector('i');
                 const label = btn.querySelector('span');
                 
-                if (i === index) {
-                    icon.className = icon.className.replace('text-gray-300', 'text-white');
-                    label.className = label.className.replace('text-gray-300', 'text-white').replace('font-medium', 'font-bold');
+                // 기존 색상 및 폰트 굵기 클래스 초기화
+                icon.className = icon.className.replace(/text-(white|gray-300|black|gray-600)/g, '').trim();
+                label.className = label.className.replace(/text-(white|gray-300|black|gray-600)/g, '').replace(/font-(medium|bold)/g, '').trim();
+
+                if (index === 0) {
+                    // 지도 화면일 때는 검은색 계열로 표시
+                    if (i === index) {
+                        icon.className += ' text-black';
+                        label.className += ' text-black font-bold';
+                    } else {
+                        icon.className += ' text-gray-600';
+                        label.className += ' text-gray-600 font-medium';
+                    }
                 } else {
-                    icon.className = icon.className.replace('text-white', 'text-gray-300');
-                    label.className = label.className.replace('text-white', 'text-gray-300').replace('font-bold', 'font-medium');
+                    // 다른 화면일 때는 흰색 계열로 표시
+                    if (i === index) {
+                        icon.className += ' text-white';
+                        label.className += ' text-white font-bold';
+                    } else {
+                        icon.className += ' text-gray-300';
+                        label.className += ' text-gray-300 font-medium';
+                    }
                 }
             });
 
