@@ -515,22 +515,17 @@
             // 통합 스타일 적용 함수
             function applyMapStyle() {
                 map.data.setStyle(function(feature) {
-                    const code = String(feature.getProperty('code') || '');
+                    const name = feature.getProperty('name') || '';
                     let color = null;
 
-                    // [광역시/도 단위 검사 - 코드 길이가 2자리]
-                    if (code.length === 2) {
-                        if (code === '27') color = colorThemes.red.markerBg;         // 대구광역시 전체
-                        else if (code === '30') color = colorThemes.yellow.markerBg; // 대전광역시 전체
-                        else if (code === '50') color = colorThemes.orange.markerBg; // 제주특별자치도 전체
-                    } 
-                    // [시/군/구 단위 검사 - 코드 길이가 5자리]
-                    else if (code.length === 5) {
-                        if (code === '48170') color = colorThemes.purple.markerBg;   // 진주시
-                        else if (code === '47850') color = colorThemes.blue.markerBg;      // 칠곡군
-                        else if (code === '47190') color = colorThemes.green.markerBg;     // 구미시
-                        else if (code === '44710') color = colorThemes.red.markerBg;       // 청양군
-                    }
+                    // [수정됨] 헷갈리는 숫자 코드 대신 '한글 지역 이름'으로 정확하게 매칭합니다.
+                    if (name === '대구광역시') color = colorThemes.red.markerBg;
+                    else if (name === '대전광역시') color = colorThemes.yellow.markerBg;
+                    else if (name === '제주특별자치도') color = colorThemes.orange.markerBg;
+                    else if (name === '진주시') color = colorThemes.purple.markerBg;
+                    else if (name === '칠곡군') color = colorThemes.blue.markerBg;
+                    else if (name === '구미시') color = colorThemes.green.markerBg;
+                    else if (name === '청양군') color = colorThemes.red.markerBg;
 
                     if (color) {
                         return {
