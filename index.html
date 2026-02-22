@@ -746,10 +746,10 @@
                 const text = await response.text();
                 const rows = text.split('\n');
                 let times = [];
-                let foundStationRows = [];
+                let targetRowIndex = -1;
                 
-                for(let row of rows) {
-                    const cols = row.split(',');
+                for(let i = 0; i < rows.length; i++) {
+                    const cols = rows[i].split(',');
                     if (cols.length < 1) continue;
 
                     // 1. 역 이름 정확도 100% 매칭 ('대구'가 '서대구'를 불러오는 현상 완벽 차단)
@@ -758,17 +758,14 @@
                     const c1 = cols[1] ? cols[1].replace(/["'\s]/g, '').replace(/역$/, '') : '';
                     
                     if(c0 === stationName || c1 === stationName) {
-                        foundStationRows.push(row);
+                        // 2. 사용자의 요청: 역 이름이 있는 줄(윗줄)이 아니라 그 아랫줄(출발시간)을 읽어야 함
+                        targetRowIndex = i + 1;
+                        break; 
                     }
                 }
 
-                let targetRow = null;
-                if (foundStationRows.length > 0) {
-                    // 2. 여러 데이터 줄이 있다면 '도착' 말고 무조건 '출발'이 포함된 줄을 우선 선택
-                    targetRow = foundStationRows.find(r => r.includes('출발'));
-                    // 만약 파일에 출발이라는 단어가 없다면 검색된 첫 번째 줄을 사용
-                    if (!targetRow) targetRow = foundStationRows[0];
-                    
+                if (targetRowIndex !== -1 && targetRowIndex < rows.length) {
+                    const targetRow = rows[targetRowIndex];
                     const cols = targetRow.split(',');
                     for(let col of cols) {
                         const match = col.trim().match(/(\d{1,2}):(\d{2})/);
