@@ -418,7 +418,7 @@
         // 지도 초기화
         function initMap() {
             if (typeof naver === 'undefined' || typeof naver.maps === 'undefined' || typeof naver.maps.LatLng === 'undefined') {
-                console.warn("네이버 지도 API를 불러올 수 없습니다.");
+                console.warn("네이버 지도 API를 불러올 수 없습니다. (미리보기 환경 등 도메인 미등록 상태)");
                 return;
             }
 
@@ -443,13 +443,31 @@
             createMarkers();
         }
 
-        // 마커 생성
+        // 마커 생성 및 지역 색칠
         function createMarkers() {
             if (!map || typeof naver === 'undefined' || !naver.maps) return;
 
             travelData.forEach((trip, index) => {
                 const position = new naver.maps.LatLng(trip.lat, trip.lng);
                 const theme = colorThemes[trip.color] || colorThemes.blue;
+
+                // --- [신규 추가] 해당 지역 영토 색칠 (하이라이트) ---
+                let areaRadius = 15000; // 기본 반경 15km
+                if (trip.id === 2) areaRadius = 22000; // 대구/칠곡은 범위를 넓게
+                if (trip.id === 3) areaRadius = 35000; // 제주도는 섬 전체를 덮도록 아주 넓게
+
+                new naver.maps.Circle({
+                    map: map,
+                    center: position,
+                    radius: areaRadius,
+                    fillColor: theme.markerBg,
+                    fillOpacity: 0.15, // 반투명하게 색칠
+                    strokeColor: theme.markerBg,
+                    strokeOpacity: 0.5,
+                    strokeWeight: 2,
+                    clickable: false // 클릭 시 마커 선택을 방해하지 않도록 설정
+                });
+                // ------------------------------------------------
 
                 const markerHtml = `
                     <div id="marker-${index}" class="travel-marker">
