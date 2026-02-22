@@ -129,11 +129,11 @@
         /* 바텀 시트 (정보 패널) 애니메이션 */
         #bottom-sheet {
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
-            transform: translateY(120%);
+            transform: translate(-50%, 120%);
             opacity: 0;
         }
         #bottom-sheet.show {
-            transform: translateY(0);
+            transform: translate(-50%, 0);
             opacity: 1;
         }
     </style>
@@ -175,7 +175,7 @@
             </header>
 
             <!-- 선택된 여행지 정보 바텀 시트 (mobile-wrapper 안에서 absolute로 동작) -->
-            <div id="bottom-sheet" class="absolute bottom-24 left-1/2 -translate-x-1/2 w-[92%] z-30 toss-card p-5 cursor-default">
+            <div id="bottom-sheet" class="absolute bottom-24 left-1/2 w-[92%] z-30 toss-card p-5 cursor-default">
                 <button onclick="closeBottomSheet()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
