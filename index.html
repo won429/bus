@@ -10,7 +10,7 @@
         window.addEventListener('error', function(e) {
             if (e.message === 'Script error.' || (e.message && e.message.includes('Script error'))) {
                 console.warn('외부 스크립트(네이버 지도 API 등) 도메인 제한으로 인한 경고입니다. (정상 작동 중)');
-                e.preventDefault(); // 콘솔에 빨간 에러창이 뜨는 것을 방지
+                e.preventDefault();
             }
         });
     </script>
@@ -28,6 +28,8 @@
     <style>
         body { 
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "sans-serif";
+            background-color: #000000;
+            color: #FFFFFF;
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
             touch-action: pan-y;
@@ -132,187 +134,183 @@
         }
     </style>
 </head>
-<body class="w-full h-[100dvh] bg-[#0a0a0a] flex justify-center items-center overflow-hidden">
+<body class="w-full h-[100dvh] flex flex-col overflow-hidden bg-black" ontouchstart="">
 
-    <!-- 스마트폰 형태의 메인 컨테이너 -->
-    <div id="mobile-wrapper" class="w-full h-full max-w-[430px] bg-black relative flex flex-col overflow-hidden sm:border-x border-white/10 sm:shadow-2xl">
-
-        <!-- 1. 지도 화면 (메인) -->
-        <main id="map-screen" class="flex-1 relative w-full flex flex-col bg-[#111]">
-            
-            <!-- 오류/안내 배경 -->
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-0 bg-[#111]">
-                <i class="fa-solid fa-map-location-dot text-4xl text-gray-600 mb-4"></i>
-                <p class="text-sm text-gray-400 break-keep leading-relaxed">
-                    <span class="text-blue-400 font-bold">지도 로딩 중...</span><br><br>
-                    만약 지도가 계속 보이지 않는다면,<br>
-                    이곳(미리보기) 주소가 네이버 클라우드에<br>
-                    등록되지 않아 차단된 것입니다.<br>
-                    <strong class="text-white mt-2 block">깃허브에 올리면 정상적으로 나타납니다! ✨</strong>
-                </p>
-            </div>
-
-            <!-- 네이버 지도 컨테이너 -->
-            <div id="map" class="absolute inset-0 z-10"></div>
-            
-            <!-- 상단 헤더 오버레이 -->
-            <header class="absolute top-0 left-0 right-0 pt-safe px-5 pb-4 z-20 pointer-events-none bg-gradient-to-b from-black/80 to-transparent">
-                <div class="flex justify-between items-center mt-2">
-                    <div class="pointer-events-auto">
-                        <h2 class="text-2xl font-bold text-main drop-shadow-lg">우리의 발자취 ✈️</h2>
-                        <p class="text-sm font-medium text-gray-300 drop-shadow-md">총 4번의 즐거운 여행</p>
-                    </div>
-                    <button onclick="zoomToAll()" class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white pointer-events-auto shadow-lg active:scale-90 transition-transform">
-                        <i class="fa-solid fa-expand text-sm"></i>
-                    </button>
-                </div>
-            </header>
-
-            <!-- 선택된 여행지 정보 바텀 시트 -->
-            <div id="bottom-sheet" class="absolute bottom-24 left-1/2 -translate-x-1/2 w-[92%] z-30 toss-card p-5 cursor-default">
-                <button onclick="closeBottomSheet()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-                
-                <div class="flex items-center gap-3 mb-3">
-                    <div id="sheet-emoji" class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl border border-blue-500/30">
-                        🍊
-                    </div>
-                    <div class="flex-1">
-                        <span id="sheet-date" class="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">2024.08.15</span>
-                        <h3 id="sheet-title" class="text-xl font-bold text-white mt-1 leading-tight">제주도 출장엔조이</h3>
-                    </div>
-                </div>
-                
-                <p id="sheet-desc" class="text-sm text-gray-300 font-medium mb-4 break-keep line-clamp-2">
-                    여름 휴가 겸 떠난 첫 출장엔조이! 비도 오고 우여곡절이 많았지만 즐거웠던 기억.
-                </p>
-                
-                <div class="flex gap-2">
-                    <button onclick="alert('준비 중인 기능입니다!')" class="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm font-bold py-3 rounded-xl transition-colors border border-white/5">
-                        <i class="fa-regular fa-images mr-1"></i> 사진 보기
-                    </button>
-                    <button onclick="window.openBrowser('https://youtu.be/tjIYiWqG6Hk')" class="flex-[1.5] bg-[#3182F6] hover:bg-blue-600 text-white text-sm font-bold py-3 rounded-xl shadow-lg transition-colors">
-                        <i class="fa-brands fa-youtube mr-1"></i> 브이로그 시청
-                    </button>
-                </div>
-            </div>
-        </main>
-
-        <!-- 2. 목록 화면 -->
-        <main id="list-screen" class="hidden flex-1 relative w-full flex-col bg-black overflow-y-auto scrollbar-hide pb-24">
-            <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
-                <div class="px-5 pt-3 pb-4 flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-main drop-shadow-sm">여행 기록</h2>
-                    <div class="text-xs font-medium text-gray-400 bg-gray-900 px-3 py-1.5 rounded-full border border-gray-800">
-                        최신순 <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i>
-                    </div>
-                </div>
-            </header>
-
-            <div class="px-5 pt-4 space-y-4" id="travel-list-container">
-                <!-- JS로 목록 렌더링 -->
-            </div>
-        </main>
-
-        <!-- 3. 통계 화면 -->
-        <main id="stats-screen" class="hidden flex-1 relative w-full flex-col bg-black overflow-y-auto scrollbar-hide pb-24">
-            <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
-                <div class="px-5 pt-3 pb-4 flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-main drop-shadow-sm">통계</h2>
-                </div>
-            </header>
-            <div class="flex-1 flex flex-col items-center justify-center text-center px-6 min-h-[60vh]">
-                <div class="w-20 h-20 bg-[#1C1C1E] rounded-full flex items-center justify-center text-3xl mb-4 border border-white/5 shadow-lg">
-                    📊
-                </div>
-                <h3 class="text-lg font-bold text-white mb-2">여행 통계 준비 중</h3>
-                <p class="text-sm text-gray-400 break-keep">가장 많이 간 지역, 누적 이동 거리 등<br>다양한 통계 데이터를 모으고 있어요!</p>
-            </div>
-        </main>
-
-        <!-- 4. 설정 화면 -->
-        <main id="settings-screen" class="hidden flex-1 relative w-full flex-col bg-black overflow-y-auto scrollbar-hide pb-24">
-            <header class="flex-none pt-safe px-5 pb-4 flex justify-between items-center bg-black/80 backdrop-blur-md border-b border-white/10 z-10 sticky top-0">
-                <h2 class="text-xl font-bold text-main drop-shadow-sm mt-2">설정</h2>
-            </header>
-            <div class="px-5 pt-4">
-                <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">지도 설정</h4>
-                <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
-                    <div class="w-full flex justify-between items-center p-4 border-b border-white/5">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-[10px] bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fa-solid fa-map"></i></div>
-                            <span class="text-sm font-bold text-gray-200">위성 지도로 보기</span>
-                        </div>
-                        <div class="w-10 h-6 bg-gray-600 rounded-full relative"><div class="absolute left-1 top-1 w-4 h-4 bg-gray-300 rounded-full"></div></div>
-                    </div>
-                </div>
-
-                <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">데이터 관리</h4>
-                <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
-                    <button class="w-full flex justify-between items-center p-4 border-b border-white/5 hover:bg-white/5 transition-colors text-left">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-[10px] bg-emerald-500/20 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                            <span class="text-sm font-bold text-gray-200">기록 백업하기</span>
-                        </div>
-                        <i class="fa-solid fa-chevron-right text-gray-600 text-xs"></i>
-                    </button>
-                </div>
-            </div>
-        </main>
-
-        <!-- 내부 브라우저 (유튜브 링크용) -->
-        <div id="browser-screen" class="hidden absolute inset-0 z-[100] flex-col bg-black">
-            <header class="flex-none pt-safe px-4 pb-3 flex items-center bg-black border-b border-gray-800">
-                <button onclick="closeBrowser()" class="w-8 h-8 flex items-center justify-center text-white active:scale-90 transition-transform">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-                <span class="flex-1 text-center text-sm font-bold text-gray-300 truncate pr-8">브이로그 시청</span>
-            </header>
-            <div class="flex-1 relative w-full h-full bg-black">
-                <div id="browser-loader" class="absolute inset-0 flex items-center justify-center text-blue-500 z-0">
-                    <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
-                </div>
-                <iframe id="internal-browser-frame" class="w-full h-full border-0 relative z-10 bg-transparent" allow="autoplay; encrypted-media" onload="document.getElementById('browser-loader').style.display='none'"></iframe>
-            </div>
+    <!-- 1. 지도 화면 (메인) -->
+    <main id="map-screen" class="flex-1 relative w-full h-full bg-[#111]">
+        
+        <!-- 오류/안내 배경 (지도가 막혔을 때 보임) -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-0 bg-[#111]">
+            <i class="fa-solid fa-map-location-dot text-4xl text-gray-600 mb-4"></i>
+            <p class="text-sm text-gray-400 break-keep leading-relaxed">
+                <span class="text-blue-400 font-bold">지도 로딩 중...</span><br><br>
+                만약 지도가 계속 보이지 않는다면,<br>
+                이곳(미리보기) 주소가 네이버 클라우드에<br>
+                등록되지 않아 차단된 것입니다.<br>
+                <strong class="text-white mt-2 block">깃허브에 올리면 정상적으로 나타납니다! ✨</strong>
+            </p>
         </div>
 
-        <!-- 하단 플로팅 메뉴 -->
-        <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[340px] px-2 touch-pan-x select-none">
-            <div class="flex items-center justify-between bg-white/10 backdrop-blur-[4px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1.5 gap-0.5 ring-1 ring-white/30 relative mix-blend-difference">
-                <!-- 활성화 표시 배경 -->
-                <div id="nav-indicator" class="absolute top-1.5 bottom-1.5 bg-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-full backdrop-blur-[2px] border border-white/20 z-0 nav-transition" style="left: 6px; width: 66px;"></div>
-                
-                <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(0)">
-                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-map-location-dot text-base text-white transition-colors"></i>
-                        <span class="text-[10px] font-bold text-white whitespace-nowrap transition-colors">지도</span>
-                    </div>
-                </button>
-
-                <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(1)">
-                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-list-ul text-base text-gray-300 group-hover:text-white transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">목록</span>
-                    </div>
-                </button>
-                
-                <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(2)">
-                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-chart-pie text-base text-gray-300 group-hover:text-white transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">통계</span>
-                    </div>
-                </button>
-                
-                <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(3)">
-                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-gear text-base text-gray-300 group-hover:text-white transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">설정</span>
-                    </div>
+        <!-- 네이버 지도 컨테이너 -->
+        <div id="map" class="absolute inset-0 z-10"></div>
+        
+        <!-- 상단 헤더 오버레이 -->
+        <header class="absolute top-0 left-0 right-0 pt-safe px-5 pb-4 z-20 pointer-events-none bg-gradient-to-b from-black/80 to-transparent">
+            <div class="flex justify-between items-center mt-2 max-w-md mx-auto">
+                <div class="pointer-events-auto">
+                    <h2 class="text-2xl font-bold text-main drop-shadow-lg">우리의 발자취 ✈️</h2>
+                    <p class="text-sm font-medium text-gray-300 drop-shadow-md">총 4번의 즐거운 여행</p>
+                </div>
+                <button onclick="zoomToAll()" class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white pointer-events-auto shadow-lg active:scale-90 transition-transform">
+                    <i class="fa-solid fa-expand text-sm"></i>
                 </button>
             </div>
-        </nav>
+        </header>
+
+        <!-- 선택된 여행지 정보 바텀 시트 -->
+        <div id="bottom-sheet" class="absolute bottom-24 left-1/2 -translate-x-1/2 w-[92%] max-w-sm z-30 toss-card p-5 cursor-default">
+            <button onclick="closeBottomSheet()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div class="flex items-center gap-3 mb-3">
+                <div id="sheet-emoji" class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl border border-blue-500/30">
+                    🍊
+                </div>
+                <div class="flex-1">
+                    <span id="sheet-date" class="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">2024.08.15</span>
+                    <h3 id="sheet-title" class="text-xl font-bold text-white mt-1 leading-tight">제주도 출장엔조이</h3>
+                </div>
+            </div>
+            
+            <p id="sheet-desc" class="text-sm text-gray-300 font-medium mb-4 break-keep line-clamp-2">
+                여름 휴가 겸 떠난 첫 출장엔조이! 비도 오고 우여곡절이 많았지만 즐거웠던 기억.
+            </p>
+            
+            <div class="flex gap-2">
+                <button onclick="alert('준비 중인 기능입니다!')" class="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm font-bold py-3 rounded-xl transition-colors border border-white/5">
+                    <i class="fa-regular fa-images mr-1"></i> 사진 보기
+                </button>
+                <button onclick="window.openBrowser('https://youtu.be/tjIYiWqG6Hk')" class="flex-[1.5] bg-[#3182F6] hover:bg-blue-600 text-white text-sm font-bold py-3 rounded-xl shadow-lg transition-colors">
+                    <i class="fa-brands fa-youtube mr-1"></i> 브이로그 시청
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 2. 목록 화면 -->
+    <main id="list-screen" class="hidden flex-1 overflow-y-auto scrollbar-hide w-full max-w-md mx-auto relative min-h-full pb-24 bg-black">
+        <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
+            <div class="px-5 pt-3 pb-4 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-main drop-shadow-sm">여행 기록</h2>
+                <div class="text-xs font-medium text-gray-400 bg-gray-900 px-3 py-1.5 rounded-full border border-gray-800">
+                    최신순 <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="px-5 pt-4 space-y-4" id="travel-list-container">
+            <!-- JS로 목록 렌더링 -->
+        </div>
+    </main>
+
+    <!-- 3. 통계 화면 (준비중) -->
+    <main id="stats-screen" class="hidden flex-1 overflow-y-auto scrollbar-hide w-full max-w-md mx-auto relative min-h-full pb-24 bg-black">
+        <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
+            <div class="px-5 pt-3 pb-4 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-main drop-shadow-sm">통계</h2>
+            </div>
+        </header>
+        <div class="flex-1 h-[70vh] flex flex-col items-center justify-center text-center px-6">
+            <div class="w-20 h-20 bg-[#1C1C1E] rounded-full flex items-center justify-center text-3xl mb-4 border border-white/5 shadow-lg">
+                📊
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">여행 통계 준비 중</h3>
+            <p class="text-sm text-gray-400 break-keep">가장 많이 간 지역, 누적 이동 거리 등<br>다양한 통계 데이터를 모으고 있어요!</p>
+        </div>
+    </main>
+
+    <!-- 4. 설정 화면 -->
+    <main id="settings-screen" class="hidden flex-1 overflow-y-auto scrollbar-hide w-full max-w-md mx-auto relative min-h-full pb-24 bg-black">
+        <header class="flex-none pt-safe px-5 pb-4 flex justify-between items-center bg-black/80 backdrop-blur-md border-b border-white/10 z-10 sticky top-0">
+            <h2 class="text-xl font-bold text-main drop-shadow-sm mt-2">설정</h2>
+        </header>
+        <div class="px-5 pt-4">
+            <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">지도 설정</h4>
+            <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
+                <div class="w-full flex justify-between items-center p-4 border-b border-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-[10px] bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fa-solid fa-map"></i></div>
+                        <span class="text-sm font-bold text-gray-200">위성 지도로 보기</span>
+                    </div>
+                    <div class="w-10 h-6 bg-gray-600 rounded-full relative"><div class="absolute left-1 top-1 w-4 h-4 bg-gray-300 rounded-full"></div></div>
+                </div>
+            </div>
+
+            <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">데이터 관리</h4>
+            <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
+                <button class="w-full flex justify-between items-center p-4 border-b border-white/5 hover:bg-white/5 transition-colors text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-[10px] bg-emerald-500/20 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <span class="text-sm font-bold text-gray-200">기록 백업하기</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-600 text-xs"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 내부 브라우저 (유튜브 링크용) -->
+    <div id="browser-screen" class="hidden fixed inset-0 z-[100] flex-col bg-black">
+        <header class="flex-none pt-safe px-4 pb-3 flex items-center bg-black border-b border-gray-800">
+            <button onclick="closeBrowser()" class="w-8 h-8 flex items-center justify-center text-white active:scale-90 transition-transform">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <span class="flex-1 text-center text-sm font-bold text-gray-300 truncate pr-8">브이로그 시청</span>
+        </header>
+        <div class="flex-1 relative w-full h-full bg-black">
+            <div id="browser-loader" class="absolute inset-0 flex items-center justify-center text-blue-500 z-0">
+                <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
+            </div>
+            <iframe id="internal-browser-frame" class="w-full h-full border-0 relative z-10 bg-transparent" allow="autoplay; encrypted-media" onload="document.getElementById('browser-loader').style.display='none'"></iframe>
+        </div>
     </div>
+
+    <!-- 하단 플로팅 메뉴 -->
+    <nav id="bottom-nav" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[340px] px-2 touch-pan-x select-none">
+        <div class="flex items-center justify-between bg-white/10 backdrop-blur-[4px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1.5 gap-0.5 ring-1 ring-white/30 relative mix-blend-difference">
+            <!-- 활성화 표시 배경 -->
+            <div id="nav-indicator" class="absolute top-1.5 bottom-1.5 bg-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-full backdrop-blur-[2px] border border-white/20 z-0 nav-transition" style="left: 6px; width: 66px;"></div>
+            
+            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(0)">
+                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                    <i class="fa-solid fa-map-location-dot text-base text-white transition-colors"></i>
+                    <span class="text-[10px] font-bold text-white whitespace-nowrap transition-colors">지도</span>
+                </div>
+            </button>
+
+            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(1)">
+                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                    <i class="fa-solid fa-list-ul text-base text-gray-300 group-hover:text-white transition-colors"></i>
+                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">목록</span>
+                </div>
+            </button>
+            
+            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(2)">
+                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                    <i class="fa-solid fa-chart-pie text-base text-gray-300 group-hover:text-white transition-colors"></i>
+                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">통계</span>
+                </div>
+            </button>
+            
+            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(3)">
+                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                    <i class="fa-solid fa-gear text-base text-gray-300 group-hover:text-white transition-colors"></i>
+                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">설정</span>
+                </div>
+            </button>
+        </div>
+    </nav>
 
     <script>
         // 전역 변수
@@ -394,7 +392,7 @@
             screens.forEach((screen, i) => {
                 if (i === index) {
                     screen.classList.remove('hidden');
-                    screen.classList.add('flex');
+                    if (i !== 0) screen.classList.add('flex');
                 } else {
                     screen.classList.add('hidden');
                     screen.classList.remove('flex');
