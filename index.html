@@ -322,14 +322,36 @@
             },
             {
                 id: 2,
-                title: '대구/칠곡 맛집 탐방',
-                region: '대구광역시 & 경북 칠곡',
+                title: '대구 맛집 탐방',
+                region: '대구광역시',
                 date: '2025.02.05',
                 emoji: '🍎',
                 color: 'red',
-                desc: '끊임없이 먹고 또 먹었던 여행. 칠곡의 여유로움과 대구의 맛있는 음식들 완벽정복!',
+                desc: '끊임없이 먹고 또 먹었던 여행. 대구의 맛있는 음식들 완벽정복!',
+                lat: 35.8714,
+                lng: 128.6014
+            },
+            {
+                id: 5,
+                title: '칠곡의 여유로움',
+                region: '경상북도 칠곡군',
+                date: '2025.02.05',
+                emoji: '🌳',
+                color: 'blue',
+                desc: '자연과 함께하는 칠곡에서의 평화롭고 여유로운 시간.',
                 lat: 35.9956,
                 lng: 128.4017
+            },
+            {
+                id: 6,
+                title: '구미 산업과 자연',
+                region: '경상북도 구미시',
+                date: '2025.02.05',
+                emoji: '🏭',
+                color: 'green',
+                desc: '금오산의 절경과 함께했던 구미에서의 특별한 하루.',
+                lat: 36.1195,
+                lng: 128.3445
             },
             {
                 id: 3,
@@ -360,7 +382,8 @@
             purple: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', markerBg: '#A855F7' },
             red:    { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30', markerBg: '#EF4444' },
             yellow: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30', markerBg: '#EAB308' },
-            blue:   { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', markerBg: '#3B82F6' }
+            blue:   { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', markerBg: '#3B82F6' },
+            green:  { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30', markerBg: '#22C55E' }
         };
 
         // 탭 전환 로직
@@ -446,44 +469,62 @@
             loadRegionBoundaries();
         }
 
-        // --- [신규 추가 함수] 실제 행정구역 GeoJSON 데이터를 불러와서 그립니다 ---
+        // --- [수정된 함수] 실제 행정구역 GeoJSON 데이터를 불러와서 그립니다 ---
         function loadRegionBoundaries() {
             if (!map || typeof naver === 'undefined' || !naver.maps) return;
 
-            // 대한민국의 시군구 경계 GeoJSON 데이터를 외부 오픈소스 저장소에서 불러옵니다.
+            // 1. 광역시/도 단위 데이터 불러오기 (대구, 대전, 제주 전체 윤곽선용 - 내부 선 없음)
+            fetch('https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_provinces_geo_simple.json')
+                .then(response => response.json())
+                .then(geojson => {
+                    map.data.addGeoJson(geojson);
+                    applyMapStyle();
+                })
+                .catch(e => console.warn('시도 경계 오류:', e));
+
+            // 2. 시/군/구 단위 데이터 불러오기 (진주시, 칠곡군 세부 윤곽선용)
             fetch('https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_municipalities_geo_simple.json')
                 .then(response => response.json())
                 .then(geojson => {
                     map.data.addGeoJson(geojson);
-
-                    map.data.setStyle(function(feature) {
-                        const name = feature.getProperty('name') || '';
-                        let color = null;
-
-                        // 방문한 지역의 이름이 포함되어 있으면 해당 테마 색상을 지정합니다.
-                        if (name.includes('진주시')) color = colorThemes.purple.markerBg;
-                        else if (name.includes('대구광역시') || name.includes('칠곡군')) color = colorThemes.red.markerBg;
-                        else if (name.includes('제주특별자치도')) color = colorThemes.orange.markerBg;
-                        else if (name.includes('대전광역시')) color = colorThemes.yellow.markerBg;
-
-                        if (color) {
-                            return {
-                                fillColor: color,
-                                fillOpacity: 0.15, // 반투명 색칠
-                                strokeColor: color,
-                                strokeWeight: 2,
-                                strokeOpacity: 0.5,
-                                clickable: false // 폴리곤 클릭 시 지도 클릭 이벤트 방해 방지
-                            };
-                        } else {
-                            // 여행하지 않은 다른 모든 지역의 폴리곤은 투명하게(숨김) 처리
-                            return { visible: false };
-                        }
-                    });
+                    applyMapStyle();
                 })
-                .catch(error => {
-                    console.warn('지역 경계 데이터를 불러오는 데 실패했습니다.', error);
+                .catch(e => console.warn('시군구 경계 오류:', e));
+
+            // 통합 스타일 적용 함수
+            function applyMapStyle() {
+                map.data.setStyle(function(feature) {
+                    const code = String(feature.getProperty('code') || '');
+                    let color = null;
+
+                    // [광역시/도 단위 검사 - 코드 길이가 2자리]
+                    if (code.length === 2) {
+                        if (code === '27') color = colorThemes.red.markerBg;      // 대구광역시 전체
+                        else if (code === '30') color = colorThemes.yellow.markerBg; // 대전광역시 전체
+                        else if (code === '50') color = colorThemes.orange.markerBg; // 제주특별자치도 전체
+                    } 
+                    // [시/군/구 단위 검사 - 코드 길이가 5자리]
+                    else if (code.length === 5) {
+                        if (code === '48170') color = colorThemes.purple.markerBg; // 진주시
+                        else if (code === '47850') color = colorThemes.blue.markerBg;    // 칠곡군
+                        else if (code === '47190') color = colorThemes.green.markerBg;   // 구미시
+                    }
+
+                    if (color) {
+                        return {
+                            fillColor: color,
+                            fillOpacity: 0.15, // 반투명 색칠
+                            strokeColor: color,
+                            strokeWeight: 2,
+                            strokeOpacity: 0.7,
+                            clickable: false // 폴리곤 클릭 시 지도 클릭 이벤트 방해 방지
+                        };
+                    } else {
+                        // 여행하지 않은 다른 모든 지역의 폴리곤은 투명하게(숨김) 처리
+                        return { visible: false };
+                    }
                 });
+            }
         }
         // ----------------------------------------------------------------------
 
