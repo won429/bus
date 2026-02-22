@@ -354,6 +354,17 @@
                 lng: 128.3445
             },
             {
+                id: 7,
+                title: '청양 1박 2일',
+                region: '충청남도 청양군',
+                date: '2026.01.26 ~ 01.27',
+                emoji: '🌶️',
+                color: 'red',
+                desc: '자연과 함께한 충남 청양에서의 즐거운 1박 2일.',
+                lat: 36.4593,
+                lng: 126.8024
+            },
+            {
                 id: 3,
                 title: '출장엔조이 첫 여행',
                 region: '제주특별자치도',
@@ -376,6 +387,10 @@
                 lng: 127.3845
             }
         ];
+
+        // --- [추가됨] 날짜 기준 최신 기록순(내림차순) 정렬 ---
+        travelData.sort((a, b) => b.date.substring(0, 10).localeCompare(a.date.substring(0, 10)));
+        // ---------------------------------------------------
 
         const colorThemes = {
             orange: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30', markerBg: '#F97316' },
@@ -469,7 +484,7 @@
             loadRegionBoundaries();
         }
 
-        // --- [수정된 함수] 실제 행정구역 GeoJSON 데이터를 불러와서 그립니다 ---
+        // --- [복구된 함수] 실제 행정구역 GeoJSON 데이터를 불러와서 그립니다 ---
         function loadRegionBoundaries() {
             if (!map || typeof naver === 'undefined' || !naver.maps) return;
 
@@ -482,7 +497,7 @@
                 })
                 .catch(e => console.warn('시도 경계 오류:', e));
 
-            // 2. 시/군/구 단위 데이터 불러오기 (진주시, 칠곡군 세부 윤곽선용)
+            // 2. 시/군/구 단위 데이터 불러오기 (진주시, 칠곡군, 구미시, 청양군 세부 윤곽선용)
             fetch('https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_municipalities_geo_simple.json')
                 .then(response => response.json())
                 .then(geojson => {
@@ -499,15 +514,16 @@
 
                     // [광역시/도 단위 검사 - 코드 길이가 2자리]
                     if (code.length === 2) {
-                        if (code === '27') color = colorThemes.red.markerBg;      // 대구광역시 전체
+                        if (code === '27') color = colorThemes.red.markerBg;         // 대구광역시 전체
                         else if (code === '30') color = colorThemes.yellow.markerBg; // 대전광역시 전체
                         else if (code === '50') color = colorThemes.orange.markerBg; // 제주특별자치도 전체
                     } 
                     // [시/군/구 단위 검사 - 코드 길이가 5자리]
                     else if (code.length === 5) {
-                        if (code === '48170') color = colorThemes.purple.markerBg; // 진주시
-                        else if (code === '47850') color = colorThemes.blue.markerBg;    // 칠곡군
-                        else if (code === '47190') color = colorThemes.green.markerBg;   // 구미시
+                        if (code === '48170') color = colorThemes.purple.markerBg;   // 진주시
+                        else if (code === '47850') color = colorThemes.blue.markerBg;      // 칠곡군
+                        else if (code === '47190') color = colorThemes.green.markerBg;     // 구미시
+                        else if (code === '44710') color = colorThemes.red.markerBg;       // 청양군
                     }
 
                     if (color) {
