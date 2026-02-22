@@ -166,7 +166,7 @@
                 <div class="flex justify-between items-center mt-2 w-full">
                     <div class="pointer-events-auto">
                         <h2 class="text-2xl font-bold text-main drop-shadow-lg">우리의 발자취 ✈️</h2>
-                        <p class="text-sm font-medium text-gray-300 drop-shadow-md">총 7번의 즐거운 여행</p>
+                        <p class="text-sm font-medium text-gray-300 drop-shadow-md">총 8번의 즐거운 여행</p>
                     </div>
                     <div class="flex gap-2 pointer-events-auto">
                         <!-- 마커 보이기/숨기기 토글 버튼 추가 -->
@@ -187,8 +187,8 @@
                 </button>
                 
                 <div class="flex items-center gap-3 mb-3">
-                    <div id="sheet-emoji" class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl border border-blue-500/30">
-                        🍊
+                    <div id="sheet-emoji" class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl border border-blue-500/30 overflow-hidden p-0.5">
+                        <img src="logo_jeju.png" alt="logo" class="w-full h-full object-cover rounded-full">
                     </div>
                     <div class="flex-1">
                         <span id="sheet-date" class="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">2024.08.15</span>
@@ -231,12 +231,10 @@
                     <h2 class="text-2xl font-bold text-main drop-shadow-sm">통계</h2>
                 </div>
             </header>
-            <div class="flex-1 flex flex-col items-center justify-center text-center px-6 min-h-[60vh]">
-                <div class="w-20 h-20 bg-[#1C1C1E] rounded-full flex items-center justify-center text-3xl mb-4 border border-white/5 shadow-lg">
-                    📊
-                </div>
-                <h3 class="text-lg font-bold text-white mb-2">여행 통계 준비 중</h3>
-                <p class="text-sm text-gray-400 break-keep">가장 많이 간 지역, 누적 이동 거리 등<br>다양한 통계 데이터를 모으고 있어요!</p>
+            
+            <!-- 통계 콘텐츠 컨테이너 -->
+            <div class="w-full pb-10" id="stats-container">
+                <!-- JS로 통계 데이터가 렌더링 됩니다 -->
             </div>
         </main>
 
@@ -248,24 +246,15 @@
             <div class="px-5 pt-4">
                 <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">지도 설정</h4>
                 <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
-                    <div class="w-full flex justify-between items-center p-4 border-b border-white/5">
+                    <div class="w-full flex justify-between items-center p-4 border-b border-white/5 cursor-pointer" onclick="toggleSatellite()">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-[10px] bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fa-solid fa-map"></i></div>
                             <span class="text-sm font-bold text-gray-200">위성 지도로 보기</span>
                         </div>
-                        <div class="w-10 h-6 bg-gray-600 rounded-full relative"><div class="absolute left-1 top-1 w-4 h-4 bg-gray-300 rounded-full"></div></div>
-                    </div>
-                </div>
-
-                <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">데이터 관리</h4>
-                <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
-                    <button class="w-full flex justify-between items-center p-4 border-b border-white/5 hover:bg-white/5 transition-colors text-left">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-[10px] bg-emerald-500/20 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                            <span class="text-sm font-bold text-gray-200">기록 백업하기</span>
+                        <div id="satellite-toggle-bg" class="w-10 h-6 bg-gray-600 rounded-full relative transition-colors duration-200">
+                            <div id="satellite-toggle-circle" class="absolute left-1 top-1 w-4 h-4 bg-gray-300 rounded-full transition-transform duration-200"></div>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-gray-600 text-xs"></i>
-                    </button>
+                    </div>
                 </div>
             </div>
         </main>
@@ -276,6 +265,13 @@
                 <!-- 활성화 표시 배경 -->
                 <div id="nav-indicator" class="absolute top-1 bottom-1 bg-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-full backdrop-blur-[2px] border border-white/20 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
                 
+                <a href="https://won429.github.io/enjoysite/" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform" style="text-decoration: none;">
+                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                        <i class="fa-solid fa-house text-base text-gray-300 group-hover:text-white transition-colors"></i>
+                        <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">홈</span>
+                    </div>
+                </a>
+
                 <button class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(0)">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
                         <i class="fa-solid fa-map-location-dot text-base text-white transition-colors"></i>
@@ -313,6 +309,7 @@
         let markers = [];
         let activeMarkerIndex = -1;
         let isMarkerVisible = true; // 마커 표시 상태
+        let isSatellite = false; // 위성 지도 상태
 
         // 여행 데이터 모음
         const travelData = [
@@ -321,7 +318,7 @@
                 title: '진주, 과거와 현재 사이',
                 region: '경상남도 진주시',
                 date: '2025.08.29 ~ 08.30',
-                emoji: '🏰',
+                logo: 'logo_jinju.png',
                 color: 'purple',
                 desc: '진주성에서 역사를 느끼고, 귀여운 하모도 구경하며 힐링했던 시간들.',
                 lat: 35.1803,
@@ -332,7 +329,7 @@
                 title: '대구 맛집 탐방',
                 region: '대구광역시',
                 date: '2025.02.05 ~ 02.07',
-                emoji: '🍎',
+                logo: 'logo_daegu.png',
                 color: 'red',
                 desc: '끊임없이 먹고 또 먹었던 여행. 대구의 맛있는 음식들 완벽정복!',
                 lat: 35.8714,
@@ -343,7 +340,7 @@
                 title: '칠곡의 여유로움',
                 region: '경상북도 칠곡군',
                 date: '2025.02.05 ~ 02.07',
-                emoji: '🌳',
+                logo: 'logo_chilgok.png',
                 color: 'blue',
                 desc: '자연과 함께하는 칠곡에서의 평화롭고 여유로운 시간.',
                 lat: 35.9956,
@@ -354,7 +351,7 @@
                 title: '구미 산업과 자연',
                 region: '경상북도 구미시',
                 date: '2025.02.05',
-                emoji: '🏭',
+                logo: 'logo_gumi.png',
                 color: 'green',
                 desc: '금오산의 절경과 함께했던 구미에서의 특별한 하루.',
                 lat: 36.1195,
@@ -365,7 +362,7 @@
                 title: '청양 1박 2일',
                 region: '충청남도 청양군',
                 date: '2026.01.26 ~ 01.27',
-                emoji: '🌶️',
+                logo: 'logo_cheongyang.png',
                 color: 'red',
                 desc: '자연과 함께한 충남 청양에서의 즐거운 1박 2일.',
                 lat: 36.4593,
@@ -376,7 +373,7 @@
                 title: '엔조이 첫 완전체 전역 여행',
                 region: '제주특별자치도',
                 date: '2024.10.30 ~ 11.02',
-                emoji: '🍊',
+                logo: 'logo_jeju.png',
                 color: 'orange',
                 desc: '우리의 첫 완전체 여행! 날씨가 완벽하진 않았지만 그래서 더 잊지 못할 추억이 된 제주도 풀빌라 여행.',
                 lat: 33.4996,
@@ -387,9 +384,20 @@
                 title: '성심당 빵지순례',
                 region: '대전광역시',
                 date: '2024.09.26 ~ 09.27',
-                emoji: '🍞',
+                logo: 'logo_daejeon.png',
                 color: 'yellow',
                 desc: '오직 빵을 위해 떠난 대전. 두 손 무겁게 돌아왔던 달콤한 하루.',
+                lat: 36.3504,
+                lng: 127.3845
+            },
+            {
+                id: 8,
+                title: '2026년 대전 방문',
+                region: '대전광역시',
+                date: '2026.01.26 ~ 01.27',
+                logo: 'logo_daejeon.png',
+                color: 'yellow',
+                desc: '2026년 새해에 다시 찾은 대전광역시 기록.',
                 lat: 36.3504,
                 lng: 127.3845
             }
@@ -476,12 +484,32 @@
                 }
             });
 
+            // 홈 버튼(<a> 태그) 색상 동기화 (지도 탭에서 혼자 밝은 회색으로 남는 문제 해결)
+            const homeLink = document.querySelector('#bottom-nav a');
+            if (homeLink) {
+                const homeIcon = homeLink.querySelector('i');
+                const homeLabel = homeLink.querySelector('span');
+                
+                homeIcon.className = homeIcon.className.replace(/text-(white|gray-300|black|gray-600)/g, '').trim();
+                homeLabel.className = homeLabel.className.replace(/text-(white|gray-300|black|gray-600)/g, '').replace(/font-(medium|bold)/g, '').trim();
+
+                if (index === 0) {
+                    homeIcon.className += ' text-gray-600';
+                    homeLabel.className += ' text-gray-600 font-medium';
+                } else {
+                    homeIcon.className += ' text-gray-300';
+                    homeLabel.className += ' text-gray-300 font-medium';
+                }
+            }
+
             if (index === 0 && map) {
                 window.dispatchEvent(new Event('resize'));
             }
             
             if (index === 1) {
                 renderTravelList();
+            } else if (index === 2) {
+                renderStats(); // 통계 탭을 누르면 통계 데이터 렌더링
             }
         }
 
@@ -581,7 +609,9 @@
                 const markerHtml = `
                     <div id="marker-${index}" class="travel-marker">
                         <div class="travel-marker-label" style="display:none;">${trip.region}</div>
-                        <div class="travel-marker-icon" style="background-color: ${theme.markerBg};">${trip.emoji}</div>
+                        <div class="travel-marker-icon overflow-hidden" style="background-color: ${theme.markerBg}; padding: 2px;">
+                            <img src="${trip.logo}" alt="logo" class="w-full h-full object-cover rounded-full">
+                        </div>
                         <div class="travel-marker-tail" style="border-top-color: ${theme.markerBg};"></div>
                     </div>
                 `;
@@ -637,8 +667,8 @@
             }
 
             const theme = colorThemes[trip.color] || colorThemes.blue;
-            document.getElementById('sheet-emoji').innerText = trip.emoji;
-            document.getElementById('sheet-emoji').className = `w-12 h-12 rounded-full ${theme.bg} ${theme.text} flex items-center justify-center text-2xl border ${theme.border}`;
+            document.getElementById('sheet-emoji').innerHTML = `<img src="${trip.logo}" alt="logo" class="w-full h-full object-cover rounded-full">`;
+            document.getElementById('sheet-emoji').className = `w-12 h-12 rounded-full ${theme.bg} flex items-center justify-center border ${theme.border} overflow-hidden p-0.5`;
             
             document.getElementById('sheet-date').innerText = trip.date;
             document.getElementById('sheet-date').className = `text-[10px] font-bold ${theme.text} ${theme.bg} px-2 py-0.5 rounded-full`;
@@ -685,6 +715,33 @@
             }
         }
 
+        // --- 위성 지도 토글 기능 ---
+        function toggleSatellite() {
+            if (navigator.vibrate) navigator.vibrate(5);
+            isSatellite = !isSatellite;
+
+            // 스위치 UI 업데이트
+            const bg = document.getElementById('satellite-toggle-bg');
+            const circle = document.getElementById('satellite-toggle-circle');
+            
+            if (isSatellite) {
+                bg.classList.remove('bg-gray-600');
+                bg.classList.add('bg-blue-500');
+                circle.classList.remove('bg-gray-300');
+                circle.classList.add('bg-white', 'translate-x-4');
+            } else {
+                bg.classList.remove('bg-blue-500');
+                bg.classList.add('bg-gray-600');
+                circle.classList.remove('bg-white', 'translate-x-4');
+                circle.classList.add('bg-gray-300');
+            }
+
+            // 지도 타입 변경 (HYBRID: 위성 사진 + 도로/지명 표시)
+            if (map && typeof naver !== 'undefined' && naver.maps) {
+                map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.HYBRID : naver.maps.MapTypeId.NORMAL);
+            }
+        }
+
         function zoomToAll() {
             if (navigator.vibrate) navigator.vibrate(5);
             closeBottomSheet();
@@ -713,8 +770,8 @@
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-3">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full ${theme.bg} flex items-center justify-center text-xl border ${theme.border}">
-                                ${trip.emoji}
+                            <div class="w-10 h-10 rounded-full ${theme.bg} flex items-center justify-center border ${theme.border} overflow-hidden p-0.5">
+                                <img src="${trip.logo}" alt="logo" class="w-full h-full object-cover rounded-full">
                             </div>
                             <div>
                                 <h3 class="text-base font-bold text-gray-100">${trip.region}</h3>
@@ -730,6 +787,102 @@
                 `;
                 container.appendChild(card);
             });
+        }
+
+        // 통계 렌더링 함수 추가
+        function renderStats() {
+            const container = document.getElementById('stats-container');
+            if (!container) return;
+
+            let totalTrips = travelData.length;
+            let totalDays = 0;
+            let regionCounts = {};
+
+            // 데이터 분석
+            travelData.forEach(trip => {
+                // 1. 지역 카운트
+                let region = trip.region;
+                regionCounts[region] = (regionCounts[region] || 0) + 1;
+
+                // 2. 여행 일수 계산 (예: '2024.10.30 ~ 11.02')
+                if (trip.date.includes('~')) {
+                    let parts = trip.date.split('~').map(s => s.trim());
+                    let startStr = parts[0].replace(/\./g, '-');
+                    let endStr = parts[1];
+                    // 연도가 생략된 경우 (예: '08.30') 앞에 연도 붙여주기
+                    if (endStr.length <= 5) { 
+                        endStr = parts[0].substring(0, 5) + endStr; 
+                    }
+                    endStr = endStr.replace(/\./g, '-');
+                    
+                    let start = new Date(startStr);
+                    let end = new Date(endStr);
+                    let days = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                    totalDays += (isNaN(days) ? 1 : days);
+                } else {
+                    // 당일치기
+                    totalDays += 1;
+                }
+            });
+
+            // 가장 많이 간 지역 찾기 (내림차순 정렬)
+            let sortedRegions = Object.entries(regionCounts).sort((a, b) => b[1] - a[1]);
+            let favoriteRegion = sortedRegions.length > 0 ? sortedRegions[0][0] : '-';
+            // 이름이 길면 마지막 단어만 추출 (예: '경상북도 구미시' -> '구미시')
+            let shortFavoriteRegion = favoriteRegion.split(' ').pop();
+            let uniqueRegions = sortedRegions.length;
+
+            // HTML 렌더링
+            container.innerHTML = `
+                <div class="px-5 pt-4">
+                    <!-- 요약 카드 4개 그리드 -->
+                    <div class="grid grid-cols-2 gap-3 mb-6 fade-in-up">
+                        <div class="list-card p-4">
+                            <div class="text-xs font-medium text-gray-400 mb-1">총 여행 횟수</div>
+                            <div class="text-2xl font-bold text-white flex items-baseline gap-1">
+                                ${totalTrips} <span class="text-sm font-normal text-gray-500">번</span>
+                            </div>
+                        </div>
+                        <div class="list-card p-4">
+                            <div class="text-xs font-medium text-gray-400 mb-1">총 여행 일수</div>
+                            <div class="text-2xl font-bold text-white flex items-baseline gap-1">
+                                ${totalDays} <span class="text-sm font-normal text-gray-500">일</span>
+                            </div>
+                        </div>
+                        <div class="list-card p-4">
+                            <div class="text-xs font-medium text-gray-400 mb-1">발도장 찍은 곳</div>
+                            <div class="text-2xl font-bold text-white flex items-baseline gap-1">
+                                ${uniqueRegions} <span class="text-sm font-normal text-gray-500">곳</span>
+                            </div>
+                        </div>
+                        <div class="list-card p-4">
+                            <div class="text-xs font-medium text-gray-400 mb-1">최애 여행지</div>
+                            <div class="text-lg font-bold text-blue-400 flex items-center h-[32px] break-keep leading-tight">
+                                ${shortFavoriteRegion}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 지역별 방문 랭킹 -->
+                    <h3 class="text-sm font-bold text-gray-300 mb-3 px-1 fade-in-up" style="animation-delay: 0.1s;">지역별 방문 횟수</h3>
+                    <div class="list-card overflow-hidden fade-in-up" style="animation-delay: 0.2s;">
+                        ${sortedRegions.map((r, i) => `
+                            <div class="flex justify-between items-center p-4 border-b border-white/5 last:border-0">
+                                <div class="flex items-center gap-3">
+                                    <!-- 1, 2, 3등에 따라 메달 색상 차등 적용 -->
+                                    <div class="w-7 h-7 rounded-full ${i === 0 ? 'bg-yellow-500/20 text-yellow-400' : (i===1 ? 'bg-gray-300/20 text-gray-300' : (i===2 ? 'bg-orange-700/20 text-orange-500' : 'bg-white/5 text-gray-500'))} flex items-center justify-center text-xs font-bold shadow-sm">
+                                        ${i + 1}
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-200">${r[0]}</span>
+                                </div>
+                                <div class="text-sm font-bold text-white flex items-baseline gap-0.5">
+                                    ${r[1]}<span class="text-[10px] font-normal text-gray-500">번</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
         }
 
         // 초기 실행
