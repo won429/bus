@@ -752,19 +752,17 @@
                     const cols = rows[i].split(',');
                     if (cols.length < 1) continue;
 
-                    // 1. 역 이름 정확도 100% 매칭 ('대구'가 '서대구'를 불러오는 현상 완벽 차단)
-                    // (공백, 따옴표, 뒤에 붙은 '역' 글자를 모두 제거하고 비교)
-                    const c0 = cols[0] ? cols[0].replace(/["'\s]/g, '').replace(/역$/, '') : '';
-                    const c1 = cols[1] ? cols[1].replace(/["'\s]/g, '').replace(/역$/, '') : '';
+                    // 1. 헤더 오작동 방지: 오직 A열(cols[0])에서만 역 이름을 찾습니다.
+                    const c0 = cols[0] ? cols[0].replace(/["'\s\r]/g, '').replace(/역$/, '') : '';
                     
-                    if(c0 === stationName || c1 === stationName) {
-                        // 2. 사용자의 요청: 역 이름이 있는 줄(윗줄)이 아니라 그 아랫줄(출발시간)을 읽어야 함
+                    if(c0 === stationName) {
+                        // 2. 역 이름이 있는 줄 바로 아랫줄(출발시간)을 읽습니다.
                         targetRowIndex = i + 1;
                         break; 
                     }
                 }
 
-                if (targetRowIndex !== -1 && targetRowIndex < rows.length) {
+                if (targetRowIndex !== -1 && targetRowIndex < rows.length && rows[targetRowIndex]) {
                     const targetRow = rows[targetRowIndex];
                     const cols = targetRow.split(',');
                     for(let col of cols) {
