@@ -746,17 +746,35 @@
                 const text = await response.text();
                 const rows = text.split('\n');
                 let times = [];
+                let foundStationRows = [];
                 
                 for(let row of rows) {
-                    if(row.includes(stationName)) {
-                        const cols = row.split(',');
-                        for(let col of cols) {
-                            const match = col.trim().match(/(\d{1,2}):(\d{2})/);
-                            if(match) {
-                                times.push(parseInt(match[1]) * 60 + parseInt(match[2]));
-                            }
+                    const cols = row.split(',');
+                    if (cols.length < 1) continue;
+
+                    // 1. 역 이름 정확도 100% 매칭 ('대구'가 '서대구'를 불러오는 현상 완벽 차단)
+                    // (공백, 따옴표, 뒤에 붙은 '역' 글자를 모두 제거하고 비교)
+                    const c0 = cols[0] ? cols[0].replace(/["'\s]/g, '').replace(/역$/, '') : '';
+                    const c1 = cols[1] ? cols[1].replace(/["'\s]/g, '').replace(/역$/, '') : '';
+                    
+                    if(c0 === stationName || c1 === stationName) {
+                        foundStationRows.push(row);
+                    }
+                }
+
+                let targetRow = null;
+                if (foundStationRows.length > 0) {
+                    // 2. 여러 데이터 줄이 있다면 '도착' 말고 무조건 '출발'이 포함된 줄을 우선 선택
+                    targetRow = foundStationRows.find(r => r.includes('출발'));
+                    // 만약 파일에 출발이라는 단어가 없다면 검색된 첫 번째 줄을 사용
+                    if (!targetRow) targetRow = foundStationRows[0];
+                    
+                    const cols = targetRow.split(',');
+                    for(let col of cols) {
+                        const match = col.trim().match(/(\d{1,2}):(\d{2})/);
+                        if(match) {
+                            times.push(parseInt(match[1], 10) * 60 + parseInt(match[2], 10));
                         }
-                        break; 
                     }
                 }
 
@@ -773,7 +791,7 @@
 
                 if(upcoming.length > 0) {
                     const diff = upcoming[0] - currentMins;
-                    // [변경점] 남은 시간이 120분(2시간) 이하일 때만 시간을 표시하고, 넘어가면 '운행 종료'로 표시
+                    // 남은 시간이 120분(2시간) 이하일 때만 시간을 표시하고, 넘어가면 '운행 종료'로 표시
                     if (diff <= 120) {
                         el.innerText = diff === 0 ? "곧 도착" : (diff <= 5 ? `곧 도착 (${diff}분)` : `${diff}분 후`);
                         el.className = diff <= 5 ? "text-sm font-bold text-red-400" : "text-sm font-bold text-white";
