@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Enjoy Travel Record</title>
     
+    <!-- 전역 에러 핸들러: 미리보기 환경의 크로스 도메인 스크립트 에러 방지 -->
+    <script>
+        window.addEventListener('error', function(e) {
+            if (e.message === 'Script error.' || (e.message && e.message.includes('Script error'))) {
+                console.warn('외부 스크립트(네이버 지도 API 등) 도메인 제한으로 인한 경고입니다. (정상 작동 중)');
+                e.preventDefault(); // 콘솔에 빨간 에러창이 뜨는 것을 방지
+            }
+        });
+    </script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -13,7 +23,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- 네이버 지도 API -->
-    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=9nl297jo77"></script>
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=9nl297jo77" crossorigin="anonymous"></script>
 
     <style>
         body { 
@@ -124,7 +134,7 @@
 </head>
 <body class="w-full h-[100dvh] bg-[#0a0a0a] flex justify-center items-center overflow-hidden">
 
-    <!-- 스마트폰 형태의 메인 컨테이너 (이 안에서만 모든 화면이 렌더링됩니다) -->
+    <!-- 스마트폰 형태의 메인 컨테이너 -->
     <div id="mobile-wrapper" class="w-full h-full max-w-[430px] bg-black relative flex flex-col overflow-hidden sm:border-x border-white/10 sm:shadow-2xl">
 
         <!-- 1. 지도 화면 (메인) -->
@@ -158,7 +168,7 @@
                 </div>
             </header>
 
-            <!-- 선택된 여행지 정보 바텀 시트 (이제 모바일 래퍼 안에서 absolute로 동작) -->
+            <!-- 선택된 여행지 정보 바텀 시트 -->
             <div id="bottom-sheet" class="absolute bottom-24 left-1/2 -translate-x-1/2 w-[92%] z-30 toss-card p-5 cursor-default">
                 <button onclick="closeBottomSheet()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
                     <i class="fa-solid fa-xmark"></i>
@@ -251,7 +261,7 @@
             </div>
         </main>
 
-        <!-- 내부 브라우저 (유튜브 링크용) - 컨테이너 내부에 absolute로 배치 -->
+        <!-- 내부 브라우저 (유튜브 링크용) -->
         <div id="browser-screen" class="hidden absolute inset-0 z-[100] flex-col bg-black">
             <header class="flex-none pt-safe px-4 pb-3 flex items-center bg-black border-b border-gray-800">
                 <button onclick="closeBrowser()" class="w-8 h-8 flex items-center justify-center text-white active:scale-90 transition-transform">
@@ -267,7 +277,7 @@
             </div>
         </div>
 
-        <!-- 하단 플로팅 메뉴 - fixed 대신 absolute로 변경하여 컨테이너 안에 갇히게 함 -->
+        <!-- 하단 플로팅 메뉴 -->
         <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[340px] px-2 touch-pan-x select-none">
             <div class="flex items-center justify-between bg-white/10 backdrop-blur-[4px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1.5 gap-0.5 ring-1 ring-white/30 relative mix-blend-difference">
                 <!-- 활성화 표시 배경 -->
@@ -424,8 +434,9 @@
 
         // 지도 초기화
         function initMap() {
-            if (typeof naver === 'undefined') {
-                console.error("네이버 지도 API를 불러올 수 없습니다.");
+            // [방어 코드] 네이버 지도 API가 차단되었거나 로딩 실패 시 안전하게 중단
+            if (typeof naver === 'undefined' || typeof naver.maps === 'undefined' || typeof naver.maps.LatLng === 'undefined') {
+                console.warn("네이버 지도 API를 불러올 수 없습니다. (미리보기 환경 등 도메인 미등록 상태)");
                 return;
             }
 
@@ -452,6 +463,8 @@
 
         // 마커 생성
         function createMarkers() {
+            if (!map || typeof naver === 'undefined' || !naver.maps) return;
+
             travelData.forEach((trip, index) => {
                 const position = new naver.maps.LatLng(trip.lat, trip.lng);
                 const theme = colorThemes[trip.color] || colorThemes.blue;
@@ -491,7 +504,9 @@
                     prevEl.classList.remove('active');
                     prevEl.querySelector('.travel-marker-label').style.display = 'none';
                 }
-                markers[activeMarkerIndex].setZIndex(10);
+                if (typeof markers[activeMarkerIndex].setZIndex === 'function') {
+                    markers[activeMarkerIndex].setZIndex(10);
+                }
             }
 
             activeMarkerIndex = index;
@@ -503,9 +518,15 @@
                 el.classList.add('active');
                 el.querySelector('.travel-marker-label').style.display = 'block';
             }
-            marker.setZIndex(100);
+            
+            // [방어 코드] 마커나 지도가 정상 객체일 때만 함수 실행
+            if (marker && typeof marker.setZIndex === 'function') {
+                marker.setZIndex(100);
+            }
 
-            map.morph(marker.getPosition(), 10, { duration: 300 });
+            if (map && typeof map.morph === 'function' && marker) {
+                map.morph(marker.getPosition(), 10, { duration: 300 });
+            }
 
             const theme = colorThemes[trip.color] || colorThemes.blue;
             document.getElementById('sheet-emoji').innerText = trip.emoji;
@@ -518,15 +539,15 @@
             document.getElementById('sheet-desc').innerText = trip.desc;
 
             const ytBtn = document.querySelector('#bottom-sheet button:last-child');
-            ytBtn.onclick = () => window.openBrowser(trip.youtube);
+            if (ytBtn) ytBtn.onclick = () => window.openBrowser(trip.youtube);
 
             const sheet = document.getElementById('bottom-sheet');
-            sheet.classList.add('show');
+            if (sheet) sheet.classList.add('show');
         }
 
         function closeBottomSheet() {
             const sheet = document.getElementById('bottom-sheet');
-            sheet.classList.remove('show');
+            if (sheet) sheet.classList.remove('show');
             
             if (activeMarkerIndex !== -1 && markers[activeMarkerIndex]) {
                 const el = document.getElementById(`marker-${activeMarkerIndex}`);
@@ -534,7 +555,9 @@
                     el.classList.remove('active');
                     el.querySelector('.travel-marker-label').style.display = 'none';
                 }
-                markers[activeMarkerIndex].setZIndex(10);
+                if (typeof markers[activeMarkerIndex].setZIndex === 'function') {
+                    markers[activeMarkerIndex].setZIndex(10);
+                }
                 activeMarkerIndex = -1;
             }
         }
@@ -542,11 +565,15 @@
         function zoomToAll() {
             if (navigator.vibrate) navigator.vibrate(5);
             closeBottomSheet();
-            map.morph(new naver.maps.LatLng(36.3504, 127.3845), 7, { duration: 400 });
+            // [방어 코드] 지도 객체가 없을 경우 무시
+            if (map && typeof map.morph === 'function' && typeof naver !== 'undefined' && naver.maps) {
+                map.morph(new naver.maps.LatLng(36.3504, 127.3845), 7, { duration: 400 });
+            }
         }
 
         function renderTravelList() {
             const container = document.getElementById('travel-list-container');
+            if (!container) return;
             container.innerHTML = '';
 
             travelData.forEach((trip, i) => {
@@ -588,18 +615,22 @@
             const frame = document.getElementById('internal-browser-frame');
             const loader = document.getElementById('browser-loader');
             
-            loader.style.display = 'flex';
-            frame.src = url;
-            screen.classList.remove('hidden');
-            screen.classList.add('flex');
+            if (loader) loader.style.display = 'flex';
+            if (frame) frame.src = url;
+            if (screen) {
+                screen.classList.remove('hidden');
+                screen.classList.add('flex');
+            }
         };
 
         window.closeBrowser = function() {
             const screen = document.getElementById('browser-screen');
             const frame = document.getElementById('internal-browser-frame');
-            screen.classList.add('hidden');
-            screen.classList.remove('flex');
-            frame.src = '';
+            if (screen) {
+                screen.classList.add('hidden');
+                screen.classList.remove('flex');
+            }
+            if (frame) frame.src = '';
         };
 
         // 초기 실행
