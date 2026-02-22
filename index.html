@@ -166,12 +166,12 @@
                 <div class="flex justify-between items-center mt-2 w-full">
                     <div class="pointer-events-auto">
                         <h2 class="text-2xl font-bold text-main drop-shadow-lg">우리의 발자취 ✈️</h2>
-                        <p class="text-sm font-medium text-gray-300 drop-shadow-md">총 8번의 즐거운 여행</p>
+                        <p class="text-sm font-medium text-gray-300 drop-shadow-md">총 9번의 즐거운 여행</p>
                     </div>
                     <div class="flex gap-2 pointer-events-auto">
                         <!-- 마커 보이기/숨기기 토글 버튼 추가 -->
                         <button id="marker-toggle-btn" onclick="toggleMarkers()" class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-lg active:scale-90 transition-transform">
-                            <i class="fa-solid fa-eye text-sm text-white"></i>
+                            <i class="fa-solid fa-eye-slash text-sm text-gray-400"></i>
                         </button>
                         <button onclick="zoomToAll()" class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-lg active:scale-90 transition-transform">
                             <i class="fa-solid fa-expand text-sm"></i>
@@ -308,7 +308,7 @@
         let map = null;
         let markers = [];
         let activeMarkerIndex = -1;
-        let isMarkerVisible = true; // 마커 표시 상태
+        let isMarkerVisible = false; // 마커 표시 상태
         let isSatellite = false; // 위성 지도 상태
 
         // 여행 데이터 모음
@@ -400,6 +400,17 @@
                 desc: '2026년 새해에 다시 찾은 대전광역시 기록.',
                 lat: 36.3504,
                 lng: 127.3845
+            },
+            {
+                id: 9,
+                title: '우리의 시작, 파주',
+                region: '경기도 파주시',
+                date: '2023년 상반기 ~ 2024년 하반기',
+                logo: 'logo_paju.png',
+                color: 'blue',
+                desc: '우리가 군생활을 했던 곳이고 우리가 만난 곳이라는 의미를 담고 있어.',
+                lat: 37.7599,
+                lng: 126.7795
             }
         ];
 
@@ -624,7 +635,8 @@
                         size: new naver.maps.Size(40, 48),
                         anchor: new naver.maps.Point(20, 48)
                     },
-                    zIndex: 10
+                    zIndex: 10,
+                    visible: isMarkerVisible
                 });
 
                 markers.push(marker);
