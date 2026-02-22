@@ -12,14 +12,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- 네이버 지도 API (기존 키 사용) -->
+    <!-- 네이버 지도 API -->
     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=9nl297jo77"></script>
 
     <style>
         body { 
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "sans-serif";
-            background-color: #000000;
-            color: #FFFFFF;
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
             touch-action: pan-y;
@@ -124,170 +122,187 @@
         }
     </style>
 </head>
-<body class="w-full h-[100dvh] flex flex-col overflow-hidden bg-black" ontouchstart="">
+<body class="w-full h-[100dvh] bg-[#0a0a0a] flex justify-center items-center overflow-hidden">
 
-    <!-- 1. 지도 화면 (메인) -->
-    <main id="map-screen" class="flex-1 relative w-full h-full bg-[#111]">
-        <!-- 네이버 지도 컨테이너 -->
-        <div id="map" class="absolute inset-0 z-0"></div>
-        
-        <!-- 상단 헤더 오버레이 -->
-        <header class="absolute top-0 left-0 right-0 pt-safe px-5 pb-4 z-10 pointer-events-none bg-gradient-to-b from-black/80 to-transparent">
-            <div class="flex justify-between items-center mt-2">
-                <div class="pointer-events-auto">
-                    <h2 class="text-2xl font-bold text-main drop-shadow-lg">우리의 발자취 ✈️</h2>
-                    <p class="text-sm font-medium text-gray-300 drop-shadow-md">총 4번의 즐거운 여행</p>
-                </div>
-                <button onclick="zoomToAll()" class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white pointer-events-auto shadow-lg active:scale-90 transition-transform">
-                    <i class="fa-solid fa-expand text-sm"></i>
-                </button>
-            </div>
-        </header>
+    <!-- 스마트폰 형태의 메인 컨테이너 (이 안에서만 모든 화면이 렌더링됩니다) -->
+    <div id="mobile-wrapper" class="w-full h-full max-w-[430px] bg-black relative flex flex-col overflow-hidden sm:border-x border-white/10 sm:shadow-2xl">
 
-        <!-- 선택된 여행지 정보 바텀 시트 -->
-        <div id="bottom-sheet" class="absolute bottom-20 left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-20 toss-card p-5 cursor-default">
-            <button onclick="closeBottomSheet()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
+        <!-- 1. 지도 화면 (메인) -->
+        <main id="map-screen" class="flex-1 relative w-full flex flex-col bg-[#111]">
             
-            <div class="flex items-center gap-3 mb-3">
-                <div id="sheet-emoji" class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl border border-blue-500/30">
-                    🍊
-                </div>
-                <div class="flex-1">
-                    <span id="sheet-date" class="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">2024.08.15</span>
-                    <h3 id="sheet-title" class="text-xl font-bold text-white mt-1 leading-tight">제주도 출장엔조이</h3>
-                </div>
+            <!-- 오류/안내 배경 -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-0 bg-[#111]">
+                <i class="fa-solid fa-map-location-dot text-4xl text-gray-600 mb-4"></i>
+                <p class="text-sm text-gray-400 break-keep leading-relaxed">
+                    <span class="text-blue-400 font-bold">지도 로딩 중...</span><br><br>
+                    만약 지도가 계속 보이지 않는다면,<br>
+                    이곳(미리보기) 주소가 네이버 클라우드에<br>
+                    등록되지 않아 차단된 것입니다.<br>
+                    <strong class="text-white mt-2 block">깃허브에 올리면 정상적으로 나타납니다! ✨</strong>
+                </p>
             </div>
+
+            <!-- 네이버 지도 컨테이너 -->
+            <div id="map" class="absolute inset-0 z-10"></div>
             
-            <p id="sheet-desc" class="text-sm text-gray-300 font-medium mb-4 break-keep line-clamp-2">
-                여름 휴가 겸 떠난 첫 출장엔조이! 비도 오고 우여곡절이 많았지만 즐거웠던 기억.
-            </p>
-            
-            <div class="flex gap-2">
-                <button onclick="alert('준비 중인 기능입니다!')" class="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm font-bold py-3 rounded-xl transition-colors border border-white/5">
-                    <i class="fa-regular fa-images mr-1"></i> 사진 보기
-                </button>
-                <button onclick="window.openBrowser('https://youtu.be/tjIYiWqG6Hk')" class="flex-[1.5] bg-[#3182F6] hover:bg-blue-600 text-white text-sm font-bold py-3 rounded-xl shadow-lg transition-colors">
-                    <i class="fa-brands fa-youtube mr-1"></i> 브이로그 시청
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <!-- 2. 목록 화면 -->
-    <main id="list-screen" class="hidden flex-1 overflow-y-auto scrollbar-hide w-full max-w-md mx-auto relative min-h-full pb-24 bg-black">
-        <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
-            <div class="px-5 pt-3 pb-4 flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-main drop-shadow-sm">여행 기록</h2>
-                <div class="text-xs font-medium text-gray-400 bg-gray-900 px-3 py-1.5 rounded-full border border-gray-800">
-                    최신순 <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i>
-                </div>
-            </div>
-        </header>
-
-        <div class="px-5 pt-4 space-y-4" id="travel-list-container">
-            <!-- JS로 목록 렌더링 -->
-        </div>
-    </main>
-
-    <!-- 3. 통계 화면 (준비중) -->
-    <main id="stats-screen" class="hidden flex-1 overflow-y-auto scrollbar-hide w-full max-w-md mx-auto relative min-h-full pb-24 bg-black">
-        <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
-            <div class="px-5 pt-3 pb-4 flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-main drop-shadow-sm">통계</h2>
-            </div>
-        </header>
-        <div class="flex-1 h-[70vh] flex flex-col items-center justify-center text-center px-6">
-            <div class="w-20 h-20 bg-[#1C1C1E] rounded-full flex items-center justify-center text-3xl mb-4 border border-white/5 shadow-lg">
-                📊
-            </div>
-            <h3 class="text-lg font-bold text-white mb-2">여행 통계 준비 중</h3>
-            <p class="text-sm text-gray-400 break-keep">가장 많이 간 지역, 누적 이동 거리 등<br>다양한 통계 데이터를 모으고 있어요!</p>
-        </div>
-    </main>
-
-    <!-- 4. 설정 화면 -->
-    <main id="settings-screen" class="hidden flex-1 overflow-y-auto scrollbar-hide w-full max-w-md mx-auto relative min-h-full pb-24 bg-black">
-        <header class="flex-none pt-safe px-5 pb-4 flex justify-between items-center bg-black/80 backdrop-blur-md border-b border-white/10 z-10 sticky top-0">
-            <h2 class="text-xl font-bold text-main drop-shadow-sm mt-2">설정</h2>
-        </header>
-        <div class="px-5 pt-4">
-            <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">지도 설정</h4>
-            <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
-                <div class="w-full flex justify-between items-center p-4 border-b border-white/5">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-[10px] bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fa-solid fa-map"></i></div>
-                        <span class="text-sm font-bold text-gray-200">위성 지도로 보기</span>
+            <!-- 상단 헤더 오버레이 -->
+            <header class="absolute top-0 left-0 right-0 pt-safe px-5 pb-4 z-20 pointer-events-none bg-gradient-to-b from-black/80 to-transparent">
+                <div class="flex justify-between items-center mt-2">
+                    <div class="pointer-events-auto">
+                        <h2 class="text-2xl font-bold text-main drop-shadow-lg">우리의 발자취 ✈️</h2>
+                        <p class="text-sm font-medium text-gray-300 drop-shadow-md">총 4번의 즐거운 여행</p>
                     </div>
-                    <div class="w-10 h-6 bg-gray-600 rounded-full relative"><div class="absolute left-1 top-1 w-4 h-4 bg-gray-300 rounded-full"></div></div>
+                    <button onclick="zoomToAll()" class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white pointer-events-auto shadow-lg active:scale-90 transition-transform">
+                        <i class="fa-solid fa-expand text-sm"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- 선택된 여행지 정보 바텀 시트 (이제 모바일 래퍼 안에서 absolute로 동작) -->
+            <div id="bottom-sheet" class="absolute bottom-24 left-1/2 -translate-x-1/2 w-[92%] z-30 toss-card p-5 cursor-default">
+                <button onclick="closeBottomSheet()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                
+                <div class="flex items-center gap-3 mb-3">
+                    <div id="sheet-emoji" class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl border border-blue-500/30">
+                        🍊
+                    </div>
+                    <div class="flex-1">
+                        <span id="sheet-date" class="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">2024.08.15</span>
+                        <h3 id="sheet-title" class="text-xl font-bold text-white mt-1 leading-tight">제주도 출장엔조이</h3>
+                    </div>
+                </div>
+                
+                <p id="sheet-desc" class="text-sm text-gray-300 font-medium mb-4 break-keep line-clamp-2">
+                    여름 휴가 겸 떠난 첫 출장엔조이! 비도 오고 우여곡절이 많았지만 즐거웠던 기억.
+                </p>
+                
+                <div class="flex gap-2">
+                    <button onclick="alert('준비 중인 기능입니다!')" class="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm font-bold py-3 rounded-xl transition-colors border border-white/5">
+                        <i class="fa-regular fa-images mr-1"></i> 사진 보기
+                    </button>
+                    <button onclick="window.openBrowser('https://youtu.be/tjIYiWqG6Hk')" class="flex-[1.5] bg-[#3182F6] hover:bg-blue-600 text-white text-sm font-bold py-3 rounded-xl shadow-lg transition-colors">
+                        <i class="fa-brands fa-youtube mr-1"></i> 브이로그 시청
+                    </button>
                 </div>
             </div>
+        </main>
 
-            <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">데이터 관리</h4>
-            <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
-                <button class="w-full flex justify-between items-center p-4 border-b border-white/5 hover:bg-white/5 transition-colors text-left">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-[10px] bg-emerald-500/20 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                        <span class="text-sm font-bold text-gray-200">기록 백업하기</span>
+        <!-- 2. 목록 화면 -->
+        <main id="list-screen" class="hidden flex-1 relative w-full flex-col bg-black overflow-y-auto scrollbar-hide pb-24">
+            <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
+                <div class="px-5 pt-3 pb-4 flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-main drop-shadow-sm">여행 기록</h2>
+                    <div class="text-xs font-medium text-gray-400 bg-gray-900 px-3 py-1.5 rounded-full border border-gray-800">
+                        최신순 <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i>
                     </div>
-                    <i class="fa-solid fa-chevron-right text-gray-600 text-xs"></i>
+                </div>
+            </header>
+
+            <div class="px-5 pt-4 space-y-4" id="travel-list-container">
+                <!-- JS로 목록 렌더링 -->
+            </div>
+        </main>
+
+        <!-- 3. 통계 화면 -->
+        <main id="stats-screen" class="hidden flex-1 relative w-full flex-col bg-black overflow-y-auto scrollbar-hide pb-24">
+            <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
+                <div class="px-5 pt-3 pb-4 flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-main drop-shadow-sm">통계</h2>
+                </div>
+            </header>
+            <div class="flex-1 flex flex-col items-center justify-center text-center px-6 min-h-[60vh]">
+                <div class="w-20 h-20 bg-[#1C1C1E] rounded-full flex items-center justify-center text-3xl mb-4 border border-white/5 shadow-lg">
+                    📊
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">여행 통계 준비 중</h3>
+                <p class="text-sm text-gray-400 break-keep">가장 많이 간 지역, 누적 이동 거리 등<br>다양한 통계 데이터를 모으고 있어요!</p>
+            </div>
+        </main>
+
+        <!-- 4. 설정 화면 -->
+        <main id="settings-screen" class="hidden flex-1 relative w-full flex-col bg-black overflow-y-auto scrollbar-hide pb-24">
+            <header class="flex-none pt-safe px-5 pb-4 flex justify-between items-center bg-black/80 backdrop-blur-md border-b border-white/10 z-10 sticky top-0">
+                <h2 class="text-xl font-bold text-main drop-shadow-sm mt-2">설정</h2>
+            </header>
+            <div class="px-5 pt-4">
+                <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">지도 설정</h4>
+                <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
+                    <div class="w-full flex justify-between items-center p-4 border-b border-white/5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-[10px] bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fa-solid fa-map"></i></div>
+                            <span class="text-sm font-bold text-gray-200">위성 지도로 보기</span>
+                        </div>
+                        <div class="w-10 h-6 bg-gray-600 rounded-full relative"><div class="absolute left-1 top-1 w-4 h-4 bg-gray-300 rounded-full"></div></div>
+                    </div>
+                </div>
+
+                <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">데이터 관리</h4>
+                <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
+                    <button class="w-full flex justify-between items-center p-4 border-b border-white/5 hover:bg-white/5 transition-colors text-left">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-[10px] bg-emerald-500/20 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                            <span class="text-sm font-bold text-gray-200">기록 백업하기</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-gray-600 text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- 내부 브라우저 (유튜브 링크용) - 컨테이너 내부에 absolute로 배치 -->
+        <div id="browser-screen" class="hidden absolute inset-0 z-[100] flex-col bg-black">
+            <header class="flex-none pt-safe px-4 pb-3 flex items-center bg-black border-b border-gray-800">
+                <button onclick="closeBrowser()" class="w-8 h-8 flex items-center justify-center text-white active:scale-90 transition-transform">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+                <span class="flex-1 text-center text-sm font-bold text-gray-300 truncate pr-8">브이로그 시청</span>
+            </header>
+            <div class="flex-1 relative w-full h-full bg-black">
+                <div id="browser-loader" class="absolute inset-0 flex items-center justify-center text-blue-500 z-0">
+                    <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
+                </div>
+                <iframe id="internal-browser-frame" class="w-full h-full border-0 relative z-10 bg-transparent" allow="autoplay; encrypted-media" onload="document.getElementById('browser-loader').style.display='none'"></iframe>
+            </div>
+        </div>
+
+        <!-- 하단 플로팅 메뉴 - fixed 대신 absolute로 변경하여 컨테이너 안에 갇히게 함 -->
+        <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[340px] px-2 touch-pan-x select-none">
+            <div class="flex items-center justify-between bg-white/10 backdrop-blur-[4px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1.5 gap-0.5 ring-1 ring-white/30 relative mix-blend-difference">
+                <!-- 활성화 표시 배경 -->
+                <div id="nav-indicator" class="absolute top-1.5 bottom-1.5 bg-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-full backdrop-blur-[2px] border border-white/20 z-0 nav-transition" style="left: 6px; width: 66px;"></div>
+                
+                <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(0)">
+                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                        <i class="fa-solid fa-map-location-dot text-base text-white transition-colors"></i>
+                        <span class="text-[10px] font-bold text-white whitespace-nowrap transition-colors">지도</span>
+                    </div>
+                </button>
+
+                <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(1)">
+                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                        <i class="fa-solid fa-list-ul text-base text-gray-300 group-hover:text-white transition-colors"></i>
+                        <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">목록</span>
+                    </div>
+                </button>
+                
+                <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(2)">
+                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                        <i class="fa-solid fa-chart-pie text-base text-gray-300 group-hover:text-white transition-colors"></i>
+                        <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">통계</span>
+                    </div>
+                </button>
+                
+                <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(3)">
+                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
+                        <i class="fa-solid fa-gear text-base text-gray-300 group-hover:text-white transition-colors"></i>
+                        <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">설정</span>
+                    </div>
                 </button>
             </div>
-        </div>
-    </main>
-
-    <!-- 내부 브라우저 (유튜브 링크용) -->
-    <div id="browser-screen" class="hidden fixed inset-0 z-[100] flex-col bg-black">
-        <header class="flex-none pt-safe px-4 pb-3 flex items-center bg-black border-b border-gray-800">
-            <button onclick="closeBrowser()" class="w-8 h-8 flex items-center justify-center text-white active:scale-90 transition-transform">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-            <span class="flex-1 text-center text-sm font-bold text-gray-300 truncate pr-8">브이로그 시청</span>
-        </header>
-        <div class="flex-1 relative w-full h-full bg-black">
-            <div id="browser-loader" class="absolute inset-0 flex items-center justify-center text-blue-500 z-0">
-                <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
-            </div>
-            <iframe id="internal-browser-frame" class="w-full h-full border-0 relative z-10 bg-transparent" allow="autoplay; encrypted-media" onload="document.getElementById('browser-loader').style.display='none'"></iframe>
-        </div>
+        </nav>
     </div>
-
-    <!-- 하단 플로팅 메뉴 -->
-    <nav id="bottom-nav" class="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-full max-w-[320px] px-2 touch-pan-x select-none">
-        <div class="flex items-center justify-between bg-white/10 backdrop-blur-[4px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1.5 gap-0.5 ring-1 ring-white/30 relative mix-blend-difference">
-            <!-- 활성화 표시 배경 -->
-            <div id="nav-indicator" class="absolute top-1.5 bottom-1.5 bg-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-full backdrop-blur-[2px] border border-white/20 z-0 nav-transition" style="left: 6px; width: 66px;"></div>
-            
-            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(0)">
-                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                    <i class="fa-solid fa-map-location-dot text-base text-white transition-colors"></i>
-                    <span class="text-[10px] font-bold text-white whitespace-nowrap transition-colors">지도</span>
-                </div>
-            </button>
-
-            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(1)">
-                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                    <i class="fa-solid fa-list-ul text-base text-gray-300 group-hover:text-white transition-colors"></i>
-                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">목록</span>
-                </div>
-            </button>
-            
-            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(2)">
-                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                    <i class="fa-solid fa-chart-pie text-base text-gray-300 group-hover:text-white transition-colors"></i>
-                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">통계</span>
-                </div>
-            </button>
-            
-            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(3)">
-                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                    <i class="fa-solid fa-gear text-base text-gray-300 group-hover:text-white transition-colors"></i>
-                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">설정</span>
-                </div>
-            </button>
-        </div>
-    </nav>
 
     <script>
         // 전역 변수
@@ -347,7 +362,6 @@
             }
         ];
 
-        // 색상별 테마 매핑
         const colorThemes = {
             orange: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30', markerBg: '#F97316' },
             purple: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', markerBg: '#A855F7' },
@@ -370,7 +384,7 @@
             screens.forEach((screen, i) => {
                 if (i === index) {
                     screen.classList.remove('hidden');
-                    if (i !== 0) screen.classList.add('flex'); // map은 block 유지 (flex-1 덮어쓰기 주의)
+                    screen.classList.add('flex');
                 } else {
                     screen.classList.add('hidden');
                     screen.classList.remove('flex');
@@ -386,7 +400,6 @@
                 indicator.style.transform = `translateX(${navButtons[index].offsetLeft - 6}px)`;
             }
 
-            // 아이콘 색상 변경
             navButtons.forEach((btn, i) => {
                 const icon = btn.querySelector('i');
                 const label = btn.querySelector('span');
@@ -400,12 +413,10 @@
                 }
             });
 
-            // 지도 탭일 경우 렌더링 버그 방지
             if (index === 0 && map) {
                 window.dispatchEvent(new Event('resize'));
             }
             
-            // 목록 탭 진입 시 렌더링
             if (index === 1) {
                 renderTravelList();
             }
@@ -418,12 +429,11 @@
                 return;
             }
 
-            // 대한민국 중심 좌표 (대전 부근)
             const centerLocation = new naver.maps.LatLng(36.3504, 127.3845);
             
             const mapOptions = {
                 center: centerLocation,
-                zoom: 7, // 전국이 대략 보이게
+                zoom: 7,
                 scaleControl: false,
                 logoControl: true,
                 logoControlOptions: { position: naver.maps.Position.BOTTOM_LEFT },
@@ -432,11 +442,7 @@
             };
 
             map = new naver.maps.Map('map', mapOptions);
-
-            // 다크 모드 스타일 적용 (야간 지도 느낌)
-            // 참고: 네이버 지도는 완전한 다크테마 타일을 공식지원하진 않으므로, 추후 커스텀 타일이 필요할 수 있습니다.
             
-            // 지도 클릭 시 바텀시트 닫기
             naver.maps.Event.addListener(map, 'click', function() {
                 closeBottomSheet();
             });
@@ -471,7 +477,6 @@
 
                 markers.push(marker);
 
-                // 마커 클릭 이벤트
                 naver.maps.Event.addListener(marker, 'click', function(e) {
                     if (navigator.vibrate) navigator.vibrate(5);
                     focusMarker(index);
@@ -479,9 +484,7 @@
             });
         }
 
-        // 마커 포커스 및 바텀 시트 열기
         function focusMarker(index) {
-            // 이전 활성 마커 리셋
             if (activeMarkerIndex !== -1 && markers[activeMarkerIndex]) {
                 const prevEl = document.getElementById(`marker-${activeMarkerIndex}`);
                 if (prevEl) {
@@ -495,7 +498,6 @@
             const trip = travelData[index];
             const marker = markers[index];
 
-            // 현재 마커 활성화
             const el = document.getElementById(`marker-${index}`);
             if (el) {
                 el.classList.add('active');
@@ -503,10 +505,8 @@
             }
             marker.setZIndex(100);
 
-            // 지도를 마커 위치로 부드럽게 이동하고 약간 확대
             map.morph(marker.getPosition(), 10, { duration: 300 });
 
-            // 바텀 시트 정보 업데이트
             const theme = colorThemes[trip.color] || colorThemes.blue;
             document.getElementById('sheet-emoji').innerText = trip.emoji;
             document.getElementById('sheet-emoji').className = `w-12 h-12 rounded-full ${theme.bg} ${theme.text} flex items-center justify-center text-2xl border ${theme.border}`;
@@ -517,16 +517,13 @@
             document.getElementById('sheet-title').innerText = trip.title;
             document.getElementById('sheet-desc').innerText = trip.desc;
 
-            // 버튼 액션 교체
             const ytBtn = document.querySelector('#bottom-sheet button:last-child');
             ytBtn.onclick = () => window.openBrowser(trip.youtube);
 
-            // 바텀 시트 올리기
             const sheet = document.getElementById('bottom-sheet');
             sheet.classList.add('show');
         }
 
-        // 바텀 시트 닫기
         function closeBottomSheet() {
             const sheet = document.getElementById('bottom-sheet');
             sheet.classList.remove('show');
@@ -542,14 +539,12 @@
             }
         }
 
-        // 전국 지도로 줌 아웃
         function zoomToAll() {
             if (navigator.vibrate) navigator.vibrate(5);
             closeBottomSheet();
             map.morph(new naver.maps.LatLng(36.3504, 127.3845), 7, { duration: 400 });
         }
 
-        // 목록 화면 렌더링
         function renderTravelList() {
             const container = document.getElementById('travel-list-container');
             container.innerHTML = '';
@@ -558,10 +553,10 @@
                 const theme = colorThemes[trip.color] || colorThemes.blue;
                 
                 const card = document.createElement('div');
-                card.className = `list-card p-5 fade-in-up`;
+                card.className = `list-card p-5 fade-in-up cursor-pointer`;
                 card.style.animationDelay = `${i * 0.1}s`;
                 card.onclick = () => {
-                    window.haptic();
+                    if (navigator.vibrate) navigator.vibrate(10);
                     switchTab(0);
                     setTimeout(() => { focusMarker(i); }, 300);
                 };
@@ -588,7 +583,6 @@
             });
         }
 
-        // 내부 브라우저 제어 (유튜브 시청용)
         window.openBrowser = function(url) {
             const screen = document.getElementById('browser-screen');
             const frame = document.getElementById('internal-browser-frame');
