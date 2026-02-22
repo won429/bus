@@ -78,6 +78,9 @@
             justify-content: center;
             pointer-events: none;
             transition: transform 0.2s;
+            /* 명시적 크기 지정으로 위치 틀어짐 방지 */
+            width: 40px;
+            height: 48px;
         }
         .travel-marker.active {
             transform: scale(1.15) translateY(-5px);
@@ -96,6 +99,7 @@
             font-size: 20px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             z-index: 10;
+            flex-shrink: 0;
         }
         .travel-marker-tail {
             width: 0;
@@ -105,9 +109,11 @@
             border-top: 8px solid white;
             margin-top: -2px;
             filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+            flex-shrink: 0;
         }
         .travel-marker-label {
-            margin-top: 4px;
+            position: absolute;
+            bottom: 54px;
             background: rgba(0,0,0,0.7);
             backdrop-filter: blur(4px);
             color: white;
@@ -458,8 +464,9 @@
                     map: map,
                     icon: {
                         content: markerHtml,
-                        size: new naver.maps.Size(60, 80),
-                        anchor: new naver.maps.Point(30, 60)
+                        /* 마커 크기와 중심점(Anchor)을 꼬리 끝부분에 완벽히 일치시킴 */
+                        size: new naver.maps.Size(40, 48),
+                        anchor: new naver.maps.Point(20, 48)
                     },
                     zIndex: 10
                 });
