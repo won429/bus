@@ -264,7 +264,7 @@
             </div>
         </main>
 
-        <!-- 하단 플로팅 메뉴 (fixed -> absolute로 변경하여 래퍼 내부에 갇히게 함) -->
+        <!-- 하단 플로팅 메뉴 -->
         <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[340px] px-2 touch-pan-x select-none">
             <div class="flex items-center justify-between bg-white/10 backdrop-blur-[4px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1.5 gap-0.5 ring-1 ring-white/30 relative mix-blend-difference">
                 <!-- 활성화 표시 배경 -->
@@ -307,7 +307,7 @@
         let markers = [];
         let activeMarkerIndex = -1;
 
-        // 여행 데이터 모음 (유튜브 관련 데이터 완전 삭제)
+        // 여행 데이터 모음
         const travelData = [
             {
                 id: 1,
@@ -441,33 +441,59 @@
             });
 
             createMarkers();
+            
+            // --- [신규 추가] 땅 모양(행정구역 경계선) 색칠 ---
+            loadRegionBoundaries();
         }
 
-        // 마커 생성 및 지역 색칠
+        // --- [신규 추가 함수] 실제 행정구역 GeoJSON 데이터를 불러와서 그립니다 ---
+        function loadRegionBoundaries() {
+            if (!map || typeof naver === 'undefined' || !naver.maps) return;
+
+            // 대한민국의 시군구 경계 GeoJSON 데이터를 외부 오픈소스 저장소에서 불러옵니다.
+            fetch('https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_municipalities_geo_simple.json')
+                .then(response => response.json())
+                .then(geojson => {
+                    map.data.addGeoJson(geojson);
+
+                    map.data.setStyle(function(feature) {
+                        const name = feature.getProperty('name') || '';
+                        let color = null;
+
+                        // 방문한 지역의 이름이 포함되어 있으면 해당 테마 색상을 지정합니다.
+                        if (name.includes('진주시')) color = colorThemes.purple.markerBg;
+                        else if (name.includes('대구광역시') || name.includes('칠곡군')) color = colorThemes.red.markerBg;
+                        else if (name.includes('제주특별자치도')) color = colorThemes.orange.markerBg;
+                        else if (name.includes('대전광역시')) color = colorThemes.yellow.markerBg;
+
+                        if (color) {
+                            return {
+                                fillColor: color,
+                                fillOpacity: 0.15, // 반투명 색칠
+                                strokeColor: color,
+                                strokeWeight: 2,
+                                strokeOpacity: 0.5,
+                                clickable: false // 폴리곤 클릭 시 지도 클릭 이벤트 방해 방지
+                            };
+                        } else {
+                            // 여행하지 않은 다른 모든 지역의 폴리곤은 투명하게(숨김) 처리
+                            return { visible: false };
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.warn('지역 경계 데이터를 불러오는 데 실패했습니다.', error);
+                });
+        }
+        // ----------------------------------------------------------------------
+
+        // 마커 생성
         function createMarkers() {
             if (!map || typeof naver === 'undefined' || !naver.maps) return;
 
             travelData.forEach((trip, index) => {
                 const position = new naver.maps.LatLng(trip.lat, trip.lng);
                 const theme = colorThemes[trip.color] || colorThemes.blue;
-
-                // --- [신규 추가] 해당 지역 영토 색칠 (하이라이트) ---
-                let areaRadius = 15000; // 기본 반경 15km
-                if (trip.id === 2) areaRadius = 22000; // 대구/칠곡은 범위를 넓게
-                if (trip.id === 3) areaRadius = 35000; // 제주도는 섬 전체를 덮도록 아주 넓게
-
-                new naver.maps.Circle({
-                    map: map,
-                    center: position,
-                    radius: areaRadius,
-                    fillColor: theme.markerBg,
-                    fillOpacity: 0.15, // 반투명하게 색칠
-                    strokeColor: theme.markerBg,
-                    strokeOpacity: 0.5,
-                    strokeWeight: 2,
-                    clickable: false // 클릭 시 마커 선택을 방해하지 않도록 설정
-                });
-                // ------------------------------------------------
 
                 const markerHtml = `
                     <div id="marker-${index}" class="travel-marker">
@@ -482,7 +508,6 @@
                     map: map,
                     icon: {
                         content: markerHtml,
-                        /* 마커 크기와 중심점(Anchor)을 꼬리 끝부분에 완벽히 일치시킴 */
                         size: new naver.maps.Size(40, 48),
                         anchor: new naver.maps.Point(20, 48)
                     },
