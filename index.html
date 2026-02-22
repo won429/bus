@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Toss Subway - 지하철 도착정보</title>
+    <title>Enjoy Travel Record</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- 네이버 지도 API -->
+    <!-- 네이버 지도 API (기존 키 사용) -->
     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=9nl297jo77"></script>
 
     <style>
@@ -27,49 +27,28 @@
 
         /* 유리 재질 공통 클래스 */
         .toss-card {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px) saturate(180%);
-            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            background: rgba(28, 28, 30, 0.85);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4); 
-            transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.1s;
-            cursor: pointer;
-            overflow: hidden;
-            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); 
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
         }
-        .toss-card:active {
-            transform: scale(0.96);
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-            filter: brightness(1.1);
+        
+        .list-card {
+            background: #1C1C1E;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            transition: transform 0.1s;
+        }
+        .list-card:active {
+            transform: scale(0.97);
+            background: #2C2C2E;
         }
 
         .text-main { color: #F2F4F6; }
         .text-sub { color: #A1A1A6; }
-        
-        /* 지하철 호선 색상 */
-        .line-1 { color: #0052A4; background: rgba(0, 82, 164, 0.15); border-color: rgba(0, 82, 164, 0.3); }
-        .line-2 { color: #00A84D; background: rgba(0, 168, 77, 0.15); border-color: rgba(0, 168, 77, 0.3); }
-        .line-3 { color: #EF7C1C; background: rgba(239, 124, 28, 0.15); border-color: rgba(239, 124, 28, 0.3); }
-        .line-4 { color: #00A5DE; background: rgba(0, 165, 222, 0.15); border-color: rgba(0, 165, 222, 0.3); }
-        .line-9 { color: #BDB092; background: rgba(189, 176, 146, 0.15); border-color: rgba(189, 176, 146, 0.3); }
-        .line-sinbundang { color: #D4003B; background: rgba(212, 0, 59, 0.15); border-color: rgba(212, 0, 59, 0.3); }
-
-        /* 지역별 지하철 호선 색상 */
-        .busan-line-1 { color: #F06A00; background: rgba(240, 106, 0, 0.15); border-color: rgba(240, 106, 0, 0.3); }
-        .busan-line-2 { color: #81BF48; background: rgba(129, 191, 72, 0.15); border-color: rgba(129, 191, 72, 0.3); }
-        .busan-line-3 { color: #C89E78; background: rgba(200, 158, 120, 0.15); border-color: rgba(200, 158, 120, 0.3); }
-        .busan-line-4 { color: #217BCE; background: rgba(33, 123, 206, 0.15); border-color: rgba(33, 123, 206, 0.3); }
-        .busan-bgl { color: #8652A1; background: rgba(134, 82, 161, 0.15); border-color: rgba(134, 82, 161, 0.3); }
-        .busan-donghae { color: #0052A4; background: rgba(0, 82, 164, 0.15); border-color: rgba(0, 82, 164, 0.3); }
-
-        .daegu-line-1 { color: #D93F5C; background: rgba(217, 63, 92, 0.15); border-color: rgba(217, 63, 92, 0.3); }
-        .daegu-line-2 { color: #00AA80; background: rgba(0, 170, 128, 0.15); border-color: rgba(0, 170, 128, 0.3); }
-        .daegu-line-3 { color: #FFB300; background: rgba(255, 179, 0, 0.15); border-color: rgba(255, 179, 0, 0.3); }
-        .daegu-daegyeong { color: #0052A4; background: rgba(0, 82, 164, 0.15); border-color: rgba(0, 82, 164, 0.3); }
-
-        .daejeon-line-1 { color: #007448; background: rgba(0, 116, 72, 0.15); border-color: rgba(0, 116, 72, 0.3); }
-        .gwangju-line-1 { color: #009088; background: rgba(0, 144, 136, 0.15); border-color: rgba(0, 144, 136, 0.3); }
 
         .fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(15px); }
         @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
@@ -81,483 +60,227 @@
         
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .nmap-logo-align { margin-bottom: 80px !important; }
+
+        /* 커스텀 마커 스타일 */
+        .travel-marker {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            transition: transform 0.2s;
+        }
+        .travel-marker.active {
+            transform: scale(1.15) translateY(-5px);
+            z-index: 100 !important;
+        }
+        .travel-marker-icon {
+            pointer-events: auto;
+            width: 40px;
+            height: 40px;
+            background: #3182F6;
+            border: 3px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+        .travel-marker-tail {
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid white;
+            margin-top: -2px;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+        }
+        .travel-marker-label {
+            margin-top: 4px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 12px;
+            white-space: nowrap;
+            border: 1px solid rgba(255,255,255,0.2);
+            pointer-events: auto;
+        }
+
+        /* 바텀 시트 (정보 패널) 애니메이션 */
+        #bottom-sheet {
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+            transform: translateY(120%);
+            opacity: 0;
+        }
+        #bottom-sheet.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="w-full h-[100dvh] flex flex-col overflow-hidden bg-black" ontouchstart="">
 
-    <!-- 1. 홈 화면 -->
-    <main id="home-screen" class="flex-1 overflow-y-auto scrollbar-hide w-full max-w-md mx-auto relative min-h-full pb-24">
+    <!-- 1. 지도 화면 (메인) -->
+    <main id="map-screen" class="flex-1 relative w-full h-full bg-[#111]">
+        <!-- 네이버 지도 컨테이너 -->
+        <div id="map" class="absolute inset-0 z-0"></div>
         
-        <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
-            <div class="px-5 pt-3 pb-2 flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-main drop-shadow-sm">지하철 도착</h2>
-            </div>
-            
-            <!-- 지역 선택 탭 -->
-            <div class="px-5 pb-3 pt-2 flex gap-2 overflow-x-auto scrollbar-hide">
-                <button onclick="alert('수도권은 현재 미지원입니다.')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-[#1C1C1E] text-gray-500 border border-white/5 transition-colors whitespace-nowrap active:scale-95 opacity-50">수도권</button>
-                <button onclick="switchRegion('busan', this)" class="region-btn px-4 py-1.5 rounded-full text-sm font-bold bg-white text-black transition-colors whitespace-nowrap active:scale-95">부산권</button>
-                <button onclick="switchRegion('daegu', this)" class="region-btn px-4 py-1.5 rounded-full text-sm font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">대구권</button>
-                <button onclick="switchRegion('daejeon', this)" class="region-btn px-4 py-1.5 rounded-full text-sm font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">대전</button>
-                <button onclick="switchRegion('gwangju', this)" class="region-btn px-4 py-1.5 rounded-full text-sm font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">광주</button>
+        <!-- 상단 헤더 오버레이 -->
+        <header class="absolute top-0 left-0 right-0 pt-safe px-5 pb-4 z-10 pointer-events-none bg-gradient-to-b from-black/80 to-transparent">
+            <div class="flex justify-between items-center mt-2">
+                <div class="pointer-events-auto">
+                    <h2 class="text-2xl font-bold text-main drop-shadow-lg">우리의 발자취 ✈️</h2>
+                    <p class="text-sm font-medium text-gray-300 drop-shadow-md">총 4번의 즐거운 여행</p>
+                </div>
+                <button onclick="zoomToAll()" class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white pointer-events-auto shadow-lg active:scale-90 transition-transform">
+                    <i class="fa-solid fa-expand text-sm"></i>
+                </button>
             </div>
         </header>
 
-        <!-- 부산권 컨텐츠 -->
-        <div id="region-busan" class="region-content px-5 pt-4 fade-in-up">
-            <!-- 노선 선택 탭 -->
-            <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
-                <button onclick="switchLine('busan', 'all', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-bold bg-white/20 text-white transition-colors whitespace-nowrap active:scale-95">전체</button>
-                <button onclick="switchLine('busan', 'line1', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">1호선</button>
-                <button onclick="switchLine('busan', 'line2', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">2호선</button>
-                <button onclick="switchLine('busan', 'line3', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">3호선</button>
-                <button onclick="switchLine('busan', 'line4', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">4호선</button>
-                <button onclick="switchLine('busan', 'bgl', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">부산김해</button>
-                <button onclick="switchLine('busan', 'donghae', this)" class="line-btn-busan px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">동해선</button>
-            </div>
-
-            <!-- 1호선 서면역 -->
-            <div class="line-content-busan line-all line-line1 toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full busan-line-1 flex items-center justify-center text-[11px] font-bold border border-[#F06A00]/30">1</div>
-                        <span class="font-bold text-white text-lg">서면역</span>
-                    </div>
-                    <button onclick="openTimetableModal('서면역', '노포 방면', null, '다대포항 방면', null)" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">노포 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-red-400">전역 도착</span>
-                                <span class="text-[10px] text-gray-500 bg-white/5 px-1.5 py-0.5 rounded">범내골</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">다대포항 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">3분 후</span>
-                                <span class="text-[10px] text-gray-500 bg-white/5 px-1.5 py-0.5 rounded">부전</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 대구권 컨텐츠 -->
-        <div id="region-daegu" class="region-content px-5 pt-4 hidden fade-in-up">
-            <!-- 노선 선택 탭 -->
-            <div class="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
-                <button onclick="switchLine('daegu', 'all', this)" class="line-btn-daegu px-3 py-1.5 rounded-[12px] text-xs font-bold bg-white/20 text-white transition-colors whitespace-nowrap active:scale-95">전체</button>
-                <button onclick="switchLine('daegu', 'line1', this)" class="line-btn-daegu px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">1호선</button>
-                <button onclick="switchLine('daegu', 'line2', this)" class="line-btn-daegu px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">2호선</button>
-                <button onclick="switchLine('daegu', 'line3', this)" class="line-btn-daegu px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">3호선</button>
-                <button onclick="switchLine('daegu', 'daegyeong', this)" class="line-btn-daegu px-3 py-1.5 rounded-[12px] text-xs font-medium bg-[#1C1C1E] text-gray-400 border border-white/10 transition-colors whitespace-nowrap active:scale-95">대경선</button>
-            </div>
-
-            <!-- 1호선 중앙로역 -->
-            <div class="line-content-daegu line-all line-line1 toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full daegu-line-1 flex items-center justify-center text-[11px] font-bold border border-[#D93F5C]/30">1</div>
-                        <span class="font-bold text-white text-lg">중앙로역</span>
-                    </div>
-                    <button onclick="openTimetableModal('중앙로역', '설화명곡 방면', null, '안심 방면', null)" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">설화명곡 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-red-400">곧 도착</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">안심 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-white">3분 후</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 대경선 구미역 -->
-            <div class="line-content-daegu line-all line-daegyeong toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
-                        <span class="font-bold text-white text-lg">구미역</span>
-                    </div>
-                    <button onclick="openTimetableModal('구미역', '경산 방면', 'time-daegyeong-gumi-down', null, null)" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span id="time-daegyeong-gumi-down" class="text-sm font-bold text-gray-500">시간 계산중...</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">구미 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-gray-500">종착역</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 대경선 사곡역 -->
-            <div class="line-content-daegu line-all line-daegyeong toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
-                        <span class="font-bold text-white text-lg">사곡역</span>
-                    </div>
-                    <button onclick="openTimetableModal('사곡역', '경산 방면', 'time-daegyeong-sagok-down', '구미 방면', 'time-daegyeong-sagok-up')" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span id="time-daegyeong-sagok-down" class="text-sm font-bold text-gray-500">시간 계산중...</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">구미 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span id="time-daegyeong-sagok-up" class="text-sm font-bold text-gray-500">시간 계산중...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 대경선 왜관역 -->
-            <div class="line-content-daegu line-all line-daegyeong toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
-                        <span class="font-bold text-white text-lg">왜관역</span>
-                    </div>
-                    <button onclick="openTimetableModal('왜관역', '경산 방면', 'time-daegyeong-waegwan-down', '구미 방면', 'time-daegyeong-waegwan-up')" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span id="time-daegyeong-waegwan-down" class="text-sm font-bold text-gray-500">시간 계산중...</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">구미 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span id="time-daegyeong-waegwan-up" class="text-sm font-bold text-gray-500">시간 계산중...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 대경선 서대구역 -->
-            <div class="line-content-daegu line-all line-daegyeong toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
-                        <span class="font-bold text-white text-lg">서대구역</span>
-                    </div>
-                    <button onclick="openTimetableModal('서대구역', '경산 방면', 'time-daegyeong-seodaegu-down', '구미 방면', 'time-daegyeong-seodaegu-up')" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span id="time-daegyeong-seodaegu-down" class="text-sm font-bold text-gray-500">시간 계산중...</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">구미 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span id="time-daegyeong-seodaegu-up" class="text-sm font-bold text-gray-500">시간 계산중...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 대경선 대구역 -->
-            <div class="line-content-daegu line-all line-daegyeong toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
-                        <span class="font-bold text-white text-lg">대구역</span>
-                    </div>
-                    <button onclick="openTimetableModal('대구역', '경산 방면', 'time-daegyeong-daegu-down', '구미 방면', 'time-daegyeong-daegu-up')" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span id="time-daegyeong-daegu-down" class="text-sm font-bold text-gray-500">시간 계산중...</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">구미 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span id="time-daegyeong-daegu-up" class="text-sm font-bold text-gray-500">시간 계산중...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 대경선 동대구역 -->
-            <div class="line-content-daegu line-all line-daegyeong toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
-                        <span class="font-bold text-white text-lg">동대구역</span>
-                    </div>
-                    <button onclick="openTimetableModal('동대구역', '경산 방면', 'time-daegyeong-dongdaegu-down', '구미 방면', 'time-daegyeong-dongdaegu-up')" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span id="time-daegyeong-dongdaegu-down" class="text-sm font-bold text-gray-500">시간 계산중...</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">구미 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span id="time-daegyeong-dongdaegu-up" class="text-sm font-bold text-gray-500">시간 계산중...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 대경선 경산역 -->
-            <div class="line-content-daegu line-all line-daegyeong toss-card p-5 !bg-[#1C1C1E] mb-3">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="px-2 h-6 rounded-full daegu-daegyeong flex items-center justify-center text-[10px] font-bold border border-[#0052A4]/30">대경</div>
-                        <span class="font-bold text-white text-lg">경산역</span>
-                    </div>
-                    <button onclick="openTimetableModal('경산역', '구미 방면', 'time-daegyeong-gyeongsan-up', null, null)" class="px-3 py-1.5 rounded-[10px] bg-white/10 hover:bg-white/20 flex items-center justify-center text-[11px] font-bold text-gray-200 transition-colors active:scale-95 border border-white/5"><i class="fa-regular fa-clock mr-1.5"></i>시간표</button>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">경산 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-gray-500">종착역</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                        <p class="text-[10px] text-gray-400 font-bold mb-2">구미 방면</p>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between items-center">
-                                <span id="time-daegyeong-gyeongsan-up" class="text-sm font-bold text-gray-500">시간 계산중...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 대전 컨텐츠 -->
-        <div id="region-daejeon" class="region-content px-5 pt-4 hidden fade-in-up">
-            <p class="text-center text-gray-500 text-sm py-10">대전 지역 임시 컨텐츠</p>
-        </div>
-
-        <!-- 광주 컨텐츠 -->
-        <div id="region-gwangju" class="region-content px-5 pt-4 hidden fade-in-up">
-            <p class="text-center text-gray-500 text-sm py-10">광주 지역 임시 컨텐츠</p>
-        </div>
-
-    </main>
-
-    <!-- 2. 검색 화면 -->
-    <div id="search-screen" class="hidden fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 flex-col overflow-hidden bg-black">
-        <header class="flex-none pt-safe px-5 pb-4 flex flex-col bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
-            <h2 class="text-2xl font-bold text-main drop-shadow-sm mb-4 mt-2">어느 역으로 가시나요?</h2>
-            
-            <div class="relative group">
-                <input type="text" placeholder="지하철역 이름 검색" class="w-full bg-[#1C1C1E] border border-white/10 rounded-2xl px-10 py-3.5 text-base font-medium text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:bg-[#2C2C2E] transition-all shadow-inner">
-                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-500 transition-colors"></i>
-            </div>
-        </header>
-        
-        <div class="flex-1 overflow-y-auto p-5 text-center flex flex-col items-center justify-center text-gray-500 pb-24">
-            <i class="fa-solid fa-keyboard text-4xl mb-4 text-gray-600"></i>
-            <p class="text-sm">도착 정보나 경로를 확인할<br>지하철역 이름을 검색해주세요.</p>
-        </div>
-    </div>
-
-    <!-- 3. 주변 지하철역 (실제 지도 연동) -->
-    <div id="nearby-screen" class="hidden fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 flex-col overflow-hidden bg-black">
-        <div class="flex-1 relative w-full h-full bg-[#111]">
-            <div id="map" class="absolute inset-0 z-0"></div>
-            
-            <header class="absolute top-0 left-0 right-0 pt-safe px-5 pb-2 z-10 pointer-events-none">
-                <div class="flex justify-between items-center mt-2">
-                    <div class="bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-auto shadow-lg">
-                        <h2 class="text-sm font-bold text-main">내 주변 지하철역</h2>
-                    </div>
-                </div>
-            </header>
-
-            <button onclick="moveToMyLocation()" class="absolute bottom-28 right-5 w-12 h-12 bg-gray-900/90 backdrop-blur-md border border-white/10 rounded-2xl flex items-center justify-center text-white shadow-xl z-10 active:scale-90 transition-transform">
-                <i class="fa-solid fa-location-crosshairs text-lg text-blue-400"></i>
+        <!-- 선택된 여행지 정보 바텀 시트 -->
+        <div id="bottom-sheet" class="absolute bottom-20 left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-20 toss-card p-5 cursor-default">
+            <button onclick="closeBottomSheet()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                <i class="fa-solid fa-xmark"></i>
             </button>
             
-            <div id="map-loader" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-20 flex flex-col items-center justify-center hidden">
-                <i class="fa-solid fa-spinner fa-spin text-3xl text-blue-500 mb-3"></i>
-                <span class="text-sm font-bold text-white">위치를 찾고 있습니다...</span>
+            <div class="flex items-center gap-3 mb-3">
+                <div id="sheet-emoji" class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl border border-blue-500/30">
+                    🍊
+                </div>
+                <div class="flex-1">
+                    <span id="sheet-date" class="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">2024.08.15</span>
+                    <h3 id="sheet-title" class="text-xl font-bold text-white mt-1 leading-tight">제주도 출장엔조이</h3>
+                </div>
+            </div>
+            
+            <p id="sheet-desc" class="text-sm text-gray-300 font-medium mb-4 break-keep line-clamp-2">
+                여름 휴가 겸 떠난 첫 출장엔조이! 비도 오고 우여곡절이 많았지만 즐거웠던 기억.
+            </p>
+            
+            <div class="flex gap-2">
+                <button onclick="alert('준비 중인 기능입니다!')" class="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm font-bold py-3 rounded-xl transition-colors border border-white/5">
+                    <i class="fa-regular fa-images mr-1"></i> 사진 보기
+                </button>
+                <button onclick="window.openBrowser('https://youtu.be/tjIYiWqG6Hk')" class="flex-[1.5] bg-[#3182F6] hover:bg-blue-600 text-white text-sm font-bold py-3 rounded-xl shadow-lg transition-colors">
+                    <i class="fa-brands fa-youtube mr-1"></i> 브이로그 시청
+                </button>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- 4. 길찾기 화면 -->
-    <div id="route-screen" class="hidden fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 flex-col overflow-hidden bg-black">
-        <header class="flex-none pt-safe px-5 pb-4 flex flex-col bg-black/80 backdrop-blur-md border-b border-white/10 z-10 sticky top-0">
-            <h2 class="text-xl font-bold text-main drop-shadow-sm mb-4 mt-2">경로 탐색</h2>
-            
-            <div class="bg-[#1C1C1E] p-1 rounded-2xl border border-white/10 flex flex-col gap-1 relative shadow-inner">
-                <button class="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black border border-white/10 flex items-center justify-center text-gray-400 z-10 hover:text-white transition-colors">
-                    <i class="fa-solid fa-arrows-up-down text-xs"></i>
-                </button>
-                
-                <div class="flex items-center px-4 py-3 bg-[#2C2C2E] rounded-xl border border-transparent focus-within:border-blue-500/50 transition-colors">
-                    <div class="w-2 h-2 rounded-full bg-blue-50 mr-3"></div>
-                    <input type="text" placeholder="출발역" value="현재 위치" class="bg-transparent border-none text-white text-sm outline-none flex-1 font-medium">
-                </div>
-                <div class="flex items-center px-4 py-3 bg-[#2C2C2E] rounded-xl border border-transparent focus-within:border-red-500/50 transition-colors">
-                    <div class="w-2 h-2 rounded-full bg-red-50 mr-3"></div>
-                    <input type="text" placeholder="도착역" class="bg-transparent border-none text-white text-sm outline-none flex-1 font-medium">
+    <!-- 2. 목록 화면 -->
+    <main id="list-screen" class="hidden flex-1 overflow-y-auto scrollbar-hide w-full max-w-md mx-auto relative min-h-full pb-24 bg-black">
+        <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
+            <div class="px-5 pt-3 pb-4 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-main drop-shadow-sm">여행 기록</h2>
+                <div class="text-xs font-medium text-gray-400 bg-gray-900 px-3 py-1.5 rounded-full border border-gray-800">
+                    최신순 <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i>
                 </div>
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-5 text-center flex flex-col items-center justify-center text-gray-500 pb-24">
-            <i class="fa-solid fa-train-subway text-4xl mb-4 text-gray-600"></i>
-            <p class="text-sm">도착역을 입력하면<br>지하철 최적 경로와 소요시간을 안내해 드립니다.</p>
+        <div class="px-5 pt-4 space-y-4" id="travel-list-container">
+            <!-- JS로 목록 렌더링 -->
         </div>
-    </div>
+    </main>
 
-    <!-- 5. 설정 화면 -->
-    <div id="settings-screen" class="hidden fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 flex-col overflow-hidden bg-black">
-        <header class="flex-none pt-safe px-5 pb-2 flex justify-between items-center bg-black/80 backdrop-blur-md border-b border-white/10 z-10 sticky top-0">
+    <!-- 3. 통계 화면 (준비중) -->
+    <main id="stats-screen" class="hidden flex-1 overflow-y-auto scrollbar-hide w-full max-w-md mx-auto relative min-h-full pb-24 bg-black">
+        <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
+            <div class="px-5 pt-3 pb-4 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-main drop-shadow-sm">통계</h2>
+            </div>
+        </header>
+        <div class="flex-1 h-[70vh] flex flex-col items-center justify-center text-center px-6">
+            <div class="w-20 h-20 bg-[#1C1C1E] rounded-full flex items-center justify-center text-3xl mb-4 border border-white/5 shadow-lg">
+                📊
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">여행 통계 준비 중</h3>
+            <p class="text-sm text-gray-400 break-keep">가장 많이 간 지역, 누적 이동 거리 등<br>다양한 통계 데이터를 모으고 있어요!</p>
+        </div>
+    </main>
+
+    <!-- 4. 설정 화면 -->
+    <main id="settings-screen" class="hidden flex-1 overflow-y-auto scrollbar-hide w-full max-w-md mx-auto relative min-h-full pb-24 bg-black">
+        <header class="flex-none pt-safe px-5 pb-4 flex justify-between items-center bg-black/80 backdrop-blur-md border-b border-white/10 z-10 sticky top-0">
             <h2 class="text-xl font-bold text-main drop-shadow-sm mt-2">설정</h2>
         </header>
-        <div class="flex-1 overflow-y-auto p-5 pb-24">
-            <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">알림 및 표시</h4>
+        <div class="px-5 pt-4">
+            <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">지도 설정</h4>
             <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
                 <div class="w-full flex justify-between items-center p-4 border-b border-white/5">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-[10px] bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fa-solid fa-bell"></i></div>
-                        <span class="text-sm font-bold text-gray-200">하차/환승 알림</span>
-                    </div>
-                    <div class="w-10 h-6 bg-blue-500 rounded-full relative"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div></div>
-                </div>
-                <div class="w-full flex justify-between items-center p-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-[10px] bg-purple-500/20 text-purple-400 flex items-center justify-center"><i class="fa-solid fa-location-arrow"></i></div>
-                        <span class="text-sm font-bold text-gray-200">항상 내 위치 사용</span>
+                        <div class="w-8 h-8 rounded-[10px] bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fa-solid fa-map"></i></div>
+                        <span class="text-sm font-bold text-gray-200">위성 지도로 보기</span>
                     </div>
                     <div class="w-10 h-6 bg-gray-600 rounded-full relative"><div class="absolute left-1 top-1 w-4 h-4 bg-gray-300 rounded-full"></div></div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- 6. 시간표 전체보기 모달 (팝업) -->
-    <div id="timetable-modal" onclick="if(event.target.id === 'timetable-modal') closeTimetableModal()" class="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md hidden flex-col items-center justify-center p-5 opacity-0 transition-opacity duration-300">
-        <div id="timetable-modal-content" class="toss-card !bg-[#1C1C1E] w-full max-w-sm flex flex-col max-h-[80vh] transform scale-95 transition-transform duration-300 border border-white/10">
-            <div class="p-4 border-b border-white/10 flex justify-between items-center relative">
-                <h3 class="text-lg font-bold text-white w-full text-center" id="modal-station-title">역 시간표</h3>
-                <button onclick="closeTimetableModal()" class="absolute right-4 w-8 h-8 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-gray-300 active:scale-90 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">데이터 관리</h4>
+            <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
+                <button class="w-full flex justify-between items-center p-4 border-b border-white/5 hover:bg-white/5 transition-colors text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-[10px] bg-emerald-500/20 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <span class="text-sm font-bold text-gray-200">기록 백업하기</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-600 text-xs"></i>
+                </button>
             </div>
-            <div class="p-4 overflow-y-auto flex-1 flex gap-3 pb-6 scrollbar-hide">
-                <!-- 상행 -->
-                <div class="flex-1 flex flex-col" id="modal-up-container">
-                    <h4 class="text-[11px] font-bold text-gray-400 mb-3 text-center bg-white/5 py-1.5 rounded-lg" id="modal-up-title">상행 방면</h4>
-                    <div id="modal-up-list" class="flex flex-col gap-1 text-center"></div>
-                </div>
-                <div class="w-[1px] bg-white/5" id="modal-divider"></div>
-                <!-- 하행 -->
-                <div class="flex-1 flex flex-col" id="modal-down-container">
-                    <h4 class="text-[11px] font-bold text-gray-400 mb-3 text-center bg-white/5 py-1.5 rounded-lg" id="modal-down-title">하행 방면</h4>
-                    <div id="modal-down-list" class="flex flex-col gap-1 text-center"></div>
-                </div>
+        </div>
+    </main>
+
+    <!-- 내부 브라우저 (유튜브 링크용) -->
+    <div id="browser-screen" class="hidden fixed inset-0 z-[100] flex-col bg-black">
+        <header class="flex-none pt-safe px-4 pb-3 flex items-center bg-black border-b border-gray-800">
+            <button onclick="closeBrowser()" class="w-8 h-8 flex items-center justify-center text-white active:scale-90 transition-transform">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <span class="flex-1 text-center text-sm font-bold text-gray-300 truncate pr-8">브이로그 시청</span>
+        </header>
+        <div class="flex-1 relative w-full h-full bg-black">
+            <div id="browser-loader" class="absolute inset-0 flex items-center justify-center text-blue-500 z-0">
+                <i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>
             </div>
+            <iframe id="internal-browser-frame" class="w-full h-full border-0 relative z-10 bg-transparent" allow="autoplay; encrypted-media" onload="document.getElementById('browser-loader').style.display='none'"></iframe>
         </div>
     </div>
 
     <!-- 하단 플로팅 메뉴 -->
-    <nav id="bottom-nav" class="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-full max-w-[360px] px-2 touch-pan-x select-none">
+    <nav id="bottom-nav" class="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-full max-w-[320px] px-2 touch-pan-x select-none">
         <div class="flex items-center justify-between bg-white/10 backdrop-blur-[4px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1.5 gap-0.5 ring-1 ring-white/30 relative mix-blend-difference">
             <!-- 활성화 표시 배경 -->
-            <div id="nav-indicator" class="absolute top-1.5 bottom-1.5 bg-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-full backdrop-blur-[2px] border border-white/20 z-0 nav-transition" style="left: 6px; width: 60px;"></div>
+            <div id="nav-indicator" class="absolute top-1.5 bottom-1.5 bg-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-full backdrop-blur-[2px] border border-white/20 z-0 nav-transition" style="left: 6px; width: 66px;"></div>
             
             <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(0)">
                 <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                    <i class="fa-solid fa-house text-base text-white transition-colors"></i>
-                    <span class="text-[10px] font-bold text-white whitespace-nowrap transition-colors">홈</span>
+                    <i class="fa-solid fa-map-location-dot text-base text-white transition-colors"></i>
+                    <span class="text-[10px] font-bold text-white whitespace-nowrap transition-colors">지도</span>
                 </div>
             </button>
 
             <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(1)">
                 <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                    <i class="fa-solid fa-magnifying-glass text-base text-gray-300 group-hover:text-white transition-colors"></i>
-                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">검색</span>
+                    <i class="fa-solid fa-list-ul text-base text-gray-300 group-hover:text-white transition-colors"></i>
+                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">목록</span>
                 </div>
             </button>
             
             <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(2)">
                 <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                    <i class="fa-solid fa-map-location-dot text-base text-gray-300 group-hover:text-white transition-colors"></i>
-                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">주변</span>
-                </div>
-            </button>
-
-            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(3)">
-                <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                    <i class="fa-solid fa-route text-base text-gray-300 group-hover:text-white transition-colors"></i>
-                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">길찾기</span>
+                    <i class="fa-solid fa-chart-pie text-base text-gray-300 group-hover:text-white transition-colors"></i>
+                    <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">통계</span>
                 </div>
             </button>
             
-            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(4)">
+            <button class="relative py-2 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(3)">
                 <div class="flex flex-col items-center gap-0.5 pointer-events-none">
                     <i class="fa-solid fa-gear text-base text-gray-300 group-hover:text-white transition-colors"></i>
                     <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">설정</span>
@@ -569,79 +292,92 @@
     <script>
         // 전역 변수
         let map = null;
-        let myLocationMarker = null;
-        let isMapInitialized = false;
-        
-        // 전체 시간표 데이터를 임시 저장할 전역 객체
-        window.fullTimetables = {};
+        let markers = [];
+        let activeMarkerIndex = -1;
 
-        // 지역 변경 로직
-        function switchRegion(regionId, btnElement) {
-            document.querySelectorAll('.region-content').forEach(el => {
-                el.classList.add('hidden');
-            });
-            
-            const targetRegion = document.getElementById('region-' + regionId);
-            if (targetRegion) {
-                targetRegion.classList.remove('hidden');
-                targetRegion.classList.remove('fade-in-up');
-                void targetRegion.offsetWidth;
-                targetRegion.classList.add('fade-in-up');
+        // 여행 데이터 모음
+        const travelData = [
+            {
+                id: 1,
+                title: '진주, 과거와 현재 사이',
+                region: '경상남도 진주시',
+                date: '2025.08.29',
+                emoji: '🏰',
+                color: 'purple',
+                desc: '진주성에서 역사를 느끼고, 귀여운 하모도 구경하며 힐링했던 시간들.',
+                lat: 35.1803,
+                lng: 128.1076,
+                youtube: 'https://www.youtube.com/@enjoy_trip'
+            },
+            {
+                id: 2,
+                title: '대구/칠곡 맛집 탐방',
+                region: '대구광역시 & 경북 칠곡',
+                date: '2025.02.05',
+                emoji: '🍎',
+                color: 'red',
+                desc: '끊임없이 먹고 또 먹었던 여행. 칠곡의 여유로움과 대구의 맛있는 음식들 완벽정복!',
+                lat: 35.9956,
+                lng: 128.4017,
+                youtube: 'https://www.youtube.com/@enjoy_trip'
+            },
+            {
+                id: 3,
+                title: '출장엔조이 첫 여행',
+                region: '제주특별자치도',
+                date: '2024.08.15',
+                emoji: '🍊',
+                color: 'orange',
+                desc: '우리의 첫 출장엔조이! 날씨가 완벽하진 않았지만 그래서 더 잊지 못할 추억이 된 제주도 풀빌라 여행.',
+                lat: 33.4996,
+                lng: 126.5312,
+                youtube: 'https://youtu.be/tjIYiWqG6Hk'
+            },
+            {
+                id: 4,
+                title: '성심당 빵지순례',
+                region: '대전광역시',
+                date: '2024.05.10',
+                emoji: '🍞',
+                color: 'yellow',
+                desc: '오직 빵을 위해 떠난 대전. 두 손 무겁게 돌아왔던 달콤한 하루.',
+                lat: 36.3504,
+                lng: 127.3845,
+                youtube: 'https://www.youtube.com/@enjoy_trip'
             }
+        ];
 
-            document.querySelectorAll('.region-btn').forEach(btn => {
-                btn.classList.remove('bg-white', 'text-black', 'font-bold');
-                btn.classList.add('bg-[#1C1C1E]', 'text-gray-400', 'font-medium', 'border-white/10');
-            });
-            
-            btnElement.classList.remove('bg-[#1C1C1E]', 'text-gray-400', 'font-medium', 'border-white/10');
-            btnElement.classList.add('bg-white', 'text-black', 'font-bold');
-        }
-
-        // 지역별 노선 필터링 로직
-        function switchLine(region, lineId, btnElement) {
-            document.querySelectorAll('.line-content-' + region).forEach(el => {
-                el.classList.add('hidden');
-            });
-            
-            document.querySelectorAll('.line-content-' + region + '.line-' + lineId).forEach(el => {
-                el.classList.remove('hidden');
-                el.classList.remove('fade-in-up');
-                void el.offsetWidth;
-                el.classList.add('fade-in-up');
-            });
-
-            document.querySelectorAll('.line-btn-' + region).forEach(btn => {
-                btn.classList.remove('bg-white/20', 'text-white', 'font-bold');
-                btn.classList.add('bg-[#1C1C1E]', 'text-gray-400', 'font-medium', 'border-white/10');
-            });
-            
-            btnElement.classList.remove('bg-[#1C1C1E]', 'text-gray-400', 'font-medium', 'border-white/10');
-            btnElement.classList.add('bg-white/20', 'text-white', 'font-bold');
-        }
+        // 색상별 테마 매핑
+        const colorThemes = {
+            orange: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30', markerBg: '#F97316' },
+            purple: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', markerBg: '#A855F7' },
+            red:    { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30', markerBg: '#EF4444' },
+            yellow: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30', markerBg: '#EAB308' },
+            blue:   { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', markerBg: '#3B82F6' }
+        };
 
         // 탭 전환 로직
         function switchTab(index) {
             if (navigator.vibrate) navigator.vibrate(10);
 
             const screens = [
-                document.getElementById('home-screen'),
-                document.getElementById('search-screen'),
-                document.getElementById('nearby-screen'),
-                document.getElementById('route-screen'), 
+                document.getElementById('map-screen'),
+                document.getElementById('list-screen'),
+                document.getElementById('stats-screen'),
                 document.getElementById('settings-screen')
             ];
             
             screens.forEach((screen, i) => {
                 if (i === index) {
                     screen.classList.remove('hidden');
-                    if (screen.id !== 'home-screen') screen.classList.add('flex');
+                    if (i !== 0) screen.classList.add('flex'); // map은 block 유지 (flex-1 덮어쓰기 주의)
                 } else {
                     screen.classList.add('hidden');
                     screen.classList.remove('flex');
                 }
             });
 
+            // 바텀 네비게이션 인디케이터 조정
             const navButtons = document.querySelectorAll('#bottom-nav button');
             const indicator = document.getElementById('nav-indicator');
 
@@ -650,6 +386,7 @@
                 indicator.style.transform = `translateX(${navButtons[index].offsetLeft - 6}px)`;
             }
 
+            // 아이콘 색상 변경
             navButtons.forEach((btn, i) => {
                 const icon = btn.querySelector('i');
                 const label = btn.querySelector('span');
@@ -663,289 +400,218 @@
                 }
             });
 
-            if (index === 2 && !isMapInitialized) {
-                initMap();
-            } else if (index === 2 && map) {
+            // 지도 탭일 경우 렌더링 버그 방지
+            if (index === 0 && map) {
                 window.dispatchEvent(new Event('resize'));
             }
+            
+            // 목록 탭 진입 시 렌더링
+            if (index === 1) {
+                renderTravelList();
+            }
         }
 
-        // 지도 초기화 함수
+        // 지도 초기화
         function initMap() {
-            if (typeof naver === 'undefined') return;
-            const defaultLocation = new naver.maps.LatLng(37.5666805, 126.9784147);
+            if (typeof naver === 'undefined') {
+                console.error("네이버 지도 API를 불러올 수 없습니다.");
+                return;
+            }
+
+            // 대한민국 중심 좌표 (대전 부근)
+            const centerLocation = new naver.maps.LatLng(36.3504, 127.3845);
+            
             const mapOptions = {
-                center: defaultLocation, zoom: 15, scaleControl: false, logoControl: true,
+                center: centerLocation,
+                zoom: 7, // 전국이 대략 보이게
+                scaleControl: false,
+                logoControl: true,
                 logoControlOptions: { position: naver.maps.Position.BOTTOM_LEFT },
-                mapDataControl: false, zoomControl: false,
+                mapDataControl: false,
+                zoomControl: false,
             };
+
             map = new naver.maps.Map('map', mapOptions);
-            isMapInitialized = true;
-            moveToMyLocation();
-        }
 
-        function moveToMyLocation() {
-            if (!map) return;
-            if (navigator.vibrate) navigator.vibrate(5);
-
-            const loader = document.getElementById('map-loader');
-            loader.classList.remove('hidden');
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        const myLatLng = new naver.maps.LatLng(lat, lng);
-
-                        map.setCenter(myLatLng);
-                        map.setZoom(16, true);
-
-                        if (myLocationMarker) {
-                            myLocationMarker.setPosition(myLatLng);
-                        } else {
-                            const markerHtml = `<div style="position:relative; display:flex; flex-direction:column; align-items:center; transform:translateY(-50%);"><div style="background-color:#3182F6; border:3px solid white; width:20px; height:20px; border-radius:50%; box-shadow:0 4px 10px rgba(0,0,0,0.3); animation: pulse 2s infinite;"></div></div><style>@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(49, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(49, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(49, 130, 246, 0); } }</style>`;
-                            myLocationMarker = new naver.maps.Marker({
-                                position: myLatLng, map: map,
-                                icon: { content: markerHtml, size: new naver.maps.Size(24, 24), anchor: new naver.maps.Point(12, 12) }
-                            });
-                        }
-                        loader.classList.add('hidden');
-                    },
-                    (error) => {
-                        console.warn("위치 정보 에러.", error);
-                        loader.classList.add('hidden');
-                        alert("위치 정보를 가져올 수 없습니다.");
-                    },
-                    { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
-                );
-            } else {
-                loader.classList.add('hidden');
-            }
-        }
-
-        // --- CSV 파일 실시간 연동 로직 ---
-        async function fetchTimetable(csvUrl, stationName, elementId) {
-            const el = document.getElementById(elementId);
-            if (!el) return;
-
-            if (window.location.protocol === 'blob:' || window.location.protocol === 'file:' || window.location.hostname === '') {
-                el.innerText = "CSV 업로드 대기중";
-                el.className = "text-[11px] font-bold text-gray-500 bg-white/5 px-2 py-0.5 rounded";
-                return;
-            }
-
-            try {
-                const response = await fetch(csvUrl);
-                if (!response.ok) {
-                    el.innerText = "파일 없음";
-                    el.className = "text-[11px] font-bold text-gray-500";
-                    return; 
-                }
-                
-                const text = await response.text();
-                const rows = text.split('\n');
-                let times = [];
-                let targetRowIndex = -1;
-                
-                for(let i = 0; i < rows.length; i++) {
-                    const cols = rows[i].split(',');
-                    if (cols.length < 1) continue;
-
-                    // 1. 헤더 오작동 방지: 오직 A열(cols[0])에서만 역 이름을 찾습니다.
-                    const c0 = cols[0] ? cols[0].replace(/["'\s\r]/g, '').replace(/역$/, '') : '';
-                    
-                    if(c0 === stationName) {
-                        // 2. 역 이름이 있는 줄 바로 아랫줄(출발시간)을 읽습니다.
-                        targetRowIndex = i + 1;
-                        break; 
-                    }
-                }
-
-                if (targetRowIndex !== -1 && targetRowIndex < rows.length && rows[targetRowIndex]) {
-                    const targetRow = rows[targetRowIndex];
-                    const cols = targetRow.split(',');
-                    for(let col of cols) {
-                        const match = col.trim().match(/(\d{1,2}):(\d{2})/);
-                        if(match) {
-                            times.push(parseInt(match[1], 10) * 60 + parseInt(match[2], 10));
-                        }
-                    }
-                }
-
-                window.fullTimetables = window.fullTimetables || {};
-                window.fullTimetables[elementId] = times.map(t => {
-                    const h = Math.floor(t / 60).toString().padStart(2, '0');
-                    const m = (t % 60).toString().padStart(2, '0');
-                    return { totalMins: t, timeStr: `${h}:${m}` };
-                });
-
-                const now = new Date();
-                const currentMins = now.getHours() * 60 + now.getMinutes();
-                let upcoming = times.filter(t => t - currentMins >= 0).sort((a,b) => a - b);
-
-                if(upcoming.length > 0) {
-                    const diff = upcoming[0] - currentMins;
-                    // 남은 시간이 120분(2시간) 이하일 때만 시간을 표시하고, 넘어가면 '운행 종료'로 표시
-                    if (diff <= 120) {
-                        el.innerText = diff === 0 ? "곧 도착" : (diff <= 5 ? `곧 도착 (${diff}분)` : `${diff}분 후`);
-                        el.className = diff <= 5 ? "text-sm font-bold text-red-400" : "text-sm font-bold text-white";
-                    } else {
-                        el.innerText = "운행 종료";
-                        el.className = "text-sm font-bold text-gray-500";
-                    }
-                } else {
-                    el.innerText = "운행 종료";
-                    el.className = "text-sm font-bold text-gray-500";
-                }
-            } catch(e) {
-                console.warn('CSV 연동 대기:', e);
-                el.innerText = "데이터 연결중...";
-                el.className = "text-[11px] font-bold text-gray-500";
-            }
-        }
-
-        // --- 공휴일 및 주말 자동 감지 로직 ---
-        const publicHolidays = [
-            '2024-12-25', '2025-01-01', '2025-01-28', '2025-01-29', '2025-01-30',
-            '2025-03-01', '2025-05-05', '2025-05-06', '2025-06-06', '2025-08-15',
-            '2025-10-03', '2025-10-06', '2025-10-07', '2025-10-08', '2025-10-09', '2025-12-25'
-        ];
-
-        function checkIsHolidayOrWeekend(date) {
-            const day = date.getDay();
-            if (day === 0 || day === 6) return true; 
+            // 다크 모드 스타일 적용 (야간 지도 느낌)
+            // 참고: 네이버 지도는 완전한 다크테마 타일을 공식지원하진 않으므로, 추후 커스텀 타일이 필요할 수 있습니다.
             
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            const dateString = `${yyyy}-${mm}-${dd}`;
-            
-            return publicHolidays.includes(dateString);
-        }
-
-        function loadRealTimetable() {
-            const now = new Date();
-            const isWeekend = checkIsHolidayOrWeekend(now);
-            const dayType = isWeekend ? 'weekend' : 'weekday'; 
-
-            // 하행
-            fetchTimetable(`daegyeong_down_${dayType}.csv`, '구미', 'time-daegyeong-gumi-down');
-            fetchTimetable(`daegyeong_down_${dayType}.csv`, '사곡', 'time-daegyeong-sagok-down');
-            fetchTimetable(`daegyeong_down_${dayType}.csv`, '왜관', 'time-daegyeong-waegwan-down');
-            fetchTimetable(`daegyeong_down_${dayType}.csv`, '서대구', 'time-daegyeong-seodaegu-down');
-            fetchTimetable(`daegyeong_down_${dayType}.csv`, '대구', 'time-daegyeong-daegu-down');
-            fetchTimetable(`daegyeong_down_${dayType}.csv`, '동대구', 'time-daegyeong-dongdaegu-down');
-            
-            // 상행
-            fetchTimetable(`daegyeong_up_${dayType}.csv`, '경산', 'time-daegyeong-gyeongsan-up');
-            fetchTimetable(`daegyeong_up_${dayType}.csv`, '동대구', 'time-daegyeong-dongdaegu-up');
-            fetchTimetable(`daegyeong_up_${dayType}.csv`, '대구', 'time-daegyeong-daegu-up');
-            fetchTimetable(`daegyeong_up_${dayType}.csv`, '서대구', 'time-daegyeong-seodaegu-up');
-            fetchTimetable(`daegyeong_up_${dayType}.csv`, '왜관', 'time-daegyeong-waegwan-up');
-            fetchTimetable(`daegyeong_up_${dayType}.csv`, '사곡', 'time-daegyeong-sagok-up');
-        }
-
-        // --- 시간표 모달 관련 기능 ---
-        function openTimetableModal(stationName, upTitle, upId, downTitle, downId) {
-            document.getElementById('modal-station-title').innerText = stationName + " 시간표";
-            
-            const upContainer = document.getElementById('modal-up-container');
-            const downContainer = document.getElementById('modal-down-container');
-            const divider = document.getElementById('modal-divider');
-
-            if (upTitle) {
-                upContainer.style.display = 'flex';
-                document.getElementById('modal-up-title').innerText = upTitle;
-                renderTimetableList(upId, 'modal-up-list');
-            } else {
-                upContainer.style.display = 'none';
-            }
-
-            if (downTitle) {
-                downContainer.style.display = 'flex';
-                document.getElementById('modal-down-title').innerText = downTitle;
-                renderTimetableList(downId, 'modal-down-list');
-            } else {
-                downContainer.style.display = 'none';
-            }
-
-            // 둘 다 있으면 구분선 보이기
-            if (upTitle && downTitle) divider.style.display = 'block';
-            else divider.style.display = 'none';
-
-            const modal = document.getElementById('timetable-modal');
-            const content = document.getElementById('timetable-modal-content');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                content.classList.remove('scale-95');
-            }, 10);
-        }
-
-        function renderTimetableList(id, containerId) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            
-            // 데이터가 없거나 로딩 실패한 역인 경우
-            const times = window.fullTimetables[id];
-            if (!times || times.length === 0) {
-                container.innerHTML = '<span class="text-gray-500 text-[11px] mt-4">데이터 없음</span>';
-                return;
-            }
-
-            const now = new Date();
-            const currentMins = now.getHours() * 60 + now.getMinutes();
-
-            times.forEach(t => {
-                const diff = t.totalMins - currentMins;
-                const isPast = diff < 0;
-                
-                const el = document.createElement('div');
-                el.className = `py-1.5 flex items-center justify-center gap-2 rounded-lg ${isPast ? 'text-gray-600' : 'text-gray-200 font-medium'}`;
-                
-                // 임박한 열차 강조
-                if (diff >= 0 && diff <= 5) el.classList.add('bg-white/5');
-
-                el.innerHTML = `
-                    <span class="${diff >= 0 && diff <= 5 ? 'text-white' : ''}">${t.timeStr}</span> 
-                    <span class="text-[10px] w-12 text-left ${isPast ? 'text-gray-700' : (diff === 0 ? 'text-red-400 font-bold' : (diff <= 5 ? 'text-red-400' : 'text-blue-400'))}">
-                        ${isPast ? '출발' : (diff === 0 ? '곧 도착' : `${diff}분`)}
-                    </span>
-                `;
-                container.appendChild(el);
+            // 지도 클릭 시 바텀시트 닫기
+            naver.maps.Event.addListener(map, 'click', function() {
+                closeBottomSheet();
             });
 
-            // 스크롤이 자동으로 "현재 시점" 부근으로 이동
-            setTimeout(() => {
-                const firstUpcoming = Array.from(container.children).find(el => !el.classList.contains('text-gray-600'));
-                if (firstUpcoming) {
-                    container.scrollTop = firstUpcoming.offsetTop - container.offsetTop - 40;
-                }
-            }, 50);
+            createMarkers();
         }
 
-        function closeTimetableModal() {
-            const modal = document.getElementById('timetable-modal');
-            const content = document.getElementById('timetable-modal-content');
-            modal.classList.add('opacity-0');
-            content.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }, 300);
+        // 마커 생성
+        function createMarkers() {
+            travelData.forEach((trip, index) => {
+                const position = new naver.maps.LatLng(trip.lat, trip.lng);
+                const theme = colorThemes[trip.color] || colorThemes.blue;
+
+                const markerHtml = `
+                    <div id="marker-${index}" class="travel-marker">
+                        <div class="travel-marker-label" style="display:none;">${trip.region}</div>
+                        <div class="travel-marker-icon" style="background-color: ${theme.markerBg};">${trip.emoji}</div>
+                        <div class="travel-marker-tail" style="border-top-color: ${theme.markerBg};"></div>
+                    </div>
+                `;
+
+                const marker = new naver.maps.Marker({
+                    position: position,
+                    map: map,
+                    icon: {
+                        content: markerHtml,
+                        size: new naver.maps.Size(60, 80),
+                        anchor: new naver.maps.Point(30, 60)
+                    },
+                    zIndex: 10
+                });
+
+                markers.push(marker);
+
+                // 마커 클릭 이벤트
+                naver.maps.Event.addListener(marker, 'click', function(e) {
+                    if (navigator.vibrate) navigator.vibrate(5);
+                    focusMarker(index);
+                });
+            });
         }
+
+        // 마커 포커스 및 바텀 시트 열기
+        function focusMarker(index) {
+            // 이전 활성 마커 리셋
+            if (activeMarkerIndex !== -1 && markers[activeMarkerIndex]) {
+                const prevEl = document.getElementById(`marker-${activeMarkerIndex}`);
+                if (prevEl) {
+                    prevEl.classList.remove('active');
+                    prevEl.querySelector('.travel-marker-label').style.display = 'none';
+                }
+                markers[activeMarkerIndex].setZIndex(10);
+            }
+
+            activeMarkerIndex = index;
+            const trip = travelData[index];
+            const marker = markers[index];
+
+            // 현재 마커 활성화
+            const el = document.getElementById(`marker-${index}`);
+            if (el) {
+                el.classList.add('active');
+                el.querySelector('.travel-marker-label').style.display = 'block';
+            }
+            marker.setZIndex(100);
+
+            // 지도를 마커 위치로 부드럽게 이동하고 약간 확대
+            map.morph(marker.getPosition(), 10, { duration: 300 });
+
+            // 바텀 시트 정보 업데이트
+            const theme = colorThemes[trip.color] || colorThemes.blue;
+            document.getElementById('sheet-emoji').innerText = trip.emoji;
+            document.getElementById('sheet-emoji').className = `w-12 h-12 rounded-full ${theme.bg} ${theme.text} flex items-center justify-center text-2xl border ${theme.border}`;
+            
+            document.getElementById('sheet-date').innerText = trip.date;
+            document.getElementById('sheet-date').className = `text-[10px] font-bold ${theme.text} ${theme.bg} px-2 py-0.5 rounded-full`;
+            
+            document.getElementById('sheet-title').innerText = trip.title;
+            document.getElementById('sheet-desc').innerText = trip.desc;
+
+            // 버튼 액션 교체
+            const ytBtn = document.querySelector('#bottom-sheet button:last-child');
+            ytBtn.onclick = () => window.openBrowser(trip.youtube);
+
+            // 바텀 시트 올리기
+            const sheet = document.getElementById('bottom-sheet');
+            sheet.classList.add('show');
+        }
+
+        // 바텀 시트 닫기
+        function closeBottomSheet() {
+            const sheet = document.getElementById('bottom-sheet');
+            sheet.classList.remove('show');
+            
+            if (activeMarkerIndex !== -1 && markers[activeMarkerIndex]) {
+                const el = document.getElementById(`marker-${activeMarkerIndex}`);
+                if (el) {
+                    el.classList.remove('active');
+                    el.querySelector('.travel-marker-label').style.display = 'none';
+                }
+                markers[activeMarkerIndex].setZIndex(10);
+                activeMarkerIndex = -1;
+            }
+        }
+
+        // 전국 지도로 줌 아웃
+        function zoomToAll() {
+            if (navigator.vibrate) navigator.vibrate(5);
+            closeBottomSheet();
+            map.morph(new naver.maps.LatLng(36.3504, 127.3845), 7, { duration: 400 });
+        }
+
+        // 목록 화면 렌더링
+        function renderTravelList() {
+            const container = document.getElementById('travel-list-container');
+            container.innerHTML = '';
+
+            travelData.forEach((trip, i) => {
+                const theme = colorThemes[trip.color] || colorThemes.blue;
+                
+                const card = document.createElement('div');
+                card.className = `list-card p-5 fade-in-up`;
+                card.style.animationDelay = `${i * 0.1}s`;
+                card.onclick = () => {
+                    window.haptic();
+                    switchTab(0);
+                    setTimeout(() => { focusMarker(i); }, 300);
+                };
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full ${theme.bg} flex items-center justify-center text-xl border ${theme.border}">
+                                ${trip.emoji}
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-gray-100">${trip.region}</h3>
+                                <span class="text-[10px] font-bold ${theme.text}">${trip.date}</span>
+                            </div>
+                        </div>
+                        <button class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+                    <p class="text-sm font-bold text-white mb-1.5">${trip.title}</p>
+                    <p class="text-xs text-gray-400 break-keep line-clamp-2">${trip.desc}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 내부 브라우저 제어 (유튜브 시청용)
+        window.openBrowser = function(url) {
+            const screen = document.getElementById('browser-screen');
+            const frame = document.getElementById('internal-browser-frame');
+            const loader = document.getElementById('browser-loader');
+            
+            loader.style.display = 'flex';
+            frame.src = url;
+            screen.classList.remove('hidden');
+            screen.classList.add('flex');
+        };
+
+        window.closeBrowser = function() {
+            const screen = document.getElementById('browser-screen');
+            const frame = document.getElementById('internal-browser-frame');
+            screen.classList.add('hidden');
+            screen.classList.remove('flex');
+            frame.src = '';
+        };
 
         // 초기 실행
         window.onload = () => {
             switchTab(0);
-            loadRealTimetable(); 
-            
-            if (window.location.protocol !== 'blob:' && window.location.protocol !== 'file:') {
-                setInterval(loadRealTimetable, 60000);
-            }
+            initMap();
         };
     </script>
 </body>
