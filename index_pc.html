@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Enjoy Travel Record</title>
+    
+    <!-- PC/모바일 분기 및 뷰포트 제어 스크립트 -->
+    <script>
+        (function() {
+            var ua = navigator.userAgent.toLowerCase();
+            // 스마트폰 감지 (아이폰, 갤럭시 등 안드로이드 모바일. 태블릿 제외)
+            var isSmartphone = /iphone|ipod|android.*mobile/.test(ua);
+            
+            // 데스크탑 모드로 접속 시 일반적으로 UA가 PC(Mac/Win)로 바뀌어 isSmartphone이 false가 됨
+            if (isSmartphone) {
+                // 일반 스마트폰 접속 시 모바일 버전 파일로 이동
+                location.replace('index.html');
+            } else {
+                // PC, 태블릿, 혹은 데스크탑 모드로 강제 접속한 스마트폰 (현재 PC 파일 유지)
+                // 터치 기기(태블릿, 폰)에서 PC버전을 볼 때 찌그러지지 않고 전체 화면이 축소되어 보이도록 뷰포트 강제 고정
+                var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+                if (isTouch) {
+                    var vp = document.querySelector('meta[name="viewport"]');
+                    if (vp) {
+                        vp.content = 'width=1024, user-scalable=yes';
+                    }
+                }
+            }
+        })();
+    </script>
+
+    <!-- 전역 에러 핸들러: 미리보기 환경의 크로스 도메인 스크립트 에러 방지 -->
+    <script>
+        window.addEventListener('error', function(e) {
+            if (e.message === 'Script error.' || (e.message && e.message.includes('Script error'))) {
+                console.warn('외부 스크립트(네이버 지도 API 등) 도메인 제한으로 인한 경고입니다. (정상 작동 중)');
+                e.preventDefault();
+            }
+        });
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 폰트 및 아이콘 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- 네이버 지도 API -->
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=9nl297jo77"></script>
+
+    <style>
+        body { 
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "sans-serif";
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+            touch-action: pan-y;
+        }
+
+        /* 유리 재질 공통 클래스 */
+        .toss-card {
+            background: rgba(28, 28, 30, 0.85);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); 
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+        }
+        
+        .list-card {
+            background: #1C1C1E;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            transition: transform 0.1s;
+        }
+        .list-card:active {
+            transform: scale(0.97);
+            background: #2C2C2E;
+        }
+
+        .text-main { color: #F2F4F6; }
+        .text-sub { color: #A1A1A6; }
+
+        .fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(15px); }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        
+        .pt-safe { padding-top: max(20px, env(safe-area-inset-top)); }
+        
+        #nav-indicator { will-change: transform, width; }
+        .nav-transition { transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* 커스텀 마커 스타일 */
+        .travel-marker {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            transition: transform 0.2s;
+            /* 명시적 크기 지정으로 위치 틀어짐 방지 */
+            width: 40px;
+            height: 48px;
+        }
+        .travel-marker.active {
+            transform: scale(1.15) translateY(-5px);
+            z-index: 100 !important;
+        }
+        .travel-marker-icon {
+            pointer-events: auto;
+            width: 40px;
+            height: 40px;
+            background: #3182F6;
+            border: 3px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+        .travel-marker-tail {
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid white;
+            margin-top: -2px;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+            flex-shrink: 0;
+        }
+        .travel-marker-label {
+            position: absolute;
+            bottom: 54px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 12px;
+            white-space: nowrap;
+            border: 1px solid rgba(255,255,255,0.2);
+            pointer-events: auto;
+        }
+
+        /* 바텀 시트 (정보 패널) 애니메이션 */
+        #bottom-sheet {
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+            transform: translate(-50%, 120%);
+            opacity: 0;
+        }
+        #bottom-sheet.show {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="w-full h-[100dvh] bg-[#0a0a0a] flex justify-center items-center overflow-hidden">
+
+    <!-- PC 풀스크린 형태의 메인 래퍼 (최대 너비 제한 해제) -->
+    <div id="mobile-wrapper" class="w-full h-full bg-black relative flex flex-col overflow-hidden">
+
+        <!-- 1. 지도 화면 (메인) -->
+        <main id="map-screen" class="flex-1 relative w-full flex flex-col bg-[#111]">
+            
+            <!-- 오류/안내 배경 (지도가 막혔을 때 보임) -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-0 bg-[#111]">
+                <i class="fa-solid fa-map-location-dot text-4xl text-gray-600 mb-4"></i>
+                <p class="text-sm text-gray-400 break-keep leading-relaxed">
+                    <span class="text-blue-400 font-bold">지도 로딩 중...</span><br><br>
+                    만약 지도가 계속 보이지 않는다면,<br>
+                    이곳(미리보기) 주소가 네이버 클라우드에<br>
+                    등록되지 않아 차단된 것입니다.<br>
+                    <strong class="text-white mt-2 block">깃허브에 올리면 정상적으로 나타납니다! ✨</strong>
+                </p>
+            </div>
+
+            <!-- 네이버 지도 컨테이너 -->
+            <div id="map" class="absolute inset-0 z-10 w-full h-full"></div>
+            
+            <!-- 선택된 여행지 정보 바텀 시트 (mobile-wrapper 안에서 absolute로 동작) -->
+            <div id="bottom-sheet" class="absolute bottom-24 left-1/2 w-[92%] max-w-[400px] z-30 toss-card p-5 cursor-default">
+                <button onclick="closeBottomSheet()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                
+                <div class="flex items-center gap-3 mb-3">
+                    <div id="sheet-emoji" class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl border border-blue-500/30 overflow-hidden p-0.5">
+                        <img src="logo_jeju.png" alt="logo" class="w-full h-full object-cover rounded-full">
+                    </div>
+                    <div class="flex-1">
+                        <span id="sheet-date" class="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">2024.08.15</span>
+                        <h3 id="sheet-title" class="text-xl font-bold text-white mt-1 leading-tight">제주도 출장엔조이</h3>
+                    </div>
+                </div>
+                
+                <p id="sheet-desc" class="text-sm text-gray-300 font-medium mb-4 break-keep line-clamp-2">
+                    여름 휴가 겸 떠난 첫 출장엔조이! 비도 오고 우여곡절이 많았지만 즐거웠던 기억.
+                </p>
+                
+                <div class="flex gap-2">
+                    <button onclick="alert('사진 갤러리 준비 중!')" class="w-full bg-white/10 hover:bg-white/20 text-white text-sm font-bold py-3 rounded-xl transition-colors border border-white/5">
+                        <i class="fa-regular fa-images mr-1"></i> 사진 보기
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- 2. 목록 화면 -->
+        <main id="list-screen" class="hidden flex-1 relative w-full flex-col bg-black overflow-y-auto scrollbar-hide pb-24 items-center pt-[88px]">
+            <div class="px-5 md:px-8 pt-4 flex justify-end w-full">
+                <div class="text-xs font-medium text-gray-400 bg-gray-900 px-3 py-1.5 rounded-full border border-gray-800">
+                    최신순 <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i>
+                </div>
+            </div>
+
+            <div class="px-5 md:px-8 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full" id="travel-list-container">
+                <!-- JS로 목록 렌더링 -->
+            </div>
+        </main>
+
+        <!-- 3. 통계 화면 -->
+        <main id="stats-screen" class="hidden flex-1 relative w-full flex-col bg-black overflow-y-auto scrollbar-hide pb-24 items-center pt-[88px]">
+            <!-- 통계 콘텐츠 컨테이너 -->
+            <div class="w-full pb-10 px-5 md:px-8" id="stats-container">
+                <!-- JS로 통계 데이터가 렌더링 됩니다 -->
+            </div>
+        </main>
+
+        <!-- 상단 네비게이션 (기존 하단 메뉴 대체) -->
+        <nav id="top-nav" class="absolute top-5 left-1/2 -translate-x-1/2 z-[100] w-[96%] max-w-[1000px] flex select-none">
+            <!-- 메인 바 -->
+            <div class="flex-1 bg-[#1A1A1A] border border-white/10 rounded-full shadow-2xl flex items-center justify-between px-6 py-2.5 transition-all duration-500">
+                <!-- 왼쪽 타이틀 -->
+                <div id="top-nav-title" class="text-white font-bold text-[16px] tracking-tight flex items-center">
+                    엔조이 발자취<span class="text-[#3182F6] ml-[2px] font-black">.</span>
+                    <span class="text-[12px] font-medium text-gray-400 hidden sm:inline-block ml-2">총 9번의 즐거운 여행</span>
+                </div>
+                
+                <!-- 오른쪽 메뉴 -->
+                <div class="flex items-center gap-6 mr-1 h-full">
+                    <a href="https://won429.github.io/enjoysite/" class="nav-item text-[#A1A1A6] hover:text-white transition-colors text-[15px] font-bold" style="text-decoration: none;">홈</a>
+                    
+                    <button class="nav-item relative text-white transition-colors text-[15px] font-bold flex flex-col items-center" onclick="switchTab(0)">
+                        <span>지도</span>
+                        <div class="active-line absolute -bottom-[6px] w-[130%] h-[3px] bg-[#3182F6] rounded-t-md"></div>
+                    </button>
+                    
+                    <button class="nav-item relative text-[#A1A1A6] hover:text-white transition-colors text-[15px] font-bold flex flex-col items-center" onclick="switchTab(1)">
+                        <span>목록</span>
+                    </button>
+                    
+                    <button class="nav-item relative text-[#A1A1A6] hover:text-white transition-colors text-[15px] font-bold flex flex-col items-center" onclick="switchTab(2)">
+                        <span>통계</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 우측 미니 버튼 -->
+            <div id="map-controls-btn" class="bg-[#1A1A1A] border-white/10 rounded-full shadow-2xl flex items-center justify-center gap-4 transition-all duration-500 overflow-hidden whitespace-nowrap" style="max-width: 280px; padding: 10px 20px; opacity: 1; margin-left: 10px; border-width: 1px;">
+                <button id="satellite-toggle-btn" onclick="toggleSatellite()" class="flex items-center justify-center active:scale-90 transition-transform text-[#A1A1A6] hover:text-white transition-colors text-[14px] font-bold gap-1.5">
+                    <i class="fa-solid fa-map"></i> 위성지도
+                </button>
+                <div class="w-[1px] h-[14px] bg-white/20"></div>
+                <button id="marker-toggle-btn" onclick="toggleMarkers()" class="flex items-center justify-center active:scale-90 transition-transform">
+                    <i class="fa-solid fa-eye-slash text-sm text-gray-400 hover:text-white transition-colors"></i>
+                </button>
+                <div class="w-[1px] h-[14px] bg-white/20"></div>
+                <button onclick="zoomToAll()" class="flex items-center justify-center active:scale-90 transition-transform text-white hover:text-gray-300 transition-colors">
+                    <i class="fa-solid fa-expand text-sm"></i>
+                </button>
+            </div>
+        </nav>
+    </div> <!-- // mobile-wrapper 끝 -->
+
+    <script>
+        // 전역 변수
+        let map = null;
+        let markers = [];
+        let activeMarkerIndex = -1;
+        let isMarkerVisible = false; // 마커 표시 상태
+        let isSatellite = false; // 위성 지도 상태
+
+        // 여행 데이터 모음
+        const travelData = [
+            {
+                id: 1,
+                title: '진주, 과거와 현재 사이',
+                region: '경상남도 진주시',
+                date: '2025.08.29 ~ 08.30',
+                logo: 'logo_jinju.png',
+                color: 'purple',
+                desc: '진주성에서 역사를 느끼고, 귀여운 하모도 구경하며 힐링했던 시간들.',
+                lat: 35.1803,
+                lng: 128.1076
+            },
+            {
+                id: 2,
+                title: '대구 맛집 탐방',
+                region: '대구광역시',
+                date: '2025.02.05 ~ 02.07',
+                logo: 'logo_daegu.png',
+                color: 'red',
+                desc: '끊임없이 먹고 또 먹었던 여행. 대구의 맛있는 음식들 완벽정복!',
+                lat: 35.8714,
+                lng: 128.6014
+            },
+            {
+                id: 5,
+                title: '칠곡의 여유로움',
+                region: '경상북도 칠곡군',
+                date: '2025.02.05 ~ 02.07',
+                logo: 'logo_chilgok.png',
+                color: 'blue',
+                desc: '자연과 함께하는 칠곡에서의 평화롭고 여유로운 시간.',
+                lat: 35.9956,
+                lng: 128.4017
+            },
+            {
+                id: 6,
+                title: '구미 산업과 자연',
+                region: '경상북도 구미시',
+                date: '2025.02.05',
+                logo: 'logo_gumi.png',
+                color: 'green',
+                desc: '금오산의 절경과 함께했던 구미에서의 특별한 하루.',
+                lat: 36.1195,
+                lng: 128.3445
+            },
+            {
+                id: 7,
+                title: '청양 1박 2일',
+                region: '충청남도 청양군',
+                date: '2026.01.26 ~ 01.27',
+                logo: 'logo_cheongyang.png',
+                color: 'red',
+                desc: '자연과 함께한 충남 청양에서의 즐거운 1박 2일.',
+                lat: 36.4593,
+                lng: 126.8024
+            },
+            {
+                id: 3,
+                title: '엔조이 첫 완전체 전역 여행',
+                region: '제주특별자치도',
+                date: '2024.10.30 ~ 11.02',
+                logo: 'logo_jeju.png',
+                color: 'orange',
+                desc: '우리의 첫 완전체 여행! 날씨가 완벽하진 않았지만 그래서 더 잊지 못할 추억이 된 제주도 풀빌라 여행.',
+                lat: 33.4996,
+                lng: 126.5312
+            },
+            {
+                id: 4,
+                title: '성심당 빵지순례',
+                region: '대전광역시',
+                date: '2024.09.26 ~ 09.27',
+                logo: 'logo_daejeon.png',
+                color: 'yellow',
+                desc: '오직 빵을 위해 떠난 대전. 두 손 무겁게 돌아왔던 달콤한 하루.',
+                lat: 36.3504,
+                lng: 127.3845
+            },
+            {
+                id: 8,
+                title: '2026년 대전 방문',
+                region: '대전광역시',
+                date: '2026.01.26 ~ 01.27',
+                logo: 'logo_daejeon.png',
+                color: 'yellow',
+                desc: '2026년 새해에 다시 찾은 대전광역시 기록.',
+                lat: 36.3504,
+                lng: 127.3845
+            },
+            {
+                id: 9,
+                title: '우리의 시작, 파주',
+                region: '경기도 파주시',
+                date: '2023년 상반기 ~ 2024년 하반기',
+                logo: 'logo_paju.png',
+                color: 'blue',
+                desc: '우리가 군생활을 했던 곳이고 우리가 만난 곳이라는 의미를 담고 있어.',
+                lat: 37.7599,
+                lng: 126.7795
+            }
+        ];
+
+        // 날짜 기준 최신 기록순(내림차순) 정렬
+        travelData.sort((a, b) => b.date.substring(0, 10).localeCompare(a.date.substring(0, 10)));
+
+        const colorThemes = {
+            orange: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30', markerBg: '#F97316' },
+            purple: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', markerBg: '#A855F7' },
+            red:    { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30', markerBg: '#EF4444' },
+            yellow: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30', markerBg: '#EAB308' },
+            blue:   { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', markerBg: '#3B82F6' },
+            green:  { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30', markerBg: '#22C55E' }
+        };
+
+        // 탭 전환 로직
+        function switchTab(index) {
+            if (navigator.vibrate) navigator.vibrate(10);
+
+            const screens = [
+                document.getElementById('map-screen'),
+                document.getElementById('list-screen'),
+                document.getElementById('stats-screen')
+            ];
+            
+            screens.forEach((screen, i) => {
+                if (i === index) {
+                    screen.classList.remove('hidden');
+                    screen.classList.add('flex');
+                } else {
+                    screen.classList.add('hidden');
+                    screen.classList.remove('flex');
+                }
+            });
+
+            // 상단 네비게이션 스타일 조정 (사진 스타일 적용)
+            const navButtons = document.querySelectorAll('#top-nav button.nav-item');
+            
+            navButtons.forEach((btn, i) => {
+                // 기존 active-line 제거
+                const existingLine = btn.querySelector('.active-line');
+                if (existingLine) existingLine.remove();
+
+                if (i === index) {
+                    btn.classList.remove('text-[#A1A1A6]');
+                    btn.classList.add('text-white');
+                    // 파란색 밑줄 간격 축소 (-bottom-[6px])
+                    btn.innerHTML += `<div class="active-line absolute -bottom-[6px] w-[130%] h-[3px] bg-[#3182F6] rounded-t-md"></div>`;
+                } else {
+                    btn.classList.remove('text-white');
+                    btn.classList.add('text-[#A1A1A6]');
+                }
+            });
+
+            // 좌측 타이틀 동적 변경 (엔조이. | 일정 스타일)
+            const topNavTitle = document.getElementById('top-nav-title');
+            if (topNavTitle) {
+                if (index === 0) {
+                    topNavTitle.innerHTML = `엔조이 발자취<span class="text-[#3182F6] ml-[2px] font-black">.</span><span class="text-[12px] font-medium text-gray-400 hidden sm:inline-block ml-2">총 9번의 즐거운 여행</span>`;
+                } else if (index === 1) {
+                    topNavTitle.innerHTML = `엔조이 발자취<span class="text-[#3182F6] ml-[2px] font-black">.</span><div class="w-[1px] h-[14px] bg-white/20 mx-3"></div><span class="text-gray-300 font-bold text-[15px]">목록</span>`;
+                } else if (index === 2) {
+                    topNavTitle.innerHTML = `엔조이 발자취<span class="text-[#3182F6] ml-[2px] font-black">.</span><div class="w-[1px] h-[14px] bg-white/20 mx-3"></div><span class="text-gray-300 font-bold text-[15px]">통계</span>`;
+                }
+            }
+
+            // 지도 컨트롤 버튼 (우측 미니 버튼) 표시/숨김 로직 (스무스한 애니메이션 적용)
+            const mapControlsBtn = document.getElementById('map-controls-btn');
+            if (mapControlsBtn) {
+                if (index === 0) {
+                    mapControlsBtn.style.maxWidth = '280px';
+                    mapControlsBtn.style.padding = '10px 20px';
+                    mapControlsBtn.style.opacity = '1';
+                    mapControlsBtn.style.marginLeft = '10px';
+                    mapControlsBtn.style.borderWidth = '1px';
+                } else {
+                    mapControlsBtn.style.maxWidth = '0px';
+                    mapControlsBtn.style.padding = '0px';
+                    mapControlsBtn.style.opacity = '0';
+                    mapControlsBtn.style.marginLeft = '0px';
+                    mapControlsBtn.style.borderWidth = '0px';
+                }
+            }
+
+            if (index === 0 && map) {
+                window.dispatchEvent(new Event('resize'));
+            }
+            
+            if (index === 1) {
+                renderTravelList();
+            } else if (index === 2) {
+                renderStats(); // 통계 탭을 누르면 통계 데이터 렌더링
+            }
+        }
+
+        // 지도 초기화
+        function initMap() {
+            if (typeof naver === 'undefined' || typeof naver.maps === 'undefined' || typeof naver.maps.LatLng === 'undefined') {
+                console.warn("네이버 지도 API를 불러올 수 없습니다. (미리보기 환경 등 도메인 미등록 상태)");
+                return;
+            }
+
+            const centerLocation = new naver.maps.LatLng(36.3504, 127.3845);
+            
+            const mapOptions = {
+                center: centerLocation,
+                zoom: 7,
+                scaleControl: false,
+                logoControl: true,
+                logoControlOptions: { position: naver.maps.Position.BOTTOM_LEFT },
+                mapDataControl: false,
+                zoomControl: false,
+            };
+
+            map = new naver.maps.Map('map', mapOptions);
+            
+            naver.maps.Event.addListener(map, 'click', function() {
+                closeBottomSheet();
+            });
+
+            createMarkers();
+
+            // --- 땅 모양(행정구역 경계선) 색칠 ---
+            loadRegionBoundaries();
+        }
+
+        // --- 실제 행정구역 GeoJSON 데이터를 불러와서 그립니다 ---
+        function loadRegionBoundaries() {
+            if (!map || typeof naver === 'undefined' || !naver.maps) return;
+
+            // 1. 광역시/도 단위 데이터 불러오기 (대구, 대전, 제주 전체 윤곽선용)
+            fetch('https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_provinces_geo_simple.json')
+                .then(response => response.json())
+                .then(geojson => {
+                    map.data.addGeoJson(geojson);
+                    applyMapStyle();
+                })
+                .catch(e => console.warn('시도 경계 오류:', e));
+
+            // 2. 시/군/구 단위 데이터 불러오기 (진주시, 칠곡군, 구미시, 청양군 세부 윤곽선용)
+            fetch('https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_municipalities_geo_simple.json')
+                .then(response => response.json())
+                .then(geojson => {
+                    map.data.addGeoJson(geojson);
+                    applyMapStyle();
+                })
+                .catch(e => console.warn('시군구 경계 오류:', e));
+
+            // 통합 스타일 적용 함수
+            function applyMapStyle() {
+                map.data.setStyle(function(feature) {
+                    const name = feature.getProperty('name') || '';
+                    let color = null;
+
+                    // [수정됨] 헷갈리는 숫자 코드 대신 '한글 지역 이름'으로 정확하게 매칭합니다.
+                    if (name === '대구광역시' || name === '군위군') color = colorThemes.red.markerBg;
+                    else if (name === '대전광역시') color = colorThemes.yellow.markerBg;
+                    else if (name === '제주특별자치도') color = colorThemes.orange.markerBg;
+                    else if (name === '진주시') color = colorThemes.purple.markerBg;
+                    else if (name === '칠곡군') color = colorThemes.blue.markerBg;
+                    else if (name === '구미시') color = colorThemes.green.markerBg;
+                    else if (name === '청양군') color = colorThemes.red.markerBg;
+                    else if (name === '파주시') color = colorThemes.blue.markerBg;
+
+                    if (color) {
+                        return {
+                            fillColor: color,
+                            fillOpacity: 0.15, // 반투명 색칠
+                            strokeColor: color,
+                            strokeWeight: 2,
+                            strokeOpacity: 0.7,
+                            clickable: false // 폴리곤 클릭 시 지도 클릭 이벤트 방해 방지
+                        };
+                    } else {
+                        // 여행하지 않은 다른 모든 지역의 폴리곤은 투명하게(숨김) 처리
+                        return { visible: false };
+                    }
+                });
+            }
+        }
+
+        // 마커 생성
+        function createMarkers() {
+            if (!map || typeof naver === 'undefined' || !naver.maps) return;
+
+            travelData.forEach((trip, index) => {
+                const position = new naver.maps.LatLng(trip.lat, trip.lng);
+                const theme = colorThemes[trip.color] || colorThemes.blue;
+
+                const markerHtml = `
+                    <div id="marker-${index}" class="travel-marker">
+                        <div class="travel-marker-label" style="display:none;">${trip.region}</div>
+                        <div class="travel-marker-icon overflow-hidden" style="background-color: ${theme.markerBg}; padding: 2px;">
+                            <img src="${trip.logo}" alt="logo" class="w-full h-full object-cover rounded-full">
+                        </div>
+                        <div class="travel-marker-tail" style="border-top-color: ${theme.markerBg};"></div>
+                    </div>
+                `;
+
+                const marker = new naver.maps.Marker({
+                    position: position,
+                    map: map,
+                    icon: {
+                        content: markerHtml,
+                        size: new naver.maps.Size(40, 48),
+                        anchor: new naver.maps.Point(20, 48)
+                    },
+                    zIndex: 10,
+                    visible: isMarkerVisible
+                });
+
+                markers.push(marker);
+
+                naver.maps.Event.addListener(marker, 'click', function(e) {
+                    if (navigator.vibrate) navigator.vibrate(5);
+                    focusMarker(index);
+                });
+            });
+        }
+
+        function focusMarker(index) {
+            if (activeMarkerIndex !== -1 && markers[activeMarkerIndex]) {
+                const prevEl = document.getElementById(`marker-${activeMarkerIndex}`);
+                if (prevEl) {
+                    prevEl.classList.remove('active');
+                    prevEl.querySelector('.travel-marker-label').style.display = 'none';
+                }
+                if (typeof markers[activeMarkerIndex].setZIndex === 'function') {
+                    markers[activeMarkerIndex].setZIndex(10);
+                }
+            }
+
+            activeMarkerIndex = index;
+            const trip = travelData[index];
+            const marker = markers[index];
+
+            const el = document.getElementById(`marker-${index}`);
+            if (el) {
+                el.classList.add('active');
+                el.querySelector('.travel-marker-label').style.display = 'block';
+            }
+            
+            if (marker && typeof marker.setZIndex === 'function') {
+                marker.setZIndex(100);
+            }
+
+            if (map && typeof map.morph === 'function' && marker) {
+                map.morph(marker.getPosition(), 10, { duration: 300 });
+            }
+
+            const theme = colorThemes[trip.color] || colorThemes.blue;
+            document.getElementById('sheet-emoji').innerHTML = `<img src="${trip.logo}" alt="logo" class="w-full h-full object-cover rounded-full">`;
+            document.getElementById('sheet-emoji').className = `w-12 h-12 rounded-full ${theme.bg} flex items-center justify-center border ${theme.border} overflow-hidden p-0.5`;
+            
+            document.getElementById('sheet-date').innerText = trip.date;
+            document.getElementById('sheet-date').className = `text-[10px] font-bold ${theme.text} ${theme.bg} px-2 py-0.5 rounded-full`;
+            
+            document.getElementById('sheet-title').innerText = trip.title;
+            document.getElementById('sheet-desc').innerText = trip.desc;
+
+            const sheet = document.getElementById('bottom-sheet');
+            if (sheet) sheet.classList.add('show');
+        }
+
+        function closeBottomSheet() {
+            const sheet = document.getElementById('bottom-sheet');
+            if (sheet) sheet.classList.remove('show');
+            
+            if (activeMarkerIndex !== -1 && markers[activeMarkerIndex]) {
+                const el = document.getElementById(`marker-${activeMarkerIndex}`);
+                if (el) {
+                    el.classList.remove('active');
+                    el.querySelector('.travel-marker-label').style.display = 'none';
+                }
+                if (typeof markers[activeMarkerIndex].setZIndex === 'function') {
+                    markers[activeMarkerIndex].setZIndex(10);
+                }
+                activeMarkerIndex = -1;
+            }
+        }
+
+        // --- 마커 보이기/숨기기 기능 ---
+        function toggleMarkers() {
+            if (navigator.vibrate) navigator.vibrate(5);
+            isMarkerVisible = !isMarkerVisible; // 상태 반전
+            
+            markers.forEach(marker => {
+                if (marker) {
+                    marker.setVisible(isMarkerVisible); // 네이버 지도 API의 마커 숨김 기능
+                }
+            });
+
+            // 아이콘 변경 (눈 모양 <-> 감은 눈 모양)
+            const icon = document.querySelector('#marker-toggle-btn i');
+            if (icon) {
+                icon.className = isMarkerVisible ? 'fa-solid fa-eye text-sm text-white' : 'fa-solid fa-eye-slash text-sm text-gray-400';
+            }
+        }
+
+        // --- 위성 지도 토글 기능 ---
+        function toggleSatellite() {
+            if (navigator.vibrate) navigator.vibrate(5);
+            isSatellite = !isSatellite;
+
+            // 메뉴 버튼 색상 업데이트 (활성화 시 파란색)
+            const btn = document.getElementById('satellite-toggle-btn');
+            if (btn) {
+                if (isSatellite) {
+                    btn.classList.remove('text-[#A1A1A6]');
+                    btn.classList.add('text-[#3182F6]');
+                } else {
+                    btn.classList.remove('text-[#3182F6]');
+                    btn.classList.add('text-[#A1A1A6]');
+                }
+            }
+
+            // 지도 타입 변경 (HYBRID: 위성 사진 + 도로/지명 표시)
+            if (map && typeof naver !== 'undefined' && naver.maps) {
+                map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.HYBRID : naver.maps.MapTypeId.NORMAL);
+            }
+        }
+
+        function zoomToAll() {
+            if (navigator.vibrate) navigator.vibrate(5);
+            closeBottomSheet();
+            if (map && typeof map.morph === 'function' && typeof naver !== 'undefined' && naver.maps) {
+                map.morph(new naver.maps.LatLng(36.3504, 127.3845), 7, { duration: 400 });
+            }
+        }
+
+        function renderTravelList() {
+            const container = document.getElementById('travel-list-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            travelData.forEach((trip, i) => {
+                const theme = colorThemes[trip.color] || colorThemes.blue;
+                
+                const card = document.createElement('div');
+                card.className = `list-card p-5 fade-in-up cursor-pointer`;
+                card.style.animationDelay = `${i * 0.1}s`;
+                card.onclick = () => {
+                    if (navigator.vibrate) navigator.vibrate(10);
+                    switchTab(0);
+                    setTimeout(() => { focusMarker(i); }, 300);
+                };
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full ${theme.bg} flex items-center justify-center border ${theme.border} overflow-hidden p-0.5">
+                                <img src="${trip.logo}" alt="logo" class="w-full h-full object-cover rounded-full">
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-gray-100">${trip.region}</h3>
+                                <span class="text-[10px] font-bold ${theme.text}">${trip.date}</span>
+                            </div>
+                        </div>
+                        <button class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+                    <p class="text-sm font-bold text-white mb-1.5">${trip.title}</p>
+                    <p class="text-xs text-gray-400 break-keep line-clamp-2">${trip.desc}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 통계 렌더링 함수 추가
+        function renderStats() {
+            const container = document.getElementById('stats-container');
+            if (!container) return;
+
+            let totalTrips = travelData.length;
+            let totalDays = 0;
+            let regionCounts = {};
+
+            // 데이터 분석
+            travelData.forEach(trip => {
+                // 1. 지역 카운트
+                let region = trip.region;
+                regionCounts[region] = (regionCounts[region] || 0) + 1;
+
+                // 2. 여행 일수 계산 (예: '2024.10.30 ~ 11.02')
+                if (trip.date.includes('~')) {
+                    let parts = trip.date.split('~').map(s => s.trim());
+                    let startStr = parts[0].replace(/\./g, '-');
+                    let endStr = parts[1];
+                    // 연도가 생략된 경우 (예: '08.30') 앞에 연도 붙여주기
+                    if (endStr.length <= 5) { 
+                        endStr = parts[0].substring(0, 5) + endStr; 
+                    }
+                    endStr = endStr.replace(/\./g, '-');
+                    
+                    let start = new Date(startStr);
+                    let end = new Date(endStr);
+                    let days = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                    totalDays += (isNaN(days) ? 1 : days);
+                } else {
+                    // 당일치기
+                    totalDays += 1;
+                }
+            });
+
+            // 가장 많이 간 지역 찾기 (내림차순 정렬)
+            let sortedRegions = Object.entries(regionCounts).sort((a, b) => b[1] - a[1]);
+            let favoriteRegion = sortedRegions.length > 0 ? sortedRegions[0][0] : '-';
+            // 이름이 길면 마지막 단어만 추출 (예: '경상북도 구미시' -> '구미시')
+            let shortFavoriteRegion = favoriteRegion.split(' ').pop();
+            let uniqueRegions = sortedRegions.length;
+
+            // HTML 렌더링
+            container.innerHTML = `
+                <div class="pt-4 w-full">
+                    <!-- 요약 카드 4개 그리드 -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 fade-in-up">
+                        <div class="list-card p-4">
+                            <div class="text-xs font-medium text-gray-400 mb-1">총 여행 횟수</div>
+                            <div class="text-2xl font-bold text-white flex items-baseline gap-1">
+                                ${totalTrips} <span class="text-sm font-normal text-gray-500">번</span>
+                            </div>
+                        </div>
+                        <div class="list-card p-4">
+                            <div class="text-xs font-medium text-gray-400 mb-1">총 여행 일수</div>
+                            <div class="text-2xl font-bold text-white flex items-baseline gap-1">
+                                ${totalDays} <span class="text-sm font-normal text-gray-500">일</span>
+                            </div>
+                        </div>
+                        <div class="list-card p-4">
+                            <div class="text-xs font-medium text-gray-400 mb-1">발도장 찍은 곳</div>
+                            <div class="text-2xl font-bold text-white flex items-baseline gap-1">
+                                ${uniqueRegions} <span class="text-sm font-normal text-gray-500">곳</span>
+                            </div>
+                        </div>
+                        <div class="list-card p-4">
+                            <div class="text-xs font-medium text-gray-400 mb-1">최애 여행지</div>
+                            <div class="text-lg font-bold text-blue-400 flex items-center h-[32px] break-keep leading-tight">
+                                ${shortFavoriteRegion}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 지역별 방문 랭킹 -->
+                    <h3 class="text-sm font-bold text-gray-300 mb-3 px-1 fade-in-up" style="animation-delay: 0.1s;">지역별 방문 횟수</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 fade-in-up" style="animation-delay: 0.2s;">
+                        ${sortedRegions.map((r, i) => `
+                            <div class="list-card flex justify-between items-center p-4">
+                                <div class="flex items-center gap-3">
+                                    <!-- 1, 2, 3등에 따라 메달 색상 차등 적용 -->
+                                    <div class="w-7 h-7 rounded-full ${i === 0 ? 'bg-yellow-500/20 text-yellow-400' : (i===1 ? 'bg-gray-300/20 text-gray-300' : (i===2 ? 'bg-orange-700/20 text-orange-500' : 'bg-white/5 text-gray-500'))} flex items-center justify-center text-xs font-bold shadow-sm">
+                                        ${i + 1}
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-200">${r[0]}</span>
+                                </div>
+                                <div class="text-sm font-bold text-white flex items-baseline gap-0.5">
+                                    ${r[1]}<span class="text-[10px] font-normal text-gray-500">번</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 초기 실행
+        window.onload = () => {
+            switchTab(0);
+            initMap();
+        };
+    </script>
+</body>
+</html>
