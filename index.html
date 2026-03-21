@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Enjoy Travel Record</title>
     
+    <!-- PC 및 태블릿 접속 시 index_pc.html로 리다이렉션 -->
+    <script>
+        (function() {
+            try {
+                var ua = navigator.userAgent.toLowerCase();
+                // 스마트폰(아이폰, 안드로이드폰 등) 감지 (안드로이드 태블릿은 보통 'mobile' 키워드가 없음)
+                var isMobilePhone = /iphone|ipod|android.*mobile|blackberry|windows phone|opera mini|iemobile/i.test(ua);
+                // 아이패드 OS 13 이상 (데스크톱 맥으로 인식되므로 터치 지원 여부로 추가 판별)
+                var isIPadOS = ua.includes('macintosh') && navigator.maxTouchPoints > 1;
+
+                // 스마트폰이 아니거나(PC, 안드로이드 태블릿), 아이패드인 경우 pc 버전으로 이동
+                if (!isMobilePhone || isIPadOS) {
+                    // 미리보기 환경(blob: 또는 data: URL)에서는 상대 경로 리다이렉션 시 SyntaxError가 발생하므로 방어 코드 추가
+                    if (window.location.protocol !== 'blob:' && window.location.protocol !== 'data:') {
+                        window.location.replace('index_pc.html');
+                    } else {
+                        console.warn('미리보기 환경이므로 PC 버전 리다이렉션을 건너뜁니다.');
+                    }
+                }
+            } catch (e) {
+                console.warn('리다이렉션 처리 중 오류 발생:', e);
+            }
+        })();
+    </script>
+
     <!-- 전역 에러 핸들러: 미리보기 환경의 크로스 도메인 스크립트 에러 방지 -->
     <script>
         window.addEventListener('error', function(e) {
@@ -161,20 +186,31 @@
             <!-- 네이버 지도 컨테이너 -->
             <div id="map" class="absolute inset-0 z-10 w-full h-full"></div>
             
-            <!-- 상단 헤더 오버레이 -->
-            <header class="absolute top-0 left-0 right-0 pt-safe px-5 pb-4 z-20 pointer-events-none bg-gradient-to-b from-black/80 to-transparent">
-                <div class="flex justify-between items-center mt-2 w-full">
-                    <div class="pointer-events-auto">
-                        <h2 class="text-2xl font-bold text-main drop-shadow-lg">우리의 발자취 ✈️</h2>
-                        <p class="text-sm font-medium text-gray-300 drop-shadow-md">총 9번의 즐거운 여행</p>
+            <!-- 상단 헤더 오버레이 (새로운 캡슐 디자인) -->
+            <header class="absolute top-0 left-0 right-0 pt-safe px-4 pb-4 z-20 pointer-events-none">
+                <div class="mt-3 flex items-center gap-2 w-full pointer-events-auto pb-2">
+                    <!-- 1. 타이틀 캡슐 -->
+                    <div class="flex items-center flex-1 bg-[#151515] rounded-full px-4 py-2 shadow-lg border border-white/5">
+                        <div class="flex items-baseline gap-1.5">
+                            <h1 class="text-[13px] font-extrabold text-white flex items-center tracking-tight">
+                                엔조이 발자취<span class="w-1 h-1 bg-[#3182F6] rounded-full ml-1 mb-0.5"></span>
+                            </h1>
+                            <span class="text-[11px] text-gray-400 font-medium">총 9번의 즐거운 여행</span>
+                        </div>
                     </div>
-                    <div class="flex gap-2 pointer-events-auto">
-                        <!-- 마커 보이기/숨기기 토글 버튼 추가 -->
-                        <button id="marker-toggle-btn" onclick="toggleMarkers()" class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-lg active:scale-90 transition-transform">
-                            <i class="fa-solid fa-eye-slash text-sm text-gray-400"></i>
+
+                    <!-- 2. 컨트롤 캡슐 -->
+                    <div class="flex items-center gap-3 bg-[#151515] rounded-full px-4 py-2 shrink-0 shadow-lg border border-white/5">
+                        <button id="satellite-top-btn" class="text-gray-400 hover:text-white text-[13px] transition-colors" onclick="toggleSatellite()">
+                            <i class="fa-solid fa-satellite"></i>
                         </button>
-                        <button onclick="zoomToAll()" class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-lg active:scale-90 transition-transform">
-                            <i class="fa-solid fa-expand text-sm"></i>
+                        <div class="w-px h-3 bg-white/10"></div>
+                        <button id="marker-toggle-btn" class="text-[13px] transition-colors" onclick="toggleMarkers()">
+                            <i class="fa-solid fa-eye-slash text-gray-400"></i>
+                        </button>
+                        <div class="w-px h-3 bg-white/10"></div>
+                        <button class="text-gray-400 hover:text-white text-[13px] transition-colors" onclick="zoomToAll()">
+                            <i class="fa-solid fa-expand"></i>
                         </button>
                     </div>
                 </div>
@@ -238,32 +274,11 @@
             </div>
         </main>
 
-        <!-- 4. 설정 화면 -->
-        <main id="settings-screen" class="hidden flex-1 relative w-full flex-col bg-black overflow-y-auto scrollbar-hide pb-24">
-            <header class="flex-none pt-safe px-5 pb-4 flex justify-between items-center bg-black/80 backdrop-blur-md border-b border-white/10 z-10 sticky top-0">
-                <h2 class="text-xl font-bold text-main drop-shadow-sm mt-2">설정</h2>
-            </header>
-            <div class="px-5 pt-4">
-                <h4 class="text-xs font-bold text-gray-500 mb-2 px-2">지도 설정</h4>
-                <div class="bg-[#1C1C1E] rounded-[24px] border border-white/5 overflow-hidden mb-6 shadow-sm">
-                    <div class="w-full flex justify-between items-center p-4 border-b border-white/5 cursor-pointer" onclick="toggleSatellite()">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-[10px] bg-blue-500/20 text-blue-400 flex items-center justify-center"><i class="fa-solid fa-map"></i></div>
-                            <span class="text-sm font-bold text-gray-200">위성 지도로 보기</span>
-                        </div>
-                        <div id="satellite-toggle-bg" class="w-10 h-6 bg-gray-600 rounded-full relative transition-colors duration-200">
-                            <div id="satellite-toggle-circle" class="absolute left-1 top-1 w-4 h-4 bg-gray-300 rounded-full transition-transform duration-200"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
         <!-- 하단 플로팅 메뉴 -->
         <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-[88%] max-w-[300px] px-2 touch-pan-x select-none">
-            <div class="flex items-center justify-between bg-white/10 backdrop-blur-[4px] backdrop-saturate-[180%] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1 gap-0.5 ring-1 ring-white/30 relative mix-blend-difference transition-all duration-300">
+            <div class="flex items-center justify-between bg-[#1C1C1E] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1 gap-0.5 ring-1 ring-white/30 relative transition-all duration-300">
                 <!-- 활성화 표시 배경 -->
-                <div id="nav-indicator" class="absolute top-1 bottom-1 bg-white/50 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-full backdrop-blur-[2px] border border-white/20 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
+                <div id="nav-indicator" class="absolute top-1 bottom-1 bg-gray-500 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-full border border-white/20 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
                 
                 <a href="https://won429.github.io/enjoysite/" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform" style="text-decoration: none;">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
@@ -290,13 +305,6 @@
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
                         <i class="fa-solid fa-chart-pie text-base text-gray-300 group-hover:text-white transition-colors"></i>
                         <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">통계</span>
-                    </div>
-                </button>
-                
-                <button class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(3)">
-                    <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-gear text-base text-gray-300 group-hover:text-white transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">설정</span>
                     </div>
                 </button>
             </div>
@@ -433,8 +441,7 @@
             const screens = [
                 document.getElementById('map-screen'),
                 document.getElementById('list-screen'),
-                document.getElementById('stats-screen'),
-                document.getElementById('settings-screen')
+                document.getElementById('stats-screen')
             ];
             
             screens.forEach((screen, i) => {
@@ -456,60 +463,38 @@
                 indicator.style.transform = `translateX(${navButtons[index].offsetLeft - 4}px)`;
             }
 
-            // 지도 화면일 때 컨테이너 배경 및 mix-blend 모드 변경
-            const navContainer = document.querySelector('#bottom-nav > div');
-            if (index === 0) {
-                navContainer.classList.remove('mix-blend-difference', 'bg-white/10');
-                navContainer.classList.add('bg-white/80');
-            } else {
-                navContainer.classList.add('mix-blend-difference', 'bg-white/10');
-                navContainer.classList.remove('bg-white/80');
-            }
-
             navButtons.forEach((btn, i) => {
                 const icon = btn.querySelector('i');
                 const label = btn.querySelector('span');
                 
-                // 기존 색상 및 폰트 굵기 클래스 초기화
-                icon.className = icon.className.replace(/text-(white|gray-300|black|gray-600)/g, '').trim();
-                label.className = label.className.replace(/text-(white|gray-300|black|gray-600)/g, '').replace(/font-(medium|bold)/g, '').trim();
+                if (icon && label) {
+                    // 기존 색상 및 폰트 굵기 클래스 초기화 (문자열 replace 대신 안전한 classList API 사용)
+                    icon.classList.remove('text-white', 'text-gray-300', 'text-black', 'text-gray-600');
+                    label.classList.remove('text-white', 'text-gray-300', 'text-black', 'text-gray-600', 'font-medium', 'font-bold');
 
-                if (index === 0) {
-                    // 지도 화면일 때는 검은색 계열로 표시
+                    // 항상 흰색 계열로 표시
                     if (i === index) {
-                        icon.className += ' text-black';
-                        label.className += ' text-black font-bold';
+                        icon.classList.add('text-white');
+                        label.classList.add('text-white', 'font-bold');
                     } else {
-                        icon.className += ' text-gray-600';
-                        label.className += ' text-gray-600 font-medium';
-                    }
-                } else {
-                    // 다른 화면일 때는 흰색 계열로 표시
-                    if (i === index) {
-                        icon.className += ' text-white';
-                        label.className += ' text-white font-bold';
-                    } else {
-                        icon.className += ' text-gray-300';
-                        label.className += ' text-gray-300 font-medium';
+                        icon.classList.add('text-gray-300');
+                        label.classList.add('text-gray-300', 'font-medium');
                     }
                 }
             });
 
-            // 홈 버튼(<a> 태그) 색상 동기화 (지도 탭에서 혼자 밝은 회색으로 남는 문제 해결)
+            // 홈 버튼(<a> 태그) 색상 동기화
             const homeLink = document.querySelector('#bottom-nav a');
             if (homeLink) {
                 const homeIcon = homeLink.querySelector('i');
                 const homeLabel = homeLink.querySelector('span');
                 
-                homeIcon.className = homeIcon.className.replace(/text-(white|gray-300|black|gray-600)/g, '').trim();
-                homeLabel.className = homeLabel.className.replace(/text-(white|gray-300|black|gray-600)/g, '').replace(/font-(medium|bold)/g, '').trim();
+                if (homeIcon && homeLabel) {
+                    homeIcon.classList.remove('text-white', 'text-gray-300', 'text-black', 'text-gray-600');
+                    homeLabel.classList.remove('text-white', 'text-gray-300', 'text-black', 'text-gray-600', 'font-medium', 'font-bold');
 
-                if (index === 0) {
-                    homeIcon.className += ' text-gray-600';
-                    homeLabel.className += ' text-gray-600 font-medium';
-                } else {
-                    homeIcon.className += ' text-gray-300';
-                    homeLabel.className += ' text-gray-300 font-medium';
+                    homeIcon.classList.add('text-gray-300');
+                    homeLabel.classList.add('text-gray-300', 'font-medium');
                 }
             }
 
@@ -724,7 +709,7 @@
             // 아이콘 변경 (눈 모양 <-> 감은 눈 모양)
             const icon = document.querySelector('#marker-toggle-btn i');
             if (icon) {
-                icon.className = isMarkerVisible ? 'fa-solid fa-eye text-sm text-white' : 'fa-solid fa-eye-slash text-sm text-gray-400';
+                icon.className = isMarkerVisible ? 'fa-solid fa-eye text-white' : 'fa-solid fa-eye-slash text-gray-400';
             }
         }
 
@@ -733,20 +718,16 @@
             if (navigator.vibrate) navigator.vibrate(5);
             isSatellite = !isSatellite;
 
-            // 스위치 UI 업데이트
-            const bg = document.getElementById('satellite-toggle-bg');
-            const circle = document.getElementById('satellite-toggle-circle');
-            
-            if (isSatellite) {
-                bg.classList.remove('bg-gray-600');
-                bg.classList.add('bg-blue-500');
-                circle.classList.remove('bg-gray-300');
-                circle.classList.add('bg-white', 'translate-x-4');
-            } else {
-                bg.classList.remove('bg-blue-500');
-                bg.classList.add('bg-gray-600');
-                circle.classList.remove('bg-white', 'translate-x-4');
-                circle.classList.add('bg-gray-300');
+            // 상단 캡슐 버튼 UI 업데이트
+            const topSatBtn = document.getElementById('satellite-top-btn');
+            if (topSatBtn) {
+                if (isSatellite) {
+                    topSatBtn.classList.remove('text-gray-400');
+                    topSatBtn.classList.add('text-white');
+                } else {
+                    topSatBtn.classList.remove('text-white');
+                    topSatBtn.classList.add('text-gray-400');
+                }
             }
 
             // 지도 타입 변경 (HYBRID: 위성 사진 + 도로/지명 표시)
