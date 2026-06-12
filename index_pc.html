@@ -30,6 +30,14 @@
         })();
     </script>
 
+    <!-- 운영체제의 라이트/다크 모드를 첫 화면부터 즉시 반영 -->
+    <script>
+        (function() {
+            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.dataset.deviceTheme = prefersDark ? 'dark' : 'light';
+        })();
+    </script>
+
     <!-- 전역 에러 핸들러: 미리보기 환경의 크로스 도메인 스크립트 에러 방지 -->
     <script>
         window.addEventListener('error', function(e) {
@@ -52,10 +60,50 @@
 
     <style>
         :root {
+            color-scheme: light;
+            --app-bg: #f5f7fa;
+            --app-text: #1f2937;
+            --app-text-strong: #0f172a;
+            --app-text-secondary: #475569;
+            --app-text-muted: #526071;
+            --app-text-faint: #5c6675;
+            --app-line: rgba(15, 23, 42, 0.14);
+            --app-line-soft: rgba(15, 23, 42, 0.10);
+            --app-track: #d8dee7;
+            --app-fill: #475569;
+            --map-fallback: #eef2f6;
+            --sheet-bg: rgba(255, 255, 255, 0.88);
+            --sheet-border: rgba(15, 23, 42, 0.12);
+            --sheet-shadow: 0 12px 34px rgba(15, 23, 42, 0.20);
+            --sheet-control-bg: rgba(15, 23, 42, 0.07);
+            --sheet-control-hover: rgba(15, 23, 42, 0.12);
+            --lg-glass-border: rgba(255, 255, 255, 0.82);
+            --lg-glass-inner-border: rgba(255, 255, 255, 0.50);
+            --lg-glass-shadow: 0 14px 38px rgba(15, 23, 42, 0.16);
+            --lg-blur: 24px;
+        }
+
+        :root[data-device-theme="dark"] {
+            color-scheme: dark;
+            --app-bg: #08090b;
+            --app-text: #d7d8dc;
+            --app-text-strong: #f4f4f5;
+            --app-text-secondary: #b7bac1;
+            --app-text-muted: #9ca0a9;
+            --app-text-faint: #858a94;
+            --app-line: #292b31;
+            --app-line-soft: #23252b;
+            --app-track: #292b31;
+            --app-fill: #d4d6db;
+            --map-fallback: #111214;
+            --sheet-bg: rgba(28, 28, 30, 0.88);
+            --sheet-border: rgba(255, 255, 255, 0.10);
+            --sheet-shadow: 0 8px 32px rgba(0, 0, 0, 0.40);
+            --sheet-control-bg: rgba(255, 255, 255, 0.10);
+            --sheet-control-hover: rgba(255, 255, 255, 0.18);
             --lg-glass-border: rgba(255, 255, 255, 0.48);
             --lg-glass-inner-border: rgba(255, 255, 255, 0.20);
             --lg-glass-shadow: 0 14px 38px rgba(3, 8, 20, 0.24);
-            --lg-blur: 24px;
         }
 
         body { 
@@ -63,33 +111,79 @@
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
             touch-action: pan-y;
+            background: var(--app-bg) !important;
+            color: var(--app-text);
+        }
+
+        #mobile-wrapper {
+            background: var(--app-bg) !important;
+        }
+
+        #map-screen,
+        .map-fallback {
+            background: var(--map-fallback) !important;
+        }
+
+        .map-fallback {
+            color: var(--app-text-secondary);
+        }
+
+        .map-fallback p {
+            color: var(--app-text-secondary) !important;
+        }
+
+        .map-fallback-icon {
+            color: var(--app-text-faint) !important;
+        }
+
+        .map-fallback strong {
+            color: var(--app-text-strong) !important;
         }
 
         /* 유리 재질 공통 클래스 */
         .toss-card {
-            background: rgba(28, 28, 30, 0.85);
+            background: var(--sheet-bg);
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--sheet-border);
             border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); 
+            box-shadow: var(--sheet-shadow);
             transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+        }
+
+        #sheet-title {
+            color: var(--app-text-strong) !important;
+        }
+
+        #sheet-desc {
+            color: var(--app-text-secondary) !important;
+        }
+
+        .sheet-control {
+            color: var(--app-text-secondary) !important;
+            background: var(--sheet-control-bg) !important;
+            border-color: var(--sheet-border) !important;
+        }
+
+        .sheet-control:hover {
+            color: var(--app-text-strong) !important;
+            background: var(--sheet-control-hover) !important;
         }
         
         #list-screen,
         #stats-screen {
-            background: #08090b;
+            background: var(--app-bg);
         }
 
         .screen-kicker {
-            color: #6b7280;
+            color: var(--app-text-muted);
             font-size: 10px;
             font-weight: 800;
             letter-spacing: 0.18em;
         }
 
         .screen-description {
-            color: #787b83;
+            color: var(--app-text-secondary);
             font-size: 13px;
             line-height: 1.5;
         }
@@ -111,7 +205,7 @@
             min-width: 0;
             min-height: calc(100dvh - 170px);
             padding: 8px clamp(24px, 2.4vw, 44px) 24px 0;
-            border-right: 1px solid #292b31;
+            border-right: 1px solid var(--app-line);
         }
 
         .desktop-main-pane,
@@ -120,7 +214,7 @@
         }
 
         .desktop-title {
-            color: #f4f4f5;
+            color: var(--app-text-strong);
             font-size: clamp(30px, 2.4vw, 42px);
             font-weight: 900;
             letter-spacing: -0.055em;
@@ -134,7 +228,7 @@
 
         .screen-count strong {
             display: block;
-            color: #f4f4f5;
+            color: var(--app-text-strong);
             font-size: 48px;
             font-weight: 900;
             letter-spacing: -0.06em;
@@ -144,7 +238,7 @@
         .screen-count span {
             display: block;
             margin-top: 9px;
-            color: #6f737c;
+            color: var(--app-text-faint);
             font-size: 10px;
             font-weight: 700;
             letter-spacing: 0.12em;
@@ -154,8 +248,8 @@
         .sidebar-section-label {
             margin-top: 34px;
             padding-top: 22px;
-            border-top: 1px solid #292b31;
-            color: #666a73;
+            border-top: 1px solid var(--app-line);
+            color: var(--app-text-faint);
             font-size: 9px;
             font-weight: 800;
             letter-spacing: 0.16em;
@@ -172,15 +266,15 @@
             align-items: center;
             gap: 12px;
             padding: 13px 0;
-            border-bottom: 1px solid #22242a;
-            color: #777b84;
+            border-bottom: 1px solid var(--app-line-soft);
+            color: var(--app-text-muted);
             text-align: left;
             transition: color 160ms ease, padding-left 160ms ease;
         }
 
         .year-nav-button:hover,
         .year-nav-button.is-active {
-            color: #f1f2f3;
+            color: var(--app-text-strong);
             padding-left: 6px;
         }
 
@@ -208,7 +302,7 @@
             bottom: -18px;
             left: 18px;
             width: 1px;
-            background: #25272d;
+            background: var(--app-line);
         }
 
         .record-index {
@@ -219,14 +313,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #9ca0a9;
+            color: var(--app-text-muted);
             font-size: 12px;
             font-weight: 800;
         }
 
         .record-panel {
             padding: 0 0 18px;
-            border-bottom: 1px solid #24262c;
+            border-bottom: 1px solid var(--app-line);
             transition: opacity 160ms ease;
         }
 
@@ -252,18 +346,18 @@
         .record-copy {
             min-width: 0;
             padding-left: 18px;
-            border-left: 1px solid #292b31;
+            border-left: 1px solid var(--app-line);
         }
 
         .record-date {
-            color: #8b8f98;
+            color: var(--app-text-muted);
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.01em;
         }
 
         .record-region {
-            color: #f4f4f5;
+            color: var(--app-text-strong);
             font-size: 16px;
             font-weight: 800;
             line-height: 1.35;
@@ -271,7 +365,7 @@
         }
 
         .record-title {
-            color: #d7d8dc;
+            color: var(--app-text);
             font-size: 14px;
             font-weight: 700;
             line-height: 1.45;
@@ -280,19 +374,19 @@
 
         .record-description {
             margin-top: 6px;
-            color: #777b84;
+            color: var(--app-text-muted);
             font-size: 12px;
             line-height: 1.6;
             overflow-wrap: anywhere;
         }
 
         .record-arrow {
-            color: #555963;
+            color: var(--app-text-faint);
             font-size: 12px;
         }
 
         .record-year-group {
-            border-bottom: 1px solid #24262c;
+            border-bottom: 1px solid var(--app-line);
         }
 
         #travel-list-container {
@@ -314,7 +408,7 @@
             flex: 1;
             height: 1px;
             margin: 0 12px;
-            background: #25272d;
+            background: var(--app-line);
         }
 
         .record-year-summary::-webkit-details-marker {
@@ -322,20 +416,20 @@
         }
 
         .record-year-title {
-            color: #f4f4f5;
+            color: var(--app-text-strong);
             font-size: 27px;
             font-weight: 900;
             letter-spacing: -0.04em;
         }
 
         .record-year-count {
-            color: #737780;
+            color: var(--app-text-muted);
             font-size: 11px;
             font-weight: 700;
         }
 
         .record-year-chevron {
-            color: #737780;
+            color: var(--app-text-muted);
             font-size: 12px;
             transition: transform 180ms ease;
         }
@@ -349,7 +443,7 @@
             grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
             gap: 0 clamp(30px, 3vw, 52px);
             padding: 2px 0 22px;
-            border-top: 1px solid #22242a;
+            border-top: 1px solid var(--app-line-soft);
         }
 
         .record-month-group {
@@ -367,11 +461,11 @@
             content: "";
             flex: 1;
             height: 1px;
-            background: #25272d;
+            background: var(--app-line);
         }
 
         .record-month-title {
-            color: #b7bac1;
+            color: var(--app-text-secondary);
             font-size: 13px;
             font-weight: 800;
         }
@@ -386,13 +480,13 @@
             align-items: center;
             min-height: 19px;
             padding: 0 2px;
-            color: #aeb1b8;
+            color: var(--app-text-secondary);
             font-size: 9px;
             font-weight: 800;
         }
 
         .stats-overview-title {
-            color: #f4f4f5;
+            color: var(--app-text-strong);
             font-size: clamp(30px, 2.4vw, 42px);
             font-weight: 900;
             letter-spacing: -0.055em;
@@ -400,7 +494,7 @@
         }
 
         .stats-hero-number {
-            color: #f7f7f8;
+            color: var(--app-text-strong);
             font-size: clamp(66px, 5.8vw, 92px);
             font-weight: 900;
             letter-spacing: -0.07em;
@@ -409,7 +503,7 @@
 
         .stats-metric-grid {
             margin-top: 30px;
-            border-top: 1px solid #292b31;
+            border-top: 1px solid var(--app-line);
         }
 
         .stats-metric {
@@ -423,13 +517,13 @@
         }
 
         .stats-metric + .stats-metric {
-            border-top: 1px solid #23252b;
+            border-top: 1px solid var(--app-line-soft);
         }
 
         .stats-metric strong {
             grid-column: 2;
             grid-row: 1;
-            color: #f0f1f2;
+            color: var(--app-text-strong);
             font-size: 18px;
             font-weight: 850;
             line-height: 1.3;
@@ -439,12 +533,12 @@
         .stats-metric span {
             grid-column: 1;
             grid-row: 1;
-            color: #71757e;
+            color: var(--app-text-muted);
             font-size: 12px;
         }
 
         .stats-section-title {
-            color: #edeef0;
+            color: var(--app-text-strong);
             font-size: 17px;
             font-weight: 800;
         }
@@ -457,7 +551,7 @@
 
         .ranking-row {
             padding: 16px 0;
-            border-bottom: 1px solid #23252b;
+            border-bottom: 1px solid var(--app-line-soft);
         }
 
         .ranking-row + .ranking-row {
@@ -466,14 +560,14 @@
 
         .ranking-number {
             width: 28px;
-            color: #71757f;
+            color: var(--app-text-muted);
             font-size: 12px;
             font-weight: 800;
         }
 
         .ranking-region {
             min-width: 0;
-            color: #dfe0e3;
+            color: var(--app-text);
             font-size: 13px;
             font-weight: 700;
             line-height: 1.45;
@@ -481,7 +575,7 @@
         }
 
         .ranking-count {
-            color: #a0a3aa;
+            color: var(--app-text-secondary);
             font-size: 12px;
             font-weight: 700;
         }
@@ -491,17 +585,36 @@
             margin-top: 10px;
             overflow: hidden;
             border-radius: 999px;
-            background: #292b31;
+            background: var(--app-track);
         }
 
         .ranking-fill {
             height: 100%;
             border-radius: inherit;
-            background: #d4d6db;
+            background: var(--app-fill);
         }
 
-        .text-main { color: #F2F4F6; }
-        .text-sub { color: #A1A1A6; }
+        .stats-total-unit,
+        .stats-region-total {
+            color: var(--app-text-muted);
+        }
+
+        .theme-accent-orange { color: #c2410c; }
+        .theme-accent-purple { color: #7e22ce; }
+        .theme-accent-red { color: #b91c1c; }
+        .theme-accent-yellow { color: #854d0e; }
+        .theme-accent-blue { color: #1d4ed8; }
+        .theme-accent-green { color: #166534; }
+
+        :root[data-device-theme="dark"] .theme-accent-orange { color: #fb923c; }
+        :root[data-device-theme="dark"] .theme-accent-purple { color: #c084fc; }
+        :root[data-device-theme="dark"] .theme-accent-red { color: #f87171; }
+        :root[data-device-theme="dark"] .theme-accent-yellow { color: #facc15; }
+        :root[data-device-theme="dark"] .theme-accent-blue { color: #60a5fa; }
+        :root[data-device-theme="dark"] .theme-accent-green { color: #4ade80; }
+
+        .text-main { color: var(--app-text-strong); }
+        .text-sub { color: var(--app-text-secondary); }
 
         /* 상단바에만 적용하는 무색 Liquid Glass */
         .liquid-glass-control {
@@ -744,10 +857,10 @@
         <main id="map-screen" class="flex-1 relative w-full flex flex-col bg-[#111]">
             
             <!-- 오류/안내 배경 (지도가 막혔을 때 보임) -->
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-0 bg-[#111]">
-                <i class="fa-solid fa-map-location-dot text-4xl text-gray-600 mb-4"></i>
+            <div class="map-fallback absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-0">
+                <i class="map-fallback-icon fa-solid fa-map-location-dot text-4xl mb-4"></i>
                 <p class="text-sm text-gray-400 break-keep leading-relaxed">
-                    <span class="text-blue-400 font-bold">지도 로딩 중...</span><br><br>
+                    <span class="theme-accent-blue font-bold">지도 로딩 중...</span><br><br>
                     만약 지도가 계속 보이지 않는다면,<br>
                     이곳(미리보기) 주소가 네이버 클라우드에<br>
                     등록되지 않아 차단된 것입니다.<br>
@@ -760,7 +873,7 @@
             
             <!-- 선택된 여행지 정보 바텀 시트 (mobile-wrapper 안에서 absolute로 동작) -->
             <div id="bottom-sheet" class="absolute bottom-24 left-1/2 w-[92%] max-w-[400px] z-30 toss-card p-5 cursor-default">
-                <button onclick="closeBottomSheet()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                <button onclick="closeBottomSheet()" class="sheet-control absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
                 
@@ -769,7 +882,7 @@
                         <img src="logo_jeju.png" alt="logo" class="w-full h-full object-cover rounded-full">
                     </div>
                     <div class="flex-1">
-                        <span id="sheet-date" class="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">2024.08.15</span>
+                        <span id="sheet-date" class="theme-accent-blue text-[10px] font-bold bg-blue-500/10 px-2 py-0.5 rounded-full">2024.08.15</span>
                         <h3 id="sheet-title" class="text-xl font-bold text-white mt-1 leading-tight">제주도 출장엔조이</h3>
                     </div>
                 </div>
@@ -779,7 +892,7 @@
                 </p>
                 
                 <div class="flex gap-2">
-                    <button onclick="alert('사진 갤러리 준비 중!')" class="w-full bg-white/10 hover:bg-white/20 text-white text-sm font-bold py-3 rounded-xl transition-colors border border-white/5">
+                    <button onclick="alert('사진 갤러리 준비 중!')" class="sheet-control w-full text-sm font-bold py-3 rounded-xl transition-colors border">
                         <i class="fa-regular fa-images mr-1"></i> 사진 보기
                     </button>
                 </div>
@@ -870,6 +983,24 @@
         let isMarkerVisible = false; // 마커 표시 상태
         let isSatellite = false; // 위성 지도 상태
         let activeTabIndex = 0;
+        const deviceThemeQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+        function isDeviceDarkMode() {
+            return Boolean(deviceThemeQuery && deviceThemeQuery.matches);
+        }
+
+        function syncDeviceTheme() {
+            document.documentElement.dataset.deviceTheme = isDeviceDarkMode() ? 'dark' : 'light';
+            updateChromeContrast();
+        }
+
+        if (deviceThemeQuery) {
+            if (typeof deviceThemeQuery.addEventListener === 'function') {
+                deviceThemeQuery.addEventListener('change', syncDeviceTheme);
+            } else if (typeof deviceThemeQuery.addListener === 'function') {
+                deviceThemeQuery.addListener(syncDeviceTheme);
+            }
+        }
 
         // 여행 데이터 모음
         const travelData = [
@@ -1027,20 +1158,23 @@
         );
 
         const colorThemes = {
-            orange: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30', markerBg: '#F97316' },
-            purple: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', markerBg: '#A855F7' },
-            red:    { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30', markerBg: '#EF4444' },
-            yellow: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30', markerBg: '#EAB308' },
-            blue:   { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', markerBg: '#3B82F6' },
-            green:  { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30', markerBg: '#22C55E' }
+            orange: { bg: 'bg-orange-500/20', text: 'theme-accent-orange', border: 'border-orange-500/30', markerBg: '#F97316' },
+            purple: { bg: 'bg-purple-500/20', text: 'theme-accent-purple', border: 'border-purple-500/30', markerBg: '#A855F7' },
+            red:    { bg: 'bg-red-500/20', text: 'theme-accent-red', border: 'border-red-500/30', markerBg: '#EF4444' },
+            yellow: { bg: 'bg-yellow-500/20', text: 'theme-accent-yellow', border: 'border-yellow-500/30', markerBg: '#EAB308' },
+            blue:   { bg: 'bg-blue-500/20', text: 'theme-accent-blue', border: 'border-blue-500/30', markerBg: '#3B82F6' },
+            green:  { bg: 'bg-green-500/20', text: 'theme-accent-green', border: 'border-green-500/30', markerBg: '#22C55E' }
         };
+
+        // 2026-04-01 행정경계에서 대구광역시 소속 지역을 하나로 합친 외곽선입니다.
+        const currentDaeguBoundary = {"type":"Feature","properties":{"name":"대구광역시","includesGunwi":true,"boundaryDate":"2026-04-01"},"geometry":{"type":"Polygon","coordinates":[[[128.350373,35.695578],[128.354596,35.682346],[128.363483,35.671042],[128.381613,35.655287],[128.396307,35.648111],[128.402419,35.643426],[128.40168,35.632071],[128.392799,35.623487],[128.387965,35.613992],[128.381021,35.610993],[128.370765,35.611163],[128.372897,35.608432],[128.381669,35.606766],[128.384231,35.609793],[128.387805,35.610153],[128.399395,35.615925],[128.410998,35.615341],[128.416372,35.621691],[128.422612,35.620126],[128.426603,35.623539],[128.43191,35.623579],[128.43794,35.631297],[128.446503,35.638374],[128.454724,35.637216],[128.461126,35.640615],[128.465203,35.63713],[128.469811,35.636343],[128.478917,35.640349],[128.482857,35.635738],[128.484815,35.635449],[128.497798,35.638994],[128.506213,35.639593],[128.510711,35.645693],[128.506814,35.650148],[128.509262,35.668954],[128.507621,35.673469],[128.515819,35.675735],[128.523013,35.681588],[128.533488,35.682077],[128.531844,35.683371],[128.531406,35.687947],[128.535136,35.69402],[128.531518,35.696734],[128.532408,35.705489],[128.527144,35.713612],[128.543886,35.719143],[128.5485,35.723844],[128.56083,35.729544],[128.564332,35.736284],[128.570908,35.734264],[128.581758,35.738834],[128.589407,35.731849],[128.596175,35.737085],[128.608815,35.739075],[128.616662,35.737117],[128.616604,35.734569],[128.614475,35.732997],[128.615403,35.730441],[128.610212,35.7255],[128.615254,35.721544],[128.617188,35.717841],[128.614044,35.71427],[128.613984,35.710505],[128.623074,35.703399],[128.630969,35.707038],[128.637834,35.705845],[128.643611,35.707233],[128.661186,35.720071],[128.670758,35.718925],[128.673822,35.721157],[128.683267,35.721494],[128.683016,35.725511],[128.691786,35.732326],[128.691098,35.735648],[128.688668,35.737535],[128.694379,35.743881],[128.692615,35.748018],[128.696189,35.756586],[128.692474,35.759931],[128.691887,35.765184],[128.688713,35.769398],[128.686159,35.769489],[128.687076,35.776522],[128.681722,35.78367],[128.682581,35.789901],[128.68906,35.792333],[128.69297,35.796537],[128.696946,35.794151],[128.699989,35.79513],[128.710704,35.804871],[128.717688,35.806714],[128.713351,35.817638],[128.708832,35.822342],[128.708574,35.825622],[128.718194,35.835333],[128.725105,35.836126],[128.724054,35.840043],[128.726185,35.844233],[128.725291,35.853524],[128.721508,35.856282],[128.724959,35.857824],[128.735775,35.850907],[128.73829,35.850756],[128.746389,35.856466],[128.75162,35.857548],[128.753935,35.864024],[128.760044,35.865457],[128.758578,35.87055],[128.76067,35.873944],[128.758225,35.878195],[128.761938,35.883218],[128.757103,35.899798],[128.75725,35.904816],[128.760445,35.906984],[128.758015,35.912625],[128.755855,35.915512],[128.744461,35.921915],[128.737846,35.929485],[128.739435,35.935005],[128.745566,35.944371],[128.741792,35.947966],[128.73903,35.955325],[128.745624,35.967907],[128.745703,35.973105],[128.73848,35.976544],[128.736287,35.978869],[128.736386,35.981576],[128.73282,35.982901],[128.731385,35.987133],[128.735163,35.992904],[128.732002,35.99709],[128.728973,35.997753],[128.728978,36.001543],[128.725719,36.004698],[128.718758,36.008065],[128.70052,36.011205],[128.695246,36.016297],[128.701074,36.02751],[128.700085,36.031886],[128.696845,36.035368],[128.704696,36.045658],[128.702564,36.055662],[128.709214,36.064101],[128.711393,36.073653],[128.714092,36.075606],[128.722759,36.073276],[128.726849,36.076836],[128.729417,36.081138],[128.727654,36.086525],[128.724657,36.088457],[128.725203,36.090378],[128.7417,36.100519],[128.743937,36.10284],[128.745091,36.10915],[128.751724,36.10353],[128.752061,36.092889],[128.753727,36.091746],[128.758414,36.096807],[128.764945,36.1006],[128.768441,36.099529],[128.770643,36.09524],[128.779557,36.093839],[128.791023,36.086727],[128.795637,36.086935],[128.798466,36.08497],[128.816365,36.092279],[128.818823,36.098165],[128.822262,36.100539],[128.830847,36.102619],[128.832264,36.104969],[128.836244,36.10654],[128.837825,36.11288],[128.85017,36.118874],[128.853074,36.128403],[128.850573,36.137566],[128.858895,36.145211],[128.868386,36.145148],[128.876426,36.142345],[128.891506,36.143387],[128.890174,36.147135],[128.892503,36.155538],[128.900085,36.162546],[128.894176,36.169318],[128.896051,36.173443],[128.891127,36.176226],[128.890566,36.181775],[128.885243,36.183949],[128.881209,36.190127],[128.882458,36.199],[128.873147,36.199748],[128.870662,36.203699],[128.86058,36.206427],[128.851856,36.21488],[128.841813,36.217617],[128.834004,36.215362],[128.830037,36.21764],[128.822593,36.215834],[128.813412,36.210684],[128.804115,36.210155],[128.803,36.20061],[128.795973,36.1938],[128.786431,36.196311],[128.783521,36.193893],[128.773942,36.194977],[128.76994,36.193472],[128.758906,36.200443],[128.758067,36.202546],[128.752703,36.202673],[128.749436,36.195907],[128.74604,36.19443],[128.741732,36.198614],[128.735153,36.200654],[128.729892,36.198449],[128.727583,36.20083],[128.721298,36.198029],[128.717164,36.200371],[128.704901,36.199162],[128.696681,36.202388],[128.696577,36.204754],[128.699855,36.208762],[128.694393,36.2141],[128.681687,36.21491],[128.674857,36.212496],[128.672812,36.208403],[128.671246,36.208614],[128.667487,36.211859],[128.663387,36.221436],[128.652745,36.217171],[128.649356,36.217686],[128.642398,36.21206],[128.639922,36.208091],[128.634706,36.209068],[128.631754,36.216234],[128.635664,36.221306],[128.636674,36.233076],[128.634535,36.237307],[128.631047,36.238776],[128.632864,36.244077],[128.638266,36.247143],[128.640652,36.257757],[128.624017,36.266774],[128.616833,36.26767],[128.609538,36.27115],[128.599573,36.270436],[128.594568,36.27754],[128.590233,36.277104],[128.580511,36.279486],[128.575875,36.27961],[128.570347,36.274698],[128.566724,36.274213],[128.56293,36.276848],[128.55688,36.273641],[128.553361,36.273885],[128.545532,36.291624],[128.536132,36.294986],[128.529264,36.293872],[128.525587,36.29945],[128.519879,36.300123],[128.517841,36.30201],[128.510892,36.30064],[128.506197,36.303421],[128.496307,36.303639],[128.487587,36.308213],[128.473775,36.311826],[128.47346,36.317068],[128.471161,36.32004],[128.456018,36.325105],[128.454704,36.326974],[128.451536,36.326961],[128.445256,36.318318],[128.438109,36.314021],[128.439218,36.312247],[128.437625,36.304416],[128.433679,36.305437],[128.431597,36.301641],[128.427762,36.299133],[128.416817,36.29881],[128.413,36.293729],[128.414078,36.289903],[128.411255,36.287511],[128.413908,36.283186],[128.424237,36.278792],[128.426986,36.276156],[128.426523,36.273674],[128.421515,36.268618],[128.420914,36.260432],[128.416545,36.257571],[128.421391,36.250602],[128.419401,36.245238],[128.423777,36.240364],[128.423823,36.236647],[128.433594,36.235164],[128.434574,36.231046],[128.438272,36.226618],[128.437614,36.222272],[128.440782,36.218014],[128.4621,36.228498],[128.474037,36.230398],[128.47807,36.233977],[128.485183,36.234108],[128.485915,36.23078],[128.479535,36.224516],[128.486264,36.223926],[128.489138,36.219717],[128.488462,36.214095],[128.494486,36.205278],[128.494716,36.197712],[128.50361,36.192734],[128.50287,36.189167],[128.504348,36.184989],[128.508065,36.186267],[128.512565,36.191203],[128.51657,36.200061],[128.52401,36.200768],[128.538946,36.193668],[128.539161,36.191438],[128.54909,36.178147],[128.55745,36.178046],[128.554318,36.17349],[128.553408,36.165019],[128.547938,36.164371],[128.544458,36.16615],[128.54046,36.161522],[128.542496,36.154793],[128.550472,36.150735],[128.548328,36.147888],[128.548147,36.140959],[128.55257,36.138468],[128.548606,36.131023],[128.553019,36.128209],[128.552629,36.125099],[128.554951,36.121255],[128.561967,36.119299],[128.564266,36.115],[128.563525,36.102213],[128.567544,36.095864],[128.568741,36.08978],[128.563507,36.070561],[128.569826,36.060454],[128.577939,36.064778],[128.580055,36.067897],[128.589567,36.07075],[128.597852,36.075767],[128.609992,36.076163],[128.614374,36.079013],[128.622304,36.079212],[128.624113,36.081628],[128.629397,36.078174],[128.630447,36.076278],[128.627725,36.06377],[128.629349,36.051243],[128.623048,36.037084],[128.621287,36.025825],[128.625657,36.022036],[128.637231,36.017102],[128.640612,36.010555],[128.617239,36.00511],[128.615908,36.000824],[128.612549,35.999002],[128.6063,35.990977],[128.602941,35.989453],[128.603022,35.986164],[128.593644,35.982765],[128.593168,35.980515],[128.590703,35.979],[128.583183,35.977351],[128.572071,35.977741],[128.56417,35.972873],[128.556864,35.971005],[128.556027,35.965714],[128.553162,35.963432],[128.553322,35.960765],[128.547218,35.964498],[128.542226,35.974864],[128.528786,35.98045],[128.529242,35.977378],[128.526961,35.97526],[128.53045,35.962493],[128.534632,35.958442],[128.53261,35.951016],[128.535063,35.938753],[128.534023,35.933607],[128.529554,35.928564],[128.529661,35.923585],[128.525865,35.922348],[128.521969,35.916401],[128.510989,35.910506],[128.507173,35.906605],[128.50517,35.902997],[128.504552,35.889383],[128.501711,35.886093],[128.494604,35.891296],[128.492749,35.896161],[128.490524,35.89772],[128.487875,35.897965],[128.484197,35.894757],[128.478288,35.897785],[128.475123,35.895164],[128.467952,35.899818],[128.466865,35.90716],[128.473939,35.916762],[128.473229,35.922984],[128.476327,35.929384],[128.475679,35.935995],[128.468747,35.938447],[128.461806,35.937993],[128.457475,35.941982],[128.453765,35.943127],[128.452487,35.936013],[128.441172,35.934818],[128.437022,35.931609],[128.431448,35.930974],[128.427509,35.927339],[128.424916,35.927911],[128.423557,35.922795],[128.418102,35.921246],[128.417714,35.916174],[128.408199,35.902579],[128.406638,35.89516],[128.403336,35.889098],[128.39826,35.884297],[128.393715,35.88304],[128.387266,35.871475],[128.385465,35.864935],[128.390087,35.850371],[128.39779,35.849421],[128.422788,35.851257],[128.456312,35.842997],[128.477482,35.827217],[128.480741,35.822239],[128.480572,35.8181],[128.477196,35.812677],[128.469127,35.808435],[128.420717,35.809627],[128.407794,35.797108],[128.399039,35.777934],[128.38567,35.761852],[128.385807,35.755544],[128.39264,35.745534],[128.405313,35.739259],[128.416558,35.73663],[128.431822,35.726268],[128.434837,35.71214],[128.433169,35.703019],[128.420533,35.693885],[128.415506,35.693086],[128.396306,35.697446],[128.389179,35.700942],[128.380601,35.701145],[128.35833,35.70755],[128.351335,35.70344],[128.350373,35.695578]]]}};
 
         function updateChromeContrast() {
             const wrapper = document.getElementById('mobile-wrapper');
             if (!wrapper) return;
 
-            // 일반 지도는 밝은 바탕, 위성 지도와 목록/통계 화면은 어두운 바탕이다.
-            const useLightInk = activeTabIndex !== 0 || isSatellite;
+            // 지도에서는 지도 종류를, 목록/통계에서는 기기의 색상 모드를 기준으로 대비를 맞춘다.
+            const useLightInk = activeTabIndex === 0 ? isSatellite : isDeviceDarkMode();
             wrapper.dataset.chromeInk = useLightInk ? 'light' : 'dark';
         }
 
@@ -1151,23 +1285,40 @@
         function loadRegionBoundaries() {
             if (!map || typeof naver === 'undefined' || !naver.maps) return;
 
-            // 1. 광역시/도 단위 데이터 불러오기 (대구, 대전, 제주 전체 윤곽선용)
-            fetch('https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_provinces_geo_simple.json')
-                .then(response => response.json())
-                .then(geojson => {
-                    map.data.addGeoJson(geojson);
-                    applyMapStyle();
-                })
-                .catch(e => console.warn('시도 경계 오류:', e));
+            const provinceUrl = 'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_provinces_geo_simple.json';
+            const municipalityUrl = 'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_municipalities_geo_simple.json';
 
-            // 2. 시/군/구 단위 데이터 불러오기 (진주시, 칠곡군, 구미시, 청양군 세부 윤곽선용)
-            fetch('https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_municipalities_geo_simple.json')
-                .then(response => response.json())
-                .then(geojson => {
-                    map.data.addGeoJson(geojson);
+            // 2026년 최신 경계에서 추출한 대구광역시 전체 외곽선(군위군 포함)을 먼저 표시한다.
+            map.data.addGeoJson({
+                type: 'FeatureCollection',
+                features: [currentDaeguBoundary]
+            });
+
+            Promise.all([
+                fetch(provinceUrl).then(response => {
+                    if (!response.ok) throw new Error(`시도 경계 요청 실패: ${response.status}`);
+                    return response.json();
+                }),
+                fetch(municipalityUrl).then(response => {
+                    if (!response.ok) throw new Error(`시군구 경계 요청 실패: ${response.status}`);
+                    return response.json();
+                })
+            ])
+                .then(([provinceGeojson, municipalityGeojson]) => {
+                    map.data.addGeoJson({
+                        ...provinceGeojson,
+                        features: provinceGeojson.features.filter(feature => feature.properties?.name !== '대구광역시')
+                    });
+                    map.data.addGeoJson({
+                        ...municipalityGeojson,
+                        features: municipalityGeojson.features.filter(feature => feature.properties?.name !== '군위군')
+                    });
+
                     applyMapStyle();
                 })
-                .catch(e => console.warn('시군구 경계 오류:', e));
+                .catch(e => console.warn('행정구역 경계 오류:', e));
+
+            applyMapStyle();
 
             // 통합 스타일 적용 함수
             function applyMapStyle() {
@@ -1175,8 +1326,8 @@
                     const name = feature.getProperty('name') || '';
                     let color = null;
 
-                    // [수정됨] 헷갈리는 숫자 코드 대신 '한글 지역 이름'으로 정확하게 매칭합니다.
-                    if (name === '대구광역시' || name === '군위군') color = colorThemes.red.markerBg;
+                    // 군위군은 대구광역시 경계에 합쳐 하나의 폴리곤으로 표시한다.
+                    if (name === '대구광역시') color = colorThemes.red.markerBg;
                     else if (name === '대전광역시') color = colorThemes.yellow.markerBg;
                     else if (name === '제주특별자치도') color = colorThemes.orange.markerBg;
                     else if (name === '진주시') color = colorThemes.purple.markerBg;
@@ -1539,7 +1690,7 @@
                         <p class="screen-description mt-4">숫자로 다시 보는 우리의 발자취예요.</p>
                         <div class="flex items-end gap-3 mt-10">
                             <strong class="stats-hero-number">${totalTrips}</strong>
-                            <span class="text-sm font-bold text-gray-500 mb-1">번의 여행</span>
+                            <span class="stats-total-unit text-sm font-bold mb-1">번의 여행</span>
                         </div>
                         <div class="stats-metric-grid">
                             <div class="stats-metric">
@@ -1563,7 +1714,7 @@
                                 <p class="screen-kicker mb-1.5">DESTINATIONS</p>
                                 <h3 class="stats-section-title">지역별 방문 순위</h3>
                             </div>
-                            <span class="text-[11px] font-medium text-gray-600">${uniqueRegions}개 지역</span>
+                            <span class="stats-region-total text-[11px] font-medium">${uniqueRegions}개 지역</span>
                         </div>
 
                         <div class="ranking-list">
@@ -1587,6 +1738,7 @@
 
         // 초기 실행
         window.onload = () => {
+            syncDeviceTheme();
             switchTab(0);
             initMap();
         };
