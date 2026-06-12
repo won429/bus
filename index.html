@@ -113,10 +113,6 @@
 
         .screen-count {
             min-width: 58px;
-            padding: 9px 10px;
-            border: 1px solid #292b31;
-            border-radius: 18px;
-            background: #111216;
             text-align: center;
         }
 
@@ -140,16 +136,16 @@
         .record-item {
             position: relative;
             display: grid;
-            grid-template-columns: 42px minmax(0, 1fr);
-            gap: 12px;
+            grid-template-columns: 32px minmax(0, 1fr);
+            gap: 10px;
         }
 
         .record-item:not(:last-child)::before {
             content: "";
             position: absolute;
-            top: 42px;
+            top: 26px;
             bottom: -16px;
-            left: 20px;
+            left: 15px;
             width: 1px;
             background: #25272d;
         }
@@ -157,31 +153,24 @@
         .record-index {
             position: relative;
             z-index: 1;
-            width: 42px;
-            height: 42px;
+            width: 32px;
+            height: 26px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid #30323a;
-            border-radius: 50%;
-            background: #111216;
             color: #9ca0a9;
             font-size: 11px;
             font-weight: 800;
         }
 
         .record-panel {
-            padding: 16px;
-            border: 1px solid #24262c;
-            border-radius: 22px;
-            background: #121317;
-            transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+            padding: 0 0 16px;
+            border-bottom: 1px solid #24262c;
+            transition: opacity 160ms ease;
         }
 
         .record-panel:active {
-            transform: scale(0.98);
-            border-color: #3b3e47;
-            background: #17181d;
+            opacity: 0.68;
         }
 
         .record-logo {
@@ -189,9 +178,7 @@
             height: 42px;
             flex: 0 0 auto;
             overflow: hidden;
-            border: 1px solid #30323a;
             border-radius: 14px;
-            background: #1a1b20;
         }
 
         .record-date {
@@ -228,11 +215,94 @@
             font-size: 11px;
         }
 
+        .record-year-group {
+            border-bottom: 1px solid #24262c;
+        }
+
+        .record-year-summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 18px 0;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .record-year-summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .record-year-title {
+            color: #f4f4f5;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+        }
+
+        .record-year-count {
+            color: #737780;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .record-year-chevron {
+            color: #737780;
+            font-size: 11px;
+            transition: transform 180ms ease;
+        }
+
+        .record-year-group[open] .record-year-chevron {
+            transform: rotate(180deg);
+        }
+
+        .record-year-content {
+            padding: 2px 0 18px;
+            border-top: 1px solid #22242a;
+        }
+
+        .record-month-group {
+            padding-top: 18px;
+        }
+
+        .record-month-heading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .record-month-heading::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #25272d;
+        }
+
+        .record-month-title {
+            color: #b7bac1;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .record-month-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .record-status {
+            display: inline-flex;
+            align-items: center;
+            min-height: 19px;
+            padding: 0 2px;
+            color: #aeb1b8;
+            font-size: 9px;
+            font-weight: 800;
+        }
+
         .stats-hero {
-            padding: 20px;
-            border: 1px solid #282a31;
-            border-radius: 26px;
-            background: #121317;
+            padding: 0 0 22px;
+            border-bottom: 1px solid #292b31;
         }
 
         .stats-hero-number {
@@ -283,13 +353,10 @@
 
         .ranking-list {
             overflow: hidden;
-            border: 1px solid #24262c;
-            border-radius: 22px;
-            background: #111216;
         }
 
         .ranking-row {
-            padding: 14px 16px;
+            padding: 14px 0;
         }
 
         .ranking-row + .ranking-row {
@@ -336,9 +403,6 @@
         .text-main { color: #F2F4F6; }
         .text-sub { color: #A1A1A6; }
 
-        .fade-in-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(15px); }
-        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
-        
         .pt-safe { padding-top: max(20px, env(safe-area-inset-top)); }
         
         #nav-indicator { will-change: transform, width; }
@@ -388,8 +452,13 @@
         }
 
         #map-topbar .topbar-capsule {
-            min-height: 38px;
+            min-height: 46px;
             border-radius: 999px;
+        }
+
+        #map-topbar .topbar-title-content {
+            min-width: 0;
+            line-height: 1.1;
         }
 
         #map-topbar .topbar-capsule > div,
@@ -487,13 +556,23 @@
         }
 
         #nav-indicator {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.48);
+            background: rgba(255,255,255,0.38);
+            border: 1px solid rgba(255,255,255,0.68);
             box-shadow:
-                inset 0 1px 1px rgba(255,255,255,0.66),
-                0 5px 14px rgba(4, 10, 22, 0.16);
+                inset 0 1px 1px rgba(255,255,255,0.72),
+                0 5px 16px rgba(4, 10, 22, 0.18);
             backdrop-filter: blur(14px) saturate(1.5);
             -webkit-backdrop-filter: blur(14px) saturate(1.5);
+        }
+
+        #mobile-wrapper[data-chrome-ink="dark"] #nav-indicator {
+            background: rgba(255,255,255,0.48);
+            border-color: rgba(255,255,255,0.78);
+        }
+
+        #mobile-wrapper[data-chrome-ink="light"] #nav-indicator {
+            background: rgba(255,255,255,0.30);
+            border-color: rgba(255,255,255,0.58);
         }
         
         .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -574,9 +653,13 @@
         }
 
         @media (prefers-reduced-transparency: reduce) {
-            .liquid-glass-control::before,
-            #nav-indicator {
+            .liquid-glass-control::before {
                 background: transparent;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+            }
+
+            #nav-indicator {
                 backdrop-filter: none;
                 -webkit-backdrop-filter: none;
             }
@@ -620,11 +703,11 @@
                 <div class="mt-3 flex items-center gap-2 w-full pointer-events-auto pb-2">
                     <!-- 1. 타이틀 캡슐 -->
                     <div class="topbar-capsule liquid-glass-control flex items-center flex-1 px-4 py-2">
-                        <div class="flex items-baseline gap-1.5">
+                        <div class="topbar-title-content">
                             <h1 class="adaptive-contrast text-[13px] font-extrabold flex items-center tracking-tight">
-                                엔조이 발자취<span class="w-1 h-1 bg-[#3182F6] rounded-full ml-1 mb-0.5"></span>
+                                엔조이 여행 지도<span class="w-1 h-1 bg-[#3182F6] rounded-full ml-1 mb-0.5"></span>
                             </h1>
-                            <span class="adaptive-contrast adaptive-muted text-[11px] font-medium">총 9번의 즐거운 여행</span>
+                            <span class="adaptive-contrast adaptive-muted block mt-1 text-[10px] font-medium whitespace-nowrap">전국 226개 지역 중 11개 채움</span>
                         </div>
                     </div>
 
@@ -856,11 +939,60 @@
                 desc: '우리가 군생활을 했던 곳이고 우리가 만난 곳이라는 의미를 담고 있어.',
                 lat: 37.7599,
                 lng: 126.7795
+            },
+            {
+                id: 10,
+                title: '강릉 바다 여행',
+                region: '강원특별자치도 강릉시',
+                date: '2026.07.24 ~ 07.25',
+                emoji: '🌊',
+                color: 'blue',
+                status: 'upcoming',
+                desc: '시원한 바다를 보러 떠나는 여름 강릉 여행.',
+                lat: 37.7519,
+                lng: 128.8761
+            },
+            {
+                id: 11,
+                title: '원주 흠뻑쇼',
+                region: '강원특별자치도 원주시',
+                date: '2026.07.25 ~ 07.26',
+                emoji: '💦',
+                color: 'purple',
+                status: 'upcoming',
+                desc: '흠뻑쇼를 즐기러 떠나는 원주 여름 여행.',
+                lat: 37.3422,
+                lng: 127.9202
             }
         ];
 
-        // 날짜 기준 최신 기록순(내림차순) 정렬
-        travelData.sort((a, b) => b.date.substring(0, 10).localeCompare(a.date.substring(0, 10)));
+        function getTripDateMeta(trip) {
+            const yearMatch = trip.date.match(/^(\d{4})/);
+            const monthMatch = trip.date.match(/^\d{4}\.(\d{1,2})/);
+            const dayMatch = trip.date.match(/^\d{4}\.\d{1,2}\.(\d{1,2})/);
+            const periodMatch = trip.date.match(/^\d{4}년\s*([^~]+)/);
+
+            return {
+                year: yearMatch ? Number(yearMatch[1]) : 0,
+                month: monthMatch ? Number(monthMatch[1]) : 0,
+                day: dayMatch ? Number(dayMatch[1]) : 0,
+                periodLabel: periodMatch ? periodMatch[1].trim() : '기타'
+            };
+        }
+
+        function compareTripChronology(a, b) {
+            const aDate = getTripDateMeta(a);
+            const bDate = getTripDateMeta(b);
+            return aDate.year - bDate.year || aDate.month - bDate.month || aDate.day - bDate.day;
+        }
+
+        // 화면은 최신순으로 보여주되 번호는 가장 오래된 기록부터 고정한다.
+        travelData.sort((a, b) => compareTripChronology(b, a));
+        const tripSequenceById = new Map(
+            [...travelData]
+                .sort(compareTripChronology)
+                .map((trip, index) => [trip.id, index + 1])
+        );
 
         const colorThemes = {
             orange: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30', markerBg: '#F97316' },
@@ -1003,6 +1135,8 @@
                     else if (name === '구미시') color = colorThemes.green.markerBg;
                     else if (name === '청양군') color = colorThemes.red.markerBg;
                     else if (name === '파주시') color = colorThemes.blue.markerBg;
+                    else if (name === '강릉시') color = colorThemes.blue.markerBg;
+                    else if (name === '원주시') color = colorThemes.purple.markerBg;
 
                     if (color) {
                         return {
@@ -1021,6 +1155,14 @@
             }
         }
 
+        function getTripLogoMarkup(trip, imageClass = 'w-full h-full object-cover rounded-full') {
+            if (trip.emoji) {
+                return `<span aria-hidden="true" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;">${trip.emoji}</span>`;
+            }
+
+            return `<img src="${trip.logo}" alt="logo" class="${imageClass}">`;
+        }
+
         // 마커 생성
         function createMarkers() {
             if (!map || typeof naver === 'undefined' || !naver.maps) return;
@@ -1033,7 +1175,7 @@
                     <div id="marker-${index}" class="travel-marker">
                         <div class="travel-marker-label" style="display:none;">${trip.region}</div>
                         <div class="travel-marker-icon overflow-hidden" style="background-color: ${theme.markerBg}; padding: 2px;">
-                            <img src="${trip.logo}" alt="logo" class="w-full h-full object-cover rounded-full">
+                            ${getTripLogoMarkup(trip)}
                         </div>
                         <div class="travel-marker-tail" style="border-top-color: ${theme.markerBg};"></div>
                     </div>
@@ -1091,7 +1233,7 @@
             }
 
             const theme = colorThemes[trip.color] || colorThemes.blue;
-            document.getElementById('sheet-emoji').innerHTML = `<img src="${trip.logo}" alt="logo" class="w-full h-full object-cover rounded-full">`;
+            document.getElementById('sheet-emoji').innerHTML = getTripLogoMarkup(trip);
             document.getElementById('sheet-emoji').className = `w-12 h-12 rounded-full ${theme.bg} flex items-center justify-center border ${theme.border} overflow-hidden p-0.5`;
             
             document.getElementById('sheet-date').innerText = trip.date;
@@ -1179,40 +1321,88 @@
             const count = document.getElementById('record-count');
             if (count) count.textContent = travelData.length;
 
-            travelData.forEach((trip, i) => {
-                const item = document.createElement('div');
-                item.className = 'record-item fade-in-up';
-                item.style.animationDelay = `${i * 0.06}s`;
+            const currentYear = new Date().getFullYear();
+            const yearGroups = new Map();
 
-                item.innerHTML = `
-                    <div class="record-index">${String(i + 1).padStart(2, '0')}</div>
-                    <button type="button" class="record-panel w-full text-left" aria-label="${trip.region} 여행 기록을 지도에서 보기">
-                        <div class="flex items-center gap-3">
-                            <div class="record-logo">
-                                <img src="${trip.logo}" alt="" class="w-full h-full object-cover">
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <div class="record-date">${trip.date}</div>
-                                <div class="record-region mt-1">${trip.region}</div>
-                            </div>
-                            <i class="record-arrow fa-solid fa-arrow-up-right-from-square"></i>
-                        </div>
-                        <div class="mt-4 pt-3 border-t border-white/[0.06]">
-                            <p class="record-title">${trip.title}</p>
-                            <p class="record-description break-keep line-clamp-2">${trip.desc}</p>
-                        </div>
-                    </button>
-                `;
+            travelData.forEach((trip, tripIndex) => {
+                const meta = getTripDateMeta(trip);
+                const year = meta.year;
+                const monthKey = meta.month ? `month-${meta.month}` : `period-${meta.periodLabel}`;
+                const monthLabel = meta.month ? `${meta.month}월` : meta.periodLabel;
 
-                const panel = item.querySelector('button');
-                panel.onclick = () => {
-                    if (navigator.vibrate) navigator.vibrate(10);
-                    switchTab(0);
-                    setTimeout(() => { focusMarker(i); }, 300);
-                };
-
-                container.appendChild(item);
+                if (!yearGroups.has(year)) yearGroups.set(year, new Map());
+                const monthGroups = yearGroups.get(year);
+                if (!monthGroups.has(monthKey)) {
+                    monthGroups.set(monthKey, { label: monthLabel, trips: [] });
+                }
+                monthGroups.get(monthKey).trips.push({ trip, tripIndex });
             });
+
+            Array.from(yearGroups.entries())
+                .sort((a, b) => b[0] - a[0])
+                .forEach(([year, monthGroups]) => {
+                    const tripCount = Array.from(monthGroups.values())
+                        .reduce((sum, group) => sum + group.trips.length, 0);
+                    const yearDetails = document.createElement('details');
+                    yearDetails.className = 'record-year-group';
+                    yearDetails.open = year === currentYear;
+
+                    const monthMarkup = Array.from(monthGroups.values()).map(group => `
+                        <section class="record-month-group">
+                            <div class="record-month-heading">
+                                <h3 class="record-month-title">${group.label}</h3>
+                            </div>
+                            <div class="record-month-list">
+                                ${group.trips.map(({ trip, tripIndex }) => `
+                                    <div class="record-item">
+                                        <div class="record-index">${String(tripSequenceById.get(trip.id)).padStart(2, '0')}</div>
+                                        <button type="button" class="record-panel w-full text-left" data-trip-index="${tripIndex}" aria-label="${trip.region} 여행 기록을 지도에서 보기">
+                                            <div class="flex items-center gap-3">
+                                                <div class="record-logo">
+                                                    ${getTripLogoMarkup(trip, 'w-full h-full object-cover')}
+                                                </div>
+                                                <div class="min-w-0 flex-1">
+                                                    <div class="flex items-center gap-2">
+                                                        <div class="record-date">${trip.date}</div>
+                                                        ${trip.status === 'upcoming' ? '<span class="record-status">예정</span>' : ''}
+                                                    </div>
+                                                    <div class="record-region mt-1">${trip.region}</div>
+                                                </div>
+                                                <i class="record-arrow fa-solid fa-arrow-up-right-from-square"></i>
+                                            </div>
+                                            <div class="mt-4 pt-3 border-t border-white/[0.06]">
+                                                <p class="record-title">${trip.title}</p>
+                                                <p class="record-description break-keep line-clamp-2">${trip.desc}</p>
+                                            </div>
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </section>
+                    `).join('');
+
+                    yearDetails.innerHTML = `
+                        <summary class="record-year-summary">
+                            <div>
+                                <div class="record-year-title">${year}</div>
+                                <div class="record-year-count mt-1">${tripCount}개의 여행 기록</div>
+                            </div>
+                            <i class="record-year-chevron fa-solid fa-chevron-down"></i>
+                        </summary>
+                        <div class="record-year-content">${monthMarkup}</div>
+                    `;
+
+                    yearDetails.querySelectorAll('[data-trip-index]').forEach(panel => {
+                        panel.addEventListener('click', () => {
+                            const tripIndex = Number(panel.dataset.tripIndex);
+                            if (navigator.vibrate) navigator.vibrate(10);
+                            switchTab(0);
+                            setTimeout(() => { focusMarker(tripIndex); }, 300);
+                        });
+                    });
+
+                    container.appendChild(yearDetails);
+                });
         }
 
         // 통계 렌더링
@@ -1261,7 +1451,7 @@
 
             container.innerHTML = `
                 <div class="px-5 pt-5">
-                    <section class="stats-hero fade-in-up">
+                    <section class="stats-hero">
                         <div class="flex items-end justify-between gap-4">
                             <div>
                                 <p class="screen-kicker mb-3">TOTAL JOURNEYS</p>
@@ -1288,7 +1478,7 @@
                         </div>
                     </section>
 
-                    <section class="mt-7 fade-in-up" style="animation-delay: 0.1s;">
+                    <section class="mt-7">
                         <div class="flex items-end justify-between mb-3 px-1">
                             <div>
                                 <p class="screen-kicker mb-1.5">DESTINATIONS</p>
