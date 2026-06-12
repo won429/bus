@@ -51,6 +51,14 @@
     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=9nl297jo77"></script>
 
     <style>
+        :root {
+            --lg-glass-border: rgba(255, 255, 255, 0.48);
+            --lg-glass-inner-border: rgba(255, 255, 255, 0.20);
+            --lg-glass-shadow: 0 14px 38px rgba(3, 8, 20, 0.24);
+            --lg-glass-shadow-soft: 0 8px 24px rgba(3, 8, 20, 0.18);
+            --lg-blur: 24px;
+        }
+
         body { 
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "sans-serif";
             -webkit-tap-highlight-color: transparent;
@@ -80,6 +88,251 @@
             background: #2C2C2E;
         }
 
+        #list-screen,
+        #stats-screen {
+            background: #08090b;
+        }
+
+        .screen-header {
+            background: #08090b;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .screen-kicker {
+            color: #6b7280;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+        }
+
+        .screen-description {
+            color: #787b83;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .screen-count {
+            min-width: 58px;
+            padding: 9px 10px;
+            border: 1px solid #292b31;
+            border-radius: 18px;
+            background: #111216;
+            text-align: center;
+        }
+
+        .screen-count strong {
+            display: block;
+            color: #f4f4f5;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .screen-count span {
+            display: block;
+            margin-top: 4px;
+            color: #6f737c;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .record-item {
+            position: relative;
+            display: grid;
+            grid-template-columns: 42px minmax(0, 1fr);
+            gap: 12px;
+        }
+
+        .record-item:not(:last-child)::before {
+            content: "";
+            position: absolute;
+            top: 42px;
+            bottom: -16px;
+            left: 20px;
+            width: 1px;
+            background: #25272d;
+        }
+
+        .record-index {
+            position: relative;
+            z-index: 1;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #30323a;
+            border-radius: 50%;
+            background: #111216;
+            color: #9ca0a9;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .record-panel {
+            padding: 16px;
+            border: 1px solid #24262c;
+            border-radius: 22px;
+            background: #121317;
+            transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+        }
+
+        .record-panel:active {
+            transform: scale(0.98);
+            border-color: #3b3e47;
+            background: #17181d;
+        }
+
+        .record-logo {
+            width: 42px;
+            height: 42px;
+            flex: 0 0 auto;
+            overflow: hidden;
+            border: 1px solid #30323a;
+            border-radius: 14px;
+            background: #1a1b20;
+        }
+
+        .record-date {
+            color: #8b8f98;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+
+        .record-region {
+            overflow: hidden;
+            color: #f4f4f5;
+            font-size: 14px;
+            font-weight: 800;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .record-title {
+            color: #d7d8dc;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .record-description {
+            margin-top: 5px;
+            color: #777b84;
+            font-size: 11px;
+            line-height: 1.55;
+        }
+
+        .record-arrow {
+            color: #555963;
+            font-size: 11px;
+        }
+
+        .stats-hero {
+            padding: 20px;
+            border: 1px solid #282a31;
+            border-radius: 26px;
+            background: #121317;
+        }
+
+        .stats-hero-number {
+            color: #f7f7f8;
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: -0.07em;
+            line-height: 0.95;
+        }
+
+        .stats-metric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid #292b31;
+        }
+
+        .stats-metric {
+            min-width: 0;
+            padding: 0 10px;
+            text-align: center;
+        }
+
+        .stats-metric + .stats-metric {
+            border-left: 1px solid #292b31;
+        }
+
+        .stats-metric strong {
+            display: block;
+            color: #f0f1f2;
+            font-size: 18px;
+            font-weight: 850;
+        }
+
+        .stats-metric span {
+            display: block;
+            margin-top: 4px;
+            color: #71757e;
+            font-size: 10px;
+        }
+
+        .stats-section-title {
+            color: #edeef0;
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .ranking-list {
+            overflow: hidden;
+            border: 1px solid #24262c;
+            border-radius: 22px;
+            background: #111216;
+        }
+
+        .ranking-row {
+            padding: 14px 16px;
+        }
+
+        .ranking-row + .ranking-row {
+            border-top: 1px solid #23252b;
+        }
+
+        .ranking-number {
+            width: 24px;
+            color: #71757f;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .ranking-region {
+            min-width: 0;
+            overflow: hidden;
+            color: #dfe0e3;
+            font-size: 12px;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .ranking-count {
+            color: #a0a3aa;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .ranking-track {
+            height: 3px;
+            margin-top: 9px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #292b31;
+        }
+
+        .ranking-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: #d4d6db;
+        }
+
         .text-main { color: #F2F4F6; }
         .text-sub { color: #A1A1A6; }
 
@@ -90,6 +343,158 @@
         
         #nav-indicator { will-change: transform, width; }
         .nav-transition { transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+        /* 상단바와 하단 메뉴에만 적용하는 Liquid Glass */
+        .liquid-glass-control {
+            position: relative;
+            overflow: hidden;
+            background: transparent;
+            border: 1px solid var(--lg-glass-border);
+            box-shadow: var(--lg-glass-shadow);
+        }
+
+        .liquid-glass-control::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: transparent;
+            backdrop-filter: blur(var(--lg-blur)) saturate(1.65) contrast(1.04);
+            -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(1.65) contrast(1.04);
+            pointer-events: none;
+        }
+
+        .liquid-glass-control::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            border: 1px solid var(--lg-glass-inner-border);
+            border-radius: inherit;
+            pointer-events: none;
+        }
+
+        /*
+         * 흰색을 difference 합성하면 실제 뒤쪽 픽셀이 밝을 때는 어둡게,
+         * 어두울 때는 밝게 표시된다. 지도 타일에도 별도 색상 판별 없이 반응한다.
+         */
+        .adaptive-contrast {
+            color: #fff !important;
+            mix-blend-mode: difference;
+            filter: grayscale(1) contrast(2.4);
+        }
+
+        .adaptive-muted {
+            opacity: 0.64;
+        }
+
+        #map-topbar .topbar-capsule {
+            min-height: 38px;
+            border-radius: 999px;
+        }
+
+        #map-topbar .topbar-capsule > div,
+        #map-topbar .topbar-action,
+        #bottom-nav .nav-item {
+            position: relative;
+            z-index: 1;
+        }
+
+        #map-topbar .topbar-action {
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            opacity: 0.82;
+            transition: opacity 160ms ease, transform 160ms ease;
+        }
+
+        #map-topbar .topbar-action:hover,
+        #map-topbar .topbar-action.is-active {
+            opacity: 1;
+        }
+
+        #map-topbar .topbar-action:active {
+            transform: scale(0.88);
+        }
+
+        #map-topbar .glass-divider {
+            background: rgba(255, 255, 255, 0.42);
+            box-shadow: 0 0 0.5px rgba(0, 0, 0, 0.28);
+        }
+
+        #bottom-nav {
+            bottom: max(16px, env(safe-area-inset-bottom));
+        }
+
+        #bottom-nav .bottom-nav-glass {
+            border-radius: 999px;
+            box-shadow: var(--lg-glass-shadow), inset 0 1px 0 rgba(255,255,255,0.34);
+        }
+
+        #bottom-nav .nav-item {
+            min-width: 0;
+            color: #fff;
+            mix-blend-mode: difference;
+            filter: grayscale(1) contrast(2.4);
+            opacity: 0.62;
+            transition: opacity 180ms ease, transform 160ms ease;
+        }
+
+        #bottom-nav .nav-item .adaptive-contrast {
+            color: inherit !important;
+            mix-blend-mode: normal;
+            filter: none;
+        }
+
+        /* 화면과 지도 모드에 따라 글자색과 유리 틴트를 자동 전환한다. */
+        #mobile-wrapper[data-chrome-ink="dark"] .adaptive-contrast {
+            color: rgba(8, 15, 28, 0.94) !important;
+            mix-blend-mode: normal;
+            filter: none;
+        }
+
+        #mobile-wrapper[data-chrome-ink="light"] .adaptive-contrast {
+            color: rgba(255, 255, 255, 0.96) !important;
+            mix-blend-mode: normal;
+            filter: none;
+        }
+
+        #mobile-wrapper[data-chrome-ink="dark"] #bottom-nav .nav-item {
+            color: rgba(8, 15, 28, 0.94);
+            mix-blend-mode: normal;
+            filter: none;
+        }
+
+        #mobile-wrapper[data-chrome-ink="light"] #bottom-nav .nav-item {
+            color: rgba(255, 255, 255, 0.96);
+            mix-blend-mode: normal;
+            filter: none;
+        }
+
+        #bottom-nav .nav-item:hover,
+        #bottom-nav .nav-item.is-active {
+            opacity: 1;
+        }
+
+        #bottom-nav .nav-item:active {
+            transform: scale(0.92);
+        }
+
+        #bottom-nav .nav-item.is-active span {
+            font-weight: 800;
+        }
+
+        #nav-indicator {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.48);
+            box-shadow:
+                inset 0 1px 1px rgba(255,255,255,0.66),
+                0 5px 14px rgba(4, 10, 22, 0.16);
+            backdrop-filter: blur(14px) saturate(1.5);
+            -webkit-backdrop-filter: blur(14px) saturate(1.5);
+        }
         
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -161,6 +566,30 @@
             transform: translate(-50%, 0);
             opacity: 1;
         }
+
+        @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+            .liquid-glass-control::before {
+                background: transparent;
+            }
+        }
+
+        @media (prefers-reduced-transparency: reduce) {
+            .liquid-glass-control::before,
+            #nav-indicator {
+                background: transparent;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
 <body class="w-full h-[100dvh] bg-[#0a0a0a] flex justify-center items-center overflow-hidden">
@@ -187,29 +616,29 @@
             <div id="map" class="absolute inset-0 z-10 w-full h-full"></div>
             
             <!-- 상단 헤더 오버레이 (새로운 캡슐 디자인) -->
-            <header class="absolute top-0 left-0 right-0 pt-safe px-4 pb-4 z-20 pointer-events-none">
+            <header id="map-topbar" class="absolute top-0 left-0 right-0 pt-safe px-4 pb-4 z-20 pointer-events-none">
                 <div class="mt-3 flex items-center gap-2 w-full pointer-events-auto pb-2">
                     <!-- 1. 타이틀 캡슐 -->
-                    <div class="flex items-center flex-1 bg-[#151515] rounded-full px-4 py-2 shadow-lg border border-white/5">
+                    <div class="topbar-capsule liquid-glass-control flex items-center flex-1 px-4 py-2">
                         <div class="flex items-baseline gap-1.5">
-                            <h1 class="text-[13px] font-extrabold text-white flex items-center tracking-tight">
+                            <h1 class="adaptive-contrast text-[13px] font-extrabold flex items-center tracking-tight">
                                 엔조이 발자취<span class="w-1 h-1 bg-[#3182F6] rounded-full ml-1 mb-0.5"></span>
                             </h1>
-                            <span class="text-[11px] text-gray-400 font-medium">총 9번의 즐거운 여행</span>
+                            <span class="adaptive-contrast adaptive-muted text-[11px] font-medium">총 9번의 즐거운 여행</span>
                         </div>
                     </div>
 
                     <!-- 2. 컨트롤 캡슐 -->
-                    <div class="flex items-center gap-3 bg-[#151515] rounded-full px-4 py-2 shrink-0 shadow-lg border border-white/5">
-                        <button id="satellite-top-btn" class="text-gray-400 hover:text-white text-[13px] transition-colors" onclick="toggleSatellite()">
+                    <div class="topbar-capsule liquid-glass-control flex items-center gap-2 px-3 py-2 shrink-0">
+                        <button id="satellite-top-btn" class="topbar-action adaptive-contrast text-[13px]" onclick="toggleSatellite()" aria-label="위성 지도 전환" aria-pressed="false">
                             <i class="fa-solid fa-satellite"></i>
                         </button>
-                        <div class="w-px h-3 bg-white/10"></div>
-                        <button id="marker-toggle-btn" class="text-[13px] transition-colors" onclick="toggleMarkers()">
-                            <i class="fa-solid fa-eye-slash text-gray-400"></i>
+                        <div class="glass-divider w-px h-3"></div>
+                        <button id="marker-toggle-btn" class="topbar-action adaptive-contrast text-[13px]" onclick="toggleMarkers()" aria-label="여행 마커 표시" aria-pressed="false">
+                            <i class="fa-solid fa-eye-slash"></i>
                         </button>
-                        <div class="w-px h-3 bg-white/10"></div>
-                        <button class="text-gray-400 hover:text-white text-[13px] transition-colors" onclick="zoomToAll()">
+                        <div class="glass-divider w-px h-3"></div>
+                        <button class="topbar-action adaptive-contrast text-[13px]" onclick="zoomToAll()" aria-label="전체 여행지 보기">
                             <i class="fa-solid fa-expand"></i>
                         </button>
                     </div>
@@ -245,26 +674,33 @@
         </main>
 
         <!-- 2. 목록 화면 -->
-        <main id="list-screen" class="hidden flex-1 relative w-full flex-col bg-black overflow-y-auto scrollbar-hide pb-24">
-            <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
-                <div class="px-5 pt-3 pb-4 flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-main drop-shadow-sm">여행 기록</h2>
-                    <div class="text-xs font-medium text-gray-400 bg-gray-900 px-3 py-1.5 rounded-full border border-gray-800">
-                        최신순 <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i>
+        <main id="list-screen" class="hidden flex-1 relative w-full flex-col overflow-y-auto scrollbar-hide pb-28">
+            <header class="screen-header flex-none pt-safe z-10 sticky top-0">
+                <div class="px-5 pt-4 pb-5 flex justify-between items-end gap-4">
+                    <div class="min-w-0">
+                        <p class="screen-kicker mb-2">TRAVEL LOG</p>
+                        <h2 class="text-[27px] leading-none font-extrabold text-main tracking-[-0.04em]">여행 기록</h2>
+                        <p class="screen-description mt-2">함께 지나온 순간을 시간순으로 모았어요.</p>
+                    </div>
+                    <div class="screen-count shrink-0">
+                        <strong id="record-count">0</strong>
+                        <span>journeys</span>
                     </div>
                 </div>
             </header>
 
-            <div class="px-5 pt-4 space-y-4" id="travel-list-container">
+            <div class="px-5 pt-5 space-y-4" id="travel-list-container">
                 <!-- JS로 목록 렌더링 -->
             </div>
         </main>
 
         <!-- 3. 통계 화면 -->
-        <main id="stats-screen" class="hidden flex-1 relative w-full flex-col bg-black overflow-y-auto scrollbar-hide pb-24">
-            <header class="flex-none pt-safe bg-black/80 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
-                <div class="px-5 pt-3 pb-4 flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-main drop-shadow-sm">통계</h2>
+        <main id="stats-screen" class="hidden flex-1 relative w-full flex-col overflow-y-auto scrollbar-hide pb-28">
+            <header class="screen-header flex-none pt-safe z-10 sticky top-0">
+                <div class="px-5 pt-4 pb-5">
+                    <p class="screen-kicker mb-2">JOURNEY INSIGHT</p>
+                    <h2 class="text-[27px] leading-none font-extrabold text-main tracking-[-0.04em]">여행 요약</h2>
+                    <p class="screen-description mt-2">숫자로 다시 보는 우리의 발자취예요.</p>
                 </div>
             </header>
             
@@ -276,35 +712,35 @@
 
         <!-- 하단 플로팅 메뉴 -->
         <nav id="bottom-nav" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 w-[88%] max-w-[300px] px-2 touch-pan-x select-none">
-            <div class="flex items-center justify-between bg-[#1C1C1E] shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 rounded-full p-1 gap-0.5 ring-1 ring-white/30 relative transition-all duration-300">
+            <div class="bottom-nav-glass liquid-glass-control flex items-center justify-between p-1 gap-0.5 relative transition-all duration-300">
                 <!-- 활성화 표시 배경 -->
-                <div id="nav-indicator" class="absolute top-1 bottom-1 bg-gray-500 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] rounded-full border border-white/20 z-0 nav-transition" style="left: 4px; width: 66px;"></div>
+                <div id="nav-indicator" class="absolute top-1 bottom-1 rounded-full z-0 nav-transition" style="left: 4px; width: 66px;"></div>
                 
-                <a href="https://won429.github.io/enjoysite/" class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform" style="text-decoration: none;">
+                <a href="https://won429.github.io/enjoy-app/" class="nav-item relative py-1.5 flex-1 rounded-full" style="text-decoration: none;" aria-label="홈으로 이동">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-house text-base text-gray-300 group-hover:text-white transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">홈</span>
+                        <i class="adaptive-contrast fa-solid fa-house text-base"></i>
+                        <span class="adaptive-contrast text-[10px] font-medium whitespace-nowrap">홈</span>
                     </div>
                 </a>
 
-                <button class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(0)">
+                <button class="nav-item is-active relative py-1.5 flex-1 rounded-full" onclick="switchTab(0)" aria-label="지도" aria-current="page">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-map-location-dot text-base text-white transition-colors"></i>
-                        <span class="text-[10px] font-bold text-white whitespace-nowrap transition-colors">지도</span>
+                        <i class="adaptive-contrast fa-solid fa-map-location-dot text-base"></i>
+                        <span class="adaptive-contrast text-[10px] font-bold whitespace-nowrap">지도</span>
                     </div>
                 </button>
 
-                <button class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(1)">
+                <button class="nav-item relative py-1.5 flex-1 rounded-full" onclick="switchTab(1)" aria-label="목록">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-list-ul text-base text-gray-300 group-hover:text-white transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">목록</span>
+                        <i class="adaptive-contrast fa-solid fa-list-ul text-base"></i>
+                        <span class="adaptive-contrast text-[10px] font-medium whitespace-nowrap">목록</span>
                     </div>
                 </button>
                 
-                <button class="relative py-1.5 flex-1 rounded-full group z-10 active:scale-95 transition-transform" onclick="switchTab(2)">
+                <button class="nav-item relative py-1.5 flex-1 rounded-full" onclick="switchTab(2)" aria-label="통계">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
-                        <i class="fa-solid fa-chart-pie text-base text-gray-300 group-hover:text-white transition-colors"></i>
-                        <span class="text-[10px] font-medium text-gray-300 group-hover:text-white whitespace-nowrap transition-colors">통계</span>
+                        <i class="adaptive-contrast fa-solid fa-chart-pie text-base"></i>
+                        <span class="adaptive-contrast text-[10px] font-medium whitespace-nowrap">통계</span>
                     </div>
                 </button>
             </div>
@@ -318,6 +754,7 @@
         let activeMarkerIndex = -1;
         let isMarkerVisible = false; // 마커 표시 상태
         let isSatellite = false; // 위성 지도 상태
+        let activeTabIndex = 0;
 
         // 여행 데이터 모음
         const travelData = [
@@ -434,9 +871,20 @@
             green:  { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30', markerBg: '#22C55E' }
         };
 
+        function updateChromeContrast() {
+            const wrapper = document.getElementById('mobile-wrapper');
+            if (!wrapper) return;
+
+            // 일반 지도는 밝은 바탕, 위성 지도와 목록/통계 화면은 어두운 바탕이다.
+            const useLightInk = activeTabIndex !== 0 || isSatellite;
+            wrapper.dataset.chromeInk = useLightInk ? 'light' : 'dark';
+        }
+
         // 탭 전환 로직
         function switchTab(index) {
             if (navigator.vibrate) navigator.vibrate(10);
+            activeTabIndex = index;
+            updateChromeContrast();
 
             const screens = [
                 document.getElementById('map-screen'),
@@ -464,38 +912,16 @@
             }
 
             navButtons.forEach((btn, i) => {
-                const icon = btn.querySelector('i');
-                const label = btn.querySelector('span');
-                
-                if (icon && label) {
-                    // 기존 색상 및 폰트 굵기 클래스 초기화 (문자열 replace 대신 안전한 classList API 사용)
-                    icon.classList.remove('text-white', 'text-gray-300', 'text-black', 'text-gray-600');
-                    label.classList.remove('text-white', 'text-gray-300', 'text-black', 'text-gray-600', 'font-medium', 'font-bold');
-
-                    // 항상 흰색 계열로 표시
-                    if (i === index) {
-                        icon.classList.add('text-white');
-                        label.classList.add('text-white', 'font-bold');
-                    } else {
-                        icon.classList.add('text-gray-300');
-                        label.classList.add('text-gray-300', 'font-medium');
-                    }
-                }
+                const isActive = i === index;
+                btn.classList.toggle('is-active', isActive);
+                btn.setAttribute('aria-current', isActive ? 'page' : 'false');
             });
 
             // 홈 버튼(<a> 태그) 색상 동기화
             const homeLink = document.querySelector('#bottom-nav a');
             if (homeLink) {
-                const homeIcon = homeLink.querySelector('i');
-                const homeLabel = homeLink.querySelector('span');
-                
-                if (homeIcon && homeLabel) {
-                    homeIcon.classList.remove('text-white', 'text-gray-300', 'text-black', 'text-gray-600');
-                    homeLabel.classList.remove('text-white', 'text-gray-300', 'text-black', 'text-gray-600', 'font-medium', 'font-bold');
-
-                    homeIcon.classList.add('text-gray-300');
-                    homeLabel.classList.add('text-gray-300', 'font-medium');
-                }
+                homeLink.classList.remove('is-active');
+                homeLink.setAttribute('aria-current', 'false');
             }
 
             if (index === 0 && map) {
@@ -709,7 +1135,12 @@
             // 아이콘 변경 (눈 모양 <-> 감은 눈 모양)
             const icon = document.querySelector('#marker-toggle-btn i');
             if (icon) {
-                icon.className = isMarkerVisible ? 'fa-solid fa-eye text-white' : 'fa-solid fa-eye-slash text-gray-400';
+                icon.className = isMarkerVisible ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+            }
+            const markerButton = document.getElementById('marker-toggle-btn');
+            if (markerButton) {
+                markerButton.classList.toggle('is-active', isMarkerVisible);
+                markerButton.setAttribute('aria-pressed', String(isMarkerVisible));
             }
         }
 
@@ -721,19 +1152,15 @@
             // 상단 캡슐 버튼 UI 업데이트
             const topSatBtn = document.getElementById('satellite-top-btn');
             if (topSatBtn) {
-                if (isSatellite) {
-                    topSatBtn.classList.remove('text-gray-400');
-                    topSatBtn.classList.add('text-white');
-                } else {
-                    topSatBtn.classList.remove('text-white');
-                    topSatBtn.classList.add('text-gray-400');
-                }
+                topSatBtn.classList.toggle('is-active', isSatellite);
+                topSatBtn.setAttribute('aria-pressed', String(isSatellite));
             }
 
             // 지도 타입 변경 (HYBRID: 위성 사진 + 도로/지명 표시)
             if (map && typeof naver !== 'undefined' && naver.maps) {
                 map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.HYBRID : naver.maps.MapTypeId.NORMAL);
             }
+            updateChromeContrast();
         }
 
         function zoomToAll() {
@@ -749,41 +1176,46 @@
             if (!container) return;
             container.innerHTML = '';
 
+            const count = document.getElementById('record-count');
+            if (count) count.textContent = travelData.length;
+
             travelData.forEach((trip, i) => {
-                const theme = colorThemes[trip.color] || colorThemes.blue;
-                
-                const card = document.createElement('div');
-                card.className = `list-card p-5 fade-in-up cursor-pointer`;
-                card.style.animationDelay = `${i * 0.1}s`;
-                card.onclick = () => {
+                const item = document.createElement('div');
+                item.className = 'record-item fade-in-up';
+                item.style.animationDelay = `${i * 0.06}s`;
+
+                item.innerHTML = `
+                    <div class="record-index">${String(i + 1).padStart(2, '0')}</div>
+                    <button type="button" class="record-panel w-full text-left" aria-label="${trip.region} 여행 기록을 지도에서 보기">
+                        <div class="flex items-center gap-3">
+                            <div class="record-logo">
+                                <img src="${trip.logo}" alt="" class="w-full h-full object-cover">
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="record-date">${trip.date}</div>
+                                <div class="record-region mt-1">${trip.region}</div>
+                            </div>
+                            <i class="record-arrow fa-solid fa-arrow-up-right-from-square"></i>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-white/[0.06]">
+                            <p class="record-title">${trip.title}</p>
+                            <p class="record-description break-keep line-clamp-2">${trip.desc}</p>
+                        </div>
+                    </button>
+                `;
+
+                const panel = item.querySelector('button');
+                panel.onclick = () => {
                     if (navigator.vibrate) navigator.vibrate(10);
                     switchTab(0);
                     setTimeout(() => { focusMarker(i); }, 300);
                 };
 
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full ${theme.bg} flex items-center justify-center border ${theme.border} overflow-hidden p-0.5">
-                                <img src="${trip.logo}" alt="logo" class="w-full h-full object-cover rounded-full">
-                            </div>
-                            <div>
-                                <h3 class="text-base font-bold text-gray-100">${trip.region}</h3>
-                                <span class="text-[10px] font-bold ${theme.text}">${trip.date}</span>
-                            </div>
-                        </div>
-                        <button class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
-                            <i class="fa-solid fa-chevron-right text-xs"></i>
-                        </button>
-                    </div>
-                    <p class="text-sm font-bold text-white mb-1.5">${trip.title}</p>
-                    <p class="text-xs text-gray-400 break-keep line-clamp-2">${trip.desc}</p>
-                `;
-                container.appendChild(card);
+                container.appendChild(item);
             });
         }
 
-        // 통계 렌더링 함수 추가
+        // 통계 렌더링
         function renderStats() {
             const container = document.getElementById('stats-container');
             if (!container) return;
@@ -825,56 +1257,61 @@
             // 이름이 길면 마지막 단어만 추출 (예: '경상북도 구미시' -> '구미시')
             let shortFavoriteRegion = favoriteRegion.split(' ').pop();
             let uniqueRegions = sortedRegions.length;
+            let maxVisits = sortedRegions.length > 0 ? sortedRegions[0][1] : 1;
 
-            // HTML 렌더링
             container.innerHTML = `
-                <div class="px-5 pt-4">
-                    <!-- 요약 카드 4개 그리드 -->
-                    <div class="grid grid-cols-2 gap-3 mb-6 fade-in-up">
-                        <div class="list-card p-4">
-                            <div class="text-xs font-medium text-gray-400 mb-1">총 여행 횟수</div>
-                            <div class="text-2xl font-bold text-white flex items-baseline gap-1">
-                                ${totalTrips} <span class="text-sm font-normal text-gray-500">번</span>
+                <div class="px-5 pt-5">
+                    <section class="stats-hero fade-in-up">
+                        <div class="flex items-end justify-between gap-4">
+                            <div>
+                                <p class="screen-kicker mb-3">TOTAL JOURNEYS</p>
+                                <div class="flex items-end gap-2">
+                                    <strong class="stats-hero-number">${totalTrips}</strong>
+                                    <span class="text-sm font-bold text-gray-500 mb-1">번의 여행</span>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-route text-2xl text-gray-600 mb-1"></i>
+                        </div>
+                        <div class="stats-metric-grid">
+                            <div class="stats-metric">
+                                <strong>${totalDays}</strong>
+                                <span>여행 일수</span>
+                            </div>
+                            <div class="stats-metric">
+                                <strong>${uniqueRegions}</strong>
+                                <span>방문 지역</span>
+                            </div>
+                            <div class="stats-metric">
+                                <strong class="truncate">${shortFavoriteRegion}</strong>
+                                <span>최다 방문</span>
                             </div>
                         </div>
-                        <div class="list-card p-4">
-                            <div class="text-xs font-medium text-gray-400 mb-1">총 여행 일수</div>
-                            <div class="text-2xl font-bold text-white flex items-baseline gap-1">
-                                ${totalDays} <span class="text-sm font-normal text-gray-500">일</span>
-                            </div>
-                        </div>
-                        <div class="list-card p-4">
-                            <div class="text-xs font-medium text-gray-400 mb-1">발도장 찍은 곳</div>
-                            <div class="text-2xl font-bold text-white flex items-baseline gap-1">
-                                ${uniqueRegions} <span class="text-sm font-normal text-gray-500">곳</span>
-                            </div>
-                        </div>
-                        <div class="list-card p-4">
-                            <div class="text-xs font-medium text-gray-400 mb-1">최애 여행지</div>
-                            <div class="text-lg font-bold text-blue-400 flex items-center h-[32px] break-keep leading-tight">
-                                ${shortFavoriteRegion}
-                            </div>
-                        </div>
-                    </div>
+                    </section>
 
-                    <!-- 지역별 방문 랭킹 -->
-                    <h3 class="text-sm font-bold text-gray-300 mb-3 px-1 fade-in-up" style="animation-delay: 0.1s;">지역별 방문 횟수</h3>
-                    <div class="list-card overflow-hidden fade-in-up" style="animation-delay: 0.2s;">
-                        ${sortedRegions.map((r, i) => `
-                            <div class="flex justify-between items-center p-4 border-b border-white/5 last:border-0">
-                                <div class="flex items-center gap-3">
-                                    <!-- 1, 2, 3등에 따라 메달 색상 차등 적용 -->
-                                    <div class="w-7 h-7 rounded-full ${i === 0 ? 'bg-yellow-500/20 text-yellow-400' : (i===1 ? 'bg-gray-300/20 text-gray-300' : (i===2 ? 'bg-orange-700/20 text-orange-500' : 'bg-white/5 text-gray-500'))} flex items-center justify-center text-xs font-bold shadow-sm">
-                                        ${i + 1}
-                                    </div>
-                                    <span class="text-sm font-medium text-gray-200">${r[0]}</span>
-                                </div>
-                                <div class="text-sm font-bold text-white flex items-baseline gap-0.5">
-                                    ${r[1]}<span class="text-[10px] font-normal text-gray-500">번</span>
-                                </div>
+                    <section class="mt-7 fade-in-up" style="animation-delay: 0.1s;">
+                        <div class="flex items-end justify-between mb-3 px-1">
+                            <div>
+                                <p class="screen-kicker mb-1.5">DESTINATIONS</p>
+                                <h3 class="stats-section-title">지역별 방문 순위</h3>
                             </div>
-                        `).join('')}
-                    </div>
+                            <span class="text-[10px] font-medium text-gray-600">${uniqueRegions}개 지역</span>
+                        </div>
+
+                        <div class="ranking-list">
+                            ${sortedRegions.map((r, i) => `
+                                <div class="ranking-row">
+                                    <div class="flex items-center gap-2">
+                                        <span class="ranking-number">${String(i + 1).padStart(2, '0')}</span>
+                                        <span class="ranking-region flex-1">${r[0]}</span>
+                                        <span class="ranking-count">${r[1]}회</span>
+                                    </div>
+                                    <div class="ranking-track">
+                                        <div class="ranking-fill" style="width: ${Math.max(12, (r[1] / maxVisits) * 100)}%;"></div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </section>
                 </div>
             `;
         }
