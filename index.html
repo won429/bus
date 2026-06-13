@@ -30,6 +30,14 @@
         })();
     </script>
 
+    <!-- 운영체제의 라이트/다크 모드를 첫 화면부터 즉시 반영 -->
+    <script>
+        (function() {
+            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.dataset.deviceTheme = prefersDark ? 'dark' : 'light';
+        })();
+    </script>
+
     <!-- 전역 에러 핸들러: 미리보기 환경의 크로스 도메인 스크립트 에러 방지 -->
     <script>
         window.addEventListener('error', function(e) {
@@ -52,11 +60,58 @@
 
     <style>
         :root {
+            color-scheme: light;
+            --app-bg: #f5f7fa;
+            --app-text: #1f2937;
+            --app-text-strong: #0f172a;
+            --app-text-secondary: #475569;
+            --app-text-muted: #526071;
+            --app-text-faint: #5c6675;
+            --app-line: rgba(15, 23, 42, 0.14);
+            --app-line-soft: rgba(15, 23, 42, 0.10);
+            --app-border: rgba(15, 23, 42, 0.12);
+            --app-track: #d8dee7;
+            --app-fill: #475569;
+            --card-bg: #ffffff;
+            --card-active: #eef2f6;
+            --map-fallback: #eef2f6;
+            --sheet-bg: rgba(255, 255, 255, 0.88);
+            --sheet-border: rgba(15, 23, 42, 0.12);
+            --sheet-shadow: 0 12px 34px rgba(15, 23, 42, 0.20);
+            --sheet-control-bg: rgba(15, 23, 42, 0.07);
+            --sheet-control-hover: rgba(15, 23, 42, 0.12);
+            --lg-glass-border: rgba(255, 255, 255, 0.82);
+            --lg-glass-inner-border: rgba(255, 255, 255, 0.50);
+            --lg-glass-shadow: 0 14px 38px rgba(15, 23, 42, 0.16);
+            --lg-glass-shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.12);
+            --lg-blur: 24px;
+        }
+
+        :root[data-device-theme="dark"] {
+            color-scheme: dark;
+            --app-bg: #08090b;
+            --app-text: #d7d8dc;
+            --app-text-strong: #f4f4f5;
+            --app-text-secondary: #b7bac1;
+            --app-text-muted: #9ca0a9;
+            --app-text-faint: #858a94;
+            --app-line: #292b31;
+            --app-line-soft: #23252b;
+            --app-border: rgba(255, 255, 255, 0.10);
+            --app-track: #292b31;
+            --app-fill: #d4d6db;
+            --card-bg: #1c1c1e;
+            --card-active: #2c2c2e;
+            --map-fallback: #111214;
+            --sheet-bg: rgba(28, 28, 30, 0.88);
+            --sheet-border: rgba(255, 255, 255, 0.10);
+            --sheet-shadow: 0 8px 32px rgba(0, 0, 0, 0.40);
+            --sheet-control-bg: rgba(255, 255, 255, 0.10);
+            --sheet-control-hover: rgba(255, 255, 255, 0.18);
             --lg-glass-border: rgba(255, 255, 255, 0.48);
             --lg-glass-inner-border: rgba(255, 255, 255, 0.20);
             --lg-glass-shadow: 0 14px 38px rgba(3, 8, 20, 0.24);
             --lg-glass-shadow-soft: 0 8px 24px rgba(3, 8, 20, 0.18);
-            --lg-blur: 24px;
         }
 
         body { 
@@ -64,49 +119,93 @@
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
             touch-action: pan-y;
+            background: var(--app-bg) !important;
+            color: var(--app-text);
+        }
+
+        #mobile-wrapper {
+            background: var(--app-bg) !important;
+            border-color: var(--app-border) !important;
+        }
+
+        #map-screen,
+        .map-fallback {
+            background: var(--map-fallback) !important;
+        }
+
+        .map-fallback,
+        .map-fallback p {
+            color: var(--app-text-secondary) !important;
+        }
+
+        .map-fallback-icon {
+            color: var(--app-text-faint) !important;
+        }
+
+        .map-fallback strong {
+            color: var(--app-text-strong) !important;
         }
 
         /* 유리 재질 공통 클래스 */
         .toss-card {
-            background: rgba(28, 28, 30, 0.85);
+            background: var(--sheet-bg);
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--sheet-border);
             border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); 
+            box-shadow: var(--sheet-shadow);
             transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
+        }
+
+        #sheet-title {
+            color: var(--app-text-strong) !important;
+        }
+
+        #sheet-desc {
+            color: var(--app-text-secondary) !important;
+        }
+
+        .sheet-control {
+            color: var(--app-text-secondary) !important;
+            background: var(--sheet-control-bg) !important;
+            border-color: var(--sheet-border) !important;
+        }
+
+        .sheet-control:hover {
+            color: var(--app-text-strong) !important;
+            background: var(--sheet-control-hover) !important;
         }
         
         .list-card {
-            background: #1C1C1E;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--card-bg);
+            border: 1px solid var(--app-line-soft);
             border-radius: 20px;
             transition: transform 0.1s;
         }
         .list-card:active {
             transform: scale(0.97);
-            background: #2C2C2E;
+            background: var(--card-active);
         }
 
         #list-screen,
         #stats-screen {
-            background: #08090b;
+            background: var(--app-bg);
         }
 
         .screen-header {
-            background: #08090b;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            background: var(--app-bg);
+            border-bottom: 1px solid var(--app-line-soft);
         }
 
         .screen-kicker {
-            color: #6b7280;
+            color: var(--app-text-muted);
             font-size: 10px;
             font-weight: 800;
             letter-spacing: 0.18em;
         }
 
         .screen-description {
-            color: #787b83;
+            color: var(--app-text-secondary);
             font-size: 12px;
             line-height: 1.5;
         }
@@ -118,7 +217,7 @@
 
         .screen-count strong {
             display: block;
-            color: #f4f4f5;
+            color: var(--app-text-strong);
             font-size: 18px;
             line-height: 1;
         }
@@ -126,7 +225,7 @@
         .screen-count span {
             display: block;
             margin-top: 4px;
-            color: #6f737c;
+            color: var(--app-text-faint);
             font-size: 9px;
             font-weight: 700;
             letter-spacing: 0.06em;
@@ -147,7 +246,7 @@
             bottom: -16px;
             left: 15px;
             width: 1px;
-            background: #25272d;
+            background: var(--app-line);
         }
 
         .record-index {
@@ -158,14 +257,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #9ca0a9;
+            color: var(--app-text-muted);
             font-size: 11px;
             font-weight: 800;
         }
 
         .record-panel {
             padding: 0 0 16px;
-            border-bottom: 1px solid #24262c;
+            border-bottom: 1px solid var(--app-line);
             transition: opacity 160ms ease;
         }
 
@@ -182,7 +281,7 @@
         }
 
         .record-date {
-            color: #8b8f98;
+            color: var(--app-text-muted);
             font-size: 10px;
             font-weight: 700;
             letter-spacing: 0.01em;
@@ -190,7 +289,7 @@
 
         .record-region {
             overflow: hidden;
-            color: #f4f4f5;
+            color: var(--app-text-strong);
             font-size: 14px;
             font-weight: 800;
             text-overflow: ellipsis;
@@ -198,25 +297,25 @@
         }
 
         .record-title {
-            color: #d7d8dc;
+            color: var(--app-text);
             font-size: 13px;
             font-weight: 700;
         }
 
         .record-description {
             margin-top: 5px;
-            color: #777b84;
+            color: var(--app-text-muted);
             font-size: 11px;
             line-height: 1.55;
         }
 
         .record-arrow {
-            color: #555963;
+            color: var(--app-text-faint);
             font-size: 11px;
         }
 
         .record-year-group {
-            border-bottom: 1px solid #24262c;
+            border-bottom: 1px solid var(--app-line);
         }
 
         .record-year-summary {
@@ -234,20 +333,20 @@
         }
 
         .record-year-title {
-            color: #f4f4f5;
+            color: var(--app-text-strong);
             font-size: 22px;
             font-weight: 900;
             letter-spacing: -0.04em;
         }
 
         .record-year-count {
-            color: #737780;
+            color: var(--app-text-muted);
             font-size: 10px;
             font-weight: 700;
         }
 
         .record-year-chevron {
-            color: #737780;
+            color: var(--app-text-muted);
             font-size: 11px;
             transition: transform 180ms ease;
         }
@@ -258,7 +357,7 @@
 
         .record-year-content {
             padding: 2px 0 18px;
-            border-top: 1px solid #22242a;
+            border-top: 1px solid var(--app-line-soft);
         }
 
         .record-month-group {
@@ -276,11 +375,11 @@
             content: "";
             flex: 1;
             height: 1px;
-            background: #25272d;
+            background: var(--app-line);
         }
 
         .record-month-title {
-            color: #b7bac1;
+            color: var(--app-text-secondary);
             font-size: 12px;
             font-weight: 800;
         }
@@ -295,18 +394,18 @@
             align-items: center;
             min-height: 19px;
             padding: 0 2px;
-            color: #aeb1b8;
+            color: var(--app-text-secondary);
             font-size: 9px;
             font-weight: 800;
         }
 
         .stats-hero {
             padding: 0 0 22px;
-            border-bottom: 1px solid #292b31;
+            border-bottom: 1px solid var(--app-line);
         }
 
         .stats-hero-number {
-            color: #f7f7f8;
+            color: var(--app-text-strong);
             font-size: 48px;
             font-weight: 900;
             letter-spacing: -0.07em;
@@ -318,7 +417,7 @@
             grid-template-columns: repeat(3, minmax(0, 1fr));
             margin-top: 18px;
             padding-top: 16px;
-            border-top: 1px solid #292b31;
+            border-top: 1px solid var(--app-line);
         }
 
         .stats-metric {
@@ -328,12 +427,12 @@
         }
 
         .stats-metric + .stats-metric {
-            border-left: 1px solid #292b31;
+            border-left: 1px solid var(--app-line);
         }
 
         .stats-metric strong {
             display: block;
-            color: #f0f1f2;
+            color: var(--app-text-strong);
             font-size: 18px;
             font-weight: 850;
         }
@@ -341,12 +440,12 @@
         .stats-metric span {
             display: block;
             margin-top: 4px;
-            color: #71757e;
+            color: var(--app-text-muted);
             font-size: 10px;
         }
 
         .stats-section-title {
-            color: #edeef0;
+            color: var(--app-text-strong);
             font-size: 15px;
             font-weight: 800;
         }
@@ -360,12 +459,12 @@
         }
 
         .ranking-row + .ranking-row {
-            border-top: 1px solid #23252b;
+            border-top: 1px solid var(--app-line-soft);
         }
 
         .ranking-number {
             width: 24px;
-            color: #71757f;
+            color: var(--app-text-muted);
             font-size: 11px;
             font-weight: 800;
         }
@@ -373,7 +472,7 @@
         .ranking-region {
             min-width: 0;
             overflow: hidden;
-            color: #dfe0e3;
+            color: var(--app-text);
             font-size: 12px;
             font-weight: 700;
             text-overflow: ellipsis;
@@ -381,7 +480,7 @@
         }
 
         .ranking-count {
-            color: #a0a3aa;
+            color: var(--app-text-secondary);
             font-size: 11px;
             font-weight: 700;
         }
@@ -391,17 +490,41 @@
             margin-top: 9px;
             overflow: hidden;
             border-radius: 999px;
-            background: #292b31;
+            background: var(--app-track);
         }
 
         .ranking-fill {
             height: 100%;
             border-radius: inherit;
-            background: #d4d6db;
+            background: var(--app-fill);
         }
 
-        .text-main { color: #F2F4F6; }
-        .text-sub { color: #A1A1A6; }
+        .record-copy-divider {
+            border-color: var(--app-line-soft) !important;
+        }
+
+        .stats-total-unit,
+        .stats-region-total,
+        .stats-route-icon {
+            color: var(--app-text-muted);
+        }
+
+        .theme-accent-orange { color: #c2410c; }
+        .theme-accent-purple { color: #7e22ce; }
+        .theme-accent-red { color: #b91c1c; }
+        .theme-accent-yellow { color: #854d0e; }
+        .theme-accent-blue { color: #1d4ed8; }
+        .theme-accent-green { color: #166534; }
+
+        :root[data-device-theme="dark"] .theme-accent-orange { color: #fb923c; }
+        :root[data-device-theme="dark"] .theme-accent-purple { color: #c084fc; }
+        :root[data-device-theme="dark"] .theme-accent-red { color: #f87171; }
+        :root[data-device-theme="dark"] .theme-accent-yellow { color: #facc15; }
+        :root[data-device-theme="dark"] .theme-accent-blue { color: #60a5fa; }
+        :root[data-device-theme="dark"] .theme-accent-green { color: #4ade80; }
+
+        .text-main { color: var(--app-text-strong); }
+        .text-sub { color: var(--app-text-secondary); }
 
         .pt-safe { padding-top: max(20px, env(safe-area-inset-top)); }
         
@@ -574,6 +697,23 @@
             background: rgba(255,255,255,0.30);
             border-color: rgba(255,255,255,0.58);
         }
+
+        :root[data-device-theme="light"] #mobile-wrapper[data-chrome-ink="dark"] .liquid-glass-control {
+            border-color: rgba(15, 23, 42, 0.22);
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+        }
+
+        :root[data-device-theme="light"] #mobile-wrapper[data-chrome-ink="dark"] .liquid-glass-control::after {
+            border-color: rgba(15, 23, 42, 0.10);
+        }
+
+        :root[data-device-theme="light"] #mobile-wrapper[data-chrome-ink="dark"] #nav-indicator {
+            background: rgba(15, 23, 42, 0.14);
+            border-color: rgba(15, 23, 42, 0.26);
+            box-shadow:
+                inset 0 1px 1px rgba(255,255,255,0.42),
+                0 5px 16px rgba(15, 23, 42, 0.16);
+        }
         
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -684,10 +824,10 @@
         <main id="map-screen" class="flex-1 relative w-full flex flex-col bg-[#111]">
             
             <!-- 오류/안내 배경 (지도가 막혔을 때 보임) -->
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-0 bg-[#111]">
-                <i class="fa-solid fa-map-location-dot text-4xl text-gray-600 mb-4"></i>
-                <p class="text-sm text-gray-400 break-keep leading-relaxed">
-                    <span class="text-blue-400 font-bold">지도 로딩 중...</span><br><br>
+            <div class="map-fallback absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-0">
+                <i class="map-fallback-icon fa-solid fa-map-location-dot text-4xl mb-4"></i>
+                <p class="text-sm break-keep leading-relaxed">
+                    <span class="theme-accent-blue font-bold">지도 로딩 중...</span><br><br>
                     만약 지도가 계속 보이지 않는다면,<br>
                     이곳(미리보기) 주소가 네이버 클라우드에<br>
                     등록되지 않아 차단된 것입니다.<br>
@@ -730,7 +870,7 @@
 
             <!-- 선택된 여행지 정보 바텀 시트 (mobile-wrapper 안에서 absolute로 동작) -->
             <div id="bottom-sheet" class="absolute bottom-24 left-1/2 w-[92%] z-30 toss-card p-5 cursor-default">
-                <button onclick="closeBottomSheet()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                <button onclick="closeBottomSheet()" class="sheet-control absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
                 
@@ -739,7 +879,7 @@
                         <img src="logo_jeju.png" alt="logo" class="w-full h-full object-cover rounded-full">
                     </div>
                     <div class="flex-1">
-                        <span id="sheet-date" class="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">2024.08.15</span>
+                        <span id="sheet-date" class="theme-accent-blue text-[10px] font-bold bg-blue-500/10 px-2 py-0.5 rounded-full">2024.08.15</span>
                         <h3 id="sheet-title" class="text-xl font-bold text-white mt-1 leading-tight">제주도 출장엔조이</h3>
                     </div>
                 </div>
@@ -749,7 +889,7 @@
                 </p>
                 
                 <div class="flex gap-2">
-                    <button onclick="alert('사진 갤러리 준비 중!')" class="w-full bg-white/10 hover:bg-white/20 text-white text-sm font-bold py-3 rounded-xl transition-colors border border-white/5">
+                    <button onclick="alert('사진 갤러리 준비 중!')" class="sheet-control w-full text-sm font-bold py-3 rounded-xl transition-colors border">
                         <i class="fa-regular fa-images mr-1"></i> 사진 보기
                     </button>
                 </div>
@@ -838,6 +978,24 @@
         let isMarkerVisible = false; // 마커 표시 상태
         let isSatellite = false; // 위성 지도 상태
         let activeTabIndex = 0;
+        const deviceThemeQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+        function isDeviceDarkMode() {
+            return Boolean(deviceThemeQuery && deviceThemeQuery.matches);
+        }
+
+        function syncDeviceTheme() {
+            document.documentElement.dataset.deviceTheme = isDeviceDarkMode() ? 'dark' : 'light';
+            updateChromeContrast();
+        }
+
+        if (deviceThemeQuery) {
+            if (typeof deviceThemeQuery.addEventListener === 'function') {
+                deviceThemeQuery.addEventListener('change', syncDeviceTheme);
+            } else if (typeof deviceThemeQuery.addListener === 'function') {
+                deviceThemeQuery.addListener(syncDeviceTheme);
+            }
+        }
 
         // 여행 데이터 모음
         const travelData = [
@@ -995,20 +1153,63 @@
         );
 
         const colorThemes = {
-            orange: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30', markerBg: '#F97316' },
-            purple: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', markerBg: '#A855F7' },
-            red:    { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30', markerBg: '#EF4444' },
-            yellow: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30', markerBg: '#EAB308' },
-            blue:   { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', markerBg: '#3B82F6' },
-            green:  { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30', markerBg: '#22C55E' }
+            orange: { bg: 'bg-orange-500/20', text: 'theme-accent-orange', border: 'border-orange-500/30', markerBg: '#F97316' },
+            purple: { bg: 'bg-purple-500/20', text: 'theme-accent-purple', border: 'border-purple-500/30', markerBg: '#A855F7' },
+            red:    { bg: 'bg-red-500/20', text: 'theme-accent-red', border: 'border-red-500/30', markerBg: '#EF4444' },
+            yellow: { bg: 'bg-yellow-500/20', text: 'theme-accent-yellow', border: 'border-yellow-500/30', markerBg: '#EAB308' },
+            blue:   { bg: 'bg-blue-500/20', text: 'theme-accent-blue', border: 'border-blue-500/30', markerBg: '#3B82F6' },
+            green:  { bg: 'bg-green-500/20', text: 'theme-accent-green', border: 'border-green-500/30', markerBg: '#22C55E' }
         };
+
+        function createCurrentDaeguBoundary(encodedPath) {
+            let index = 0;
+            let latitude = 0;
+            let longitude = 0;
+            const coordinates = [];
+
+            function decodeNextValue() {
+                let result = 0;
+                let shift = 0;
+                let byte;
+
+                do {
+                    byte = encodedPath.charCodeAt(index++) - 63;
+                    result |= (byte & 0x1f) << shift;
+                    shift += 5;
+                } while (byte >= 0x20);
+
+                return (result & 1) ? ~(result >> 1) : (result >> 1);
+            }
+
+            while (index < encodedPath.length) {
+                latitude += decodeNextValue();
+                longitude += decodeNextValue();
+                coordinates.push([longitude / 1e5, latitude / 1e5]);
+            }
+
+            return {
+                type: 'Feature',
+                properties: {
+                    name: '대구광역시',
+                    includesGunwi: true,
+                    boundaryDate: '2026-04-01'
+                },
+                geometry: {
+                    type: 'Polygon',
+                    coordinates: [coordinates]
+                }
+            };
+        }
+
+        // 2026-04-01 행정경계에서 대구광역시 소속 지역을 하나로 합친 외곽선입니다.
+        const currentDaeguBoundary = createCurrentDaeguBoundary("kxzxEylknWtqAmYteAov@laBipBzk@{zAf\\ee@~eArCrt@nv@jz@d]vQlj@a@`_A`PiLjIyu@{Q_OgAiUac@ogArBogAuf@q`@vH_f@iT}WGe`@go@ud@ek@ot@dFkr@eTag@vTmX|Cy[aX}w@x[sWx@gKcUcpAwBqs@ce@c[{ZjWotBiNg[fIeMgr@qc@}k@aBo`AaGhIs[tA}d@iV}OrUwu@qDwq@|_@qa@ugBk\\y[sb@alAci@{TrKch@q[ybArj@yn@w_@gi@mKanAfK_p@|NJxHfL~NwDz]l_@vWo^bVcKhUtRnVJlk@yw@wUkp@nF{i@uGcc@goA{lBbFyz@}LcRaAaz@cXp@si@yu@wShCyJdNsf@ub@{X`Jqt@kU{SfVy_@rBkYzRQ|N}j@wDuk@n`@}e@kDeNog@iYmW|M{WcE_R{{@}aAoJuj@icAbZk\\f[oSr@u{@c{@_Dgj@mWrEeYiLay@pDgPrVsHqTdj@qbA\\wNub@sq@wEu_@mg@oM_Hce@y^bHeTaLsYfNk^eVsfBf]k^]oL_Sib@dN_QnLag@ffAin@hh@ma@{Hqy@ke@oUrV_m@fPsmAeh@m_@OoTbl@qMtL}OSgGhUmY~Gac@sVeYvRcC|QuVAwRjSaTnj@qR~pB{^|_@aeAkc@kZbEwTfSi_Aap@o}@jLws@qh@uz@sLgK{OpMeu@gUqX{YaOu`@`JaKtQ_KkBk~@cfBoM_Mmf@eFbb@mh@naAcAbFmIs^g\\uV{g@tEyTxYwLvGwv@lk@sfAg@{[fKuPul@ynByc@kNyMoT_Lut@uMyGyH{Wsf@}Hmd@clAqz@cQix@rNwn@_s@Jkz@nPgq@oEg}AmVjGos@qMyj@kn@ii@zc@wXuJmPv]ua@nBqLh`@se@dXmv@yFuCdy@uWpNaP~}@ys@nu@cPx}@bMxo@gMvWhJpm@d_@jx@fB`y@tz@~Epi@|j@uNrz@bNdQyEzz@lH~Wqj@|cAeLfDWp`@fi@jSfHfTcY|YwKbh@vLz_@{MlMnPff@sMzXpFrkAeSjr@wMRaXoSk`@da@aDjnA`Nti@rXxKi@vHiSnV{z@rXtYnaAgBdTdb@nj@xWnNcEp_@wk@nQw^mWqhAiEmYhLeHxTc`@iJcRy`@kaA{Miw@|fBsD|k@wTpl@lCh}@kk@f^vAbZ}Mv{@W|[t]pa@`BtUoOtV`Sxd@q@~TymB|o@aTvy@~E|i@{a@|UeCtb@yJvKpGlj@kPh\\k@x|@q[nu@sUjuAw_@|@qQjMu^r}AsJfG@vR~t@ff@zYtk@`J}E|o@|HkEtWvV~KtN~V~@jcAv^zV|VwE|MrP~YqOnZq_AlOePpN|Ap^f^dr@xBzPfZpj@g]n`@lKn]kZdVGhHa|@tXcEtZcVdZbCrYyRq`AgdC{JsiAkUeXYmk@xSsCbf@zf@tB_i@hY_Qbb@fCbv@ud@hn@m@b^qv@fUrCbYgH_GeVy]e[kv@_XmCom@jk@k|A|Li@`rAa}@Rgs@n[pR|s@tD`Cda@cJvT|[~W`i@wKjXyp@vPjLhj@b@pNsZpm@vWpPqZlRlA~VoMfK{j@zYkM|nArCtf@aX~d@oFbwBt_@d~@of@aZuq@oReLyPoz@k^wr@mA{jAyPkZg@qp@cNiJrTa`@xJqEdmA~OhmAcInwAjf@jeA~IrViZz]igA|g@cT~`@`qCxYhGjJ~Sbq@`f@pH~SpSOdTry@bM|AlHlNhI~m@mAldAl]jp@rJtl@b`@dDfM|PrO_@iVbe@w_Ad^}a@~rAdRyAfLfMxnAyThXcYjm@rKtkAiNb_@nEp^|Z`^UvFtVdd@jWxc@rcAjWzVpUnKbtAzBpSvPq_@lk@k]pJwH|Lq@nO`S~U}Q|c@lOxRc\\xk@{l@vE_{@ek@{e@lC_g@kRkh@`CiNhj@zAjj@}WbZeFbVnk@~FlFveA`S|X~Bxa@tUrWqBdO|^nGtHba@v^lA|sAlz@jm@vHzd@rS~\\v^zFl[hgAfg@xg@fJ`zA{[|Dco@oJg{Crr@opEraBicCb^kSzX`@z`@`TnYlq@mFpmHfmAxoAzvBtu@ncBprAlf@[p}@ui@df@enAlOieAv_Ak~AhwA{Q~w@lI`x@~mA~Cj^gZ~vByTpk@g@rt@ag@djCtXtj@bp@`E");
 
         function updateChromeContrast() {
             const wrapper = document.getElementById('mobile-wrapper');
             if (!wrapper) return;
 
-            // 일반 지도는 밝은 바탕, 위성 지도와 목록/통계 화면은 어두운 바탕이다.
-            const useLightInk = activeTabIndex !== 0 || isSatellite;
+            // 지도에서는 지도 종류를, 목록/통계에서는 기기의 색상 모드를 기준으로 대비를 맞춘다.
+            const useLightInk = activeTabIndex === 0 ? isSatellite : isDeviceDarkMode();
             wrapper.dataset.chromeInk = useLightInk ? 'light' : 'dark';
         }
 
@@ -1102,23 +1303,40 @@
         function loadRegionBoundaries() {
             if (!map || typeof naver === 'undefined' || !naver.maps) return;
 
-            // 1. 광역시/도 단위 데이터 불러오기 (대구, 대전, 제주 전체 윤곽선용)
-            fetch('https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_provinces_geo_simple.json')
-                .then(response => response.json())
-                .then(geojson => {
-                    map.data.addGeoJson(geojson);
-                    applyMapStyle();
-                })
-                .catch(e => console.warn('시도 경계 오류:', e));
+            const provinceUrl = 'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_provinces_geo_simple.json';
+            const municipalityUrl = 'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_municipalities_geo_simple.json';
 
-            // 2. 시/군/구 단위 데이터 불러오기 (진주시, 칠곡군, 구미시, 청양군 세부 윤곽선용)
-            fetch('https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_municipalities_geo_simple.json')
-                .then(response => response.json())
-                .then(geojson => {
-                    map.data.addGeoJson(geojson);
+            // 2026년 최신 경계에서 추출한 대구광역시 전체 외곽선(군위군 포함)을 먼저 표시한다.
+            map.data.addGeoJson({
+                type: 'FeatureCollection',
+                features: [currentDaeguBoundary]
+            });
+
+            Promise.all([
+                fetch(provinceUrl).then(response => {
+                    if (!response.ok) throw new Error(`시도 경계 요청 실패: ${response.status}`);
+                    return response.json();
+                }),
+                fetch(municipalityUrl).then(response => {
+                    if (!response.ok) throw new Error(`시군구 경계 요청 실패: ${response.status}`);
+                    return response.json();
+                })
+            ])
+                .then(([provinceGeojson, municipalityGeojson]) => {
+                    map.data.addGeoJson({
+                        ...provinceGeojson,
+                        features: provinceGeojson.features.filter(feature => feature.properties?.name !== '대구광역시')
+                    });
+                    map.data.addGeoJson({
+                        ...municipalityGeojson,
+                        features: municipalityGeojson.features.filter(feature => feature.properties?.name !== '군위군')
+                    });
+
                     applyMapStyle();
                 })
-                .catch(e => console.warn('시군구 경계 오류:', e));
+                .catch(e => console.warn('행정구역 경계 오류:', e));
+
+            applyMapStyle();
 
             // 통합 스타일 적용 함수
             function applyMapStyle() {
@@ -1126,8 +1344,8 @@
                     const name = feature.getProperty('name') || '';
                     let color = null;
 
-                    // [수정됨] 헷갈리는 숫자 코드 대신 '한글 지역 이름'으로 정확하게 매칭합니다.
-                    if (name === '대구광역시' || name === '군위군') color = colorThemes.red.markerBg;
+                    // 군위군은 대구광역시 경계에 합쳐 하나의 폴리곤으로 표시한다.
+                    if (name === '대구광역시') color = colorThemes.red.markerBg;
                     else if (name === '대전광역시') color = colorThemes.yellow.markerBg;
                     else if (name === '제주특별자치도') color = colorThemes.orange.markerBg;
                     else if (name === '진주시') color = colorThemes.purple.markerBg;
@@ -1370,7 +1588,7 @@
                                                 </div>
                                                 <i class="record-arrow fa-solid fa-arrow-up-right-from-square"></i>
                                             </div>
-                                            <div class="mt-4 pt-3 border-t border-white/[0.06]">
+                                            <div class="record-copy-divider mt-4 pt-3 border-t">
                                                 <p class="record-title">${trip.title}</p>
                                                 <p class="record-description break-keep line-clamp-2">${trip.desc}</p>
                                             </div>
@@ -1457,10 +1675,10 @@
                                 <p class="screen-kicker mb-3">TOTAL JOURNEYS</p>
                                 <div class="flex items-end gap-2">
                                     <strong class="stats-hero-number">${totalTrips}</strong>
-                                    <span class="text-sm font-bold text-gray-500 mb-1">번의 여행</span>
+                                    <span class="stats-total-unit text-sm font-bold mb-1">번의 여행</span>
                                 </div>
                             </div>
-                            <i class="fa-solid fa-route text-2xl text-gray-600 mb-1"></i>
+                            <i class="stats-route-icon fa-solid fa-route text-2xl mb-1"></i>
                         </div>
                         <div class="stats-metric-grid">
                             <div class="stats-metric">
@@ -1484,7 +1702,7 @@
                                 <p class="screen-kicker mb-1.5">DESTINATIONS</p>
                                 <h3 class="stats-section-title">지역별 방문 순위</h3>
                             </div>
-                            <span class="text-[10px] font-medium text-gray-600">${uniqueRegions}개 지역</span>
+                            <span class="stats-region-total text-[10px] font-medium">${uniqueRegions}개 지역</span>
                         </div>
 
                         <div class="ranking-list">
@@ -1508,6 +1726,7 @@
 
         // 초기 실행
         window.onload = () => {
+            syncDeviceTheme();
             switchTab(0);
             initMap();
         };
