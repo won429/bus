@@ -14,7 +14,6 @@
                 var isMobilePhone = /iphone|ipod|android.*mobile|blackberry|windows phone|opera mini|iemobile/i.test(ua);
                 // 아이패드 OS 13 이상 (데스크톱 맥으로 인식되므로 터치 지원 여부로 추가 판별)
                 var isIPadOS = ua.includes('macintosh') && navigator.maxTouchPoints > 1;
-
                 // 스마트폰이 아니거나(PC, 안드로이드 태블릿), 아이패드인 경우 pc 버전으로 이동
                 if (!isMobilePhone || isIPadOS) {
                     // 미리보기 환경(blob: 또는 data: URL)에서는 상대 경로 리다이렉션 시 SyntaxError가 발생하므로 방어 코드 추가
@@ -618,11 +617,20 @@
 
         #bottom-nav {
             bottom: max(16px, env(safe-area-inset-bottom));
+            transition:
+                width 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                max-width 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        #bottom-nav.is-compact {
+            width: 58% !important;
+            max-width: 216px !important;
         }
 
         #bottom-nav .bottom-nav-glass {
             border-radius: 999px;
             box-shadow: var(--lg-glass-shadow), inset 0 1px 0 rgba(255,255,255,0.34);
+            transition: padding 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         #bottom-nav .nav-item {
@@ -631,7 +639,36 @@
             mix-blend-mode: difference;
             filter: grayscale(1) contrast(2.4);
             opacity: 0.62;
-            transition: opacity 180ms ease, transform 160ms ease;
+            transition:
+                opacity 180ms ease,
+                transform 160ms ease,
+                padding 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        #bottom-nav .nav-label {
+            max-height: 16px;
+            overflow: hidden;
+            opacity: 1;
+            transform: translateY(0);
+            transition:
+                max-height 240ms ease,
+                opacity 180ms ease,
+                transform 240ms ease;
+        }
+
+        #bottom-nav.is-compact .nav-item {
+            padding-top: 0.55rem;
+            padding-bottom: 0.55rem;
+        }
+
+        #bottom-nav.is-compact .nav-item > div {
+            gap: 0;
+        }
+
+        #bottom-nav.is-compact .nav-label {
+            max-height: 0 !important;
+            opacity: 0 !important;
+            transform: translateY(4px) !important;
         }
 
         #bottom-nav .nav-item .adaptive-contrast {
@@ -942,28 +979,28 @@
                 <a href="https://won429.github.io/enjoy-app/" class="nav-item relative py-1.5 flex-1 rounded-full" style="text-decoration: none;" aria-label="홈으로 이동">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
                         <i class="adaptive-contrast fa-solid fa-house text-base"></i>
-                        <span class="adaptive-contrast text-[10px] font-medium whitespace-nowrap">홈</span>
+                        <span class="nav-label adaptive-contrast text-[10px] font-medium whitespace-nowrap">홈</span>
                     </div>
                 </a>
 
                 <button class="nav-item is-active relative py-1.5 flex-1 rounded-full" onclick="switchTab(0)" aria-label="지도" aria-current="page">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
                         <i class="adaptive-contrast fa-solid fa-map-location-dot text-base"></i>
-                        <span class="adaptive-contrast text-[10px] font-bold whitespace-nowrap">지도</span>
+                        <span class="nav-label adaptive-contrast text-[10px] font-bold whitespace-nowrap">지도</span>
                     </div>
                 </button>
 
                 <button class="nav-item relative py-1.5 flex-1 rounded-full" onclick="switchTab(1)" aria-label="목록">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
                         <i class="adaptive-contrast fa-solid fa-list-ul text-base"></i>
-                        <span class="adaptive-contrast text-[10px] font-medium whitespace-nowrap">목록</span>
+                        <span class="nav-label adaptive-contrast text-[10px] font-medium whitespace-nowrap">목록</span>
                     </div>
                 </button>
                 
                 <button class="nav-item relative py-1.5 flex-1 rounded-full" onclick="switchTab(2)" aria-label="통계">
                     <div class="flex flex-col items-center gap-0.5 pointer-events-none">
                         <i class="adaptive-contrast fa-solid fa-chart-pie text-base"></i>
-                        <span class="adaptive-contrast text-[10px] font-medium whitespace-nowrap">통계</span>
+                        <span class="nav-label adaptive-contrast text-[10px] font-medium whitespace-nowrap">통계</span>
                     </div>
                 </button>
             </div>
@@ -1204,6 +1241,72 @@
         // 2026-04-01 행정경계에서 대구광역시 소속 지역을 하나로 합친 외곽선입니다.
         const currentDaeguBoundary = createCurrentDaeguBoundary("kxzxEylknWtqAmYteAov@laBipBzk@{zAf\\ee@~eArCrt@nv@jz@d]vQlj@a@`_A`PiLjIyu@{Q_OgAiUac@ogArBogAuf@q`@vH_f@iT}WGe`@go@ud@ek@ot@dFkr@eTag@vTmX|Cy[aX}w@x[sWx@gKcUcpAwBqs@ce@c[{ZjWotBiNg[fIeMgr@qc@}k@aBo`AaGhIs[tA}d@iV}OrUwu@qDwq@|_@qa@ugBk\\y[sb@alAci@{TrKch@q[ybArj@yn@w_@gi@mKanAfK_p@|NJxHfL~NwDz]l_@vWo^bVcKhUtRnVJlk@yw@wUkp@nF{i@uGcc@goA{lBbFyz@}LcRaAaz@cXp@si@yu@wShCyJdNsf@ub@{X`Jqt@kU{SfVy_@rBkYzRQ|N}j@wDuk@n`@}e@kDeNog@iYmW|M{WcE_R{{@}aAoJuj@icAbZk\\f[oSr@u{@c{@_Dgj@mWrEeYiLay@pDgPrVsHqTdj@qbA\\wNub@sq@wEu_@mg@oM_Hce@y^bHeTaLsYfNk^eVsfBf]k^]oL_Sib@dN_QnLag@ffAin@hh@ma@{Hqy@ke@oUrV_m@fPsmAeh@m_@OoTbl@qMtL}OSgGhUmY~Gac@sVeYvRcC|QuVAwRjSaTnj@qR~pB{^|_@aeAkc@kZbEwTfSi_Aap@o}@jLws@qh@uz@sLgK{OpMeu@gUqX{YaOu`@`JaKtQ_KkBk~@cfBoM_Mmf@eFbb@mh@naAcAbFmIs^g\\uV{g@tEyTxYwLvGwv@lk@sfAg@{[fKuPul@ynByc@kNyMoT_Lut@uMyGyH{Wsf@}Hmd@clAqz@cQix@rNwn@_s@Jkz@nPgq@oEg}AmVjGos@qMyj@kn@ii@zc@wXuJmPv]ua@nBqLh`@se@dXmv@yFuCdy@uWpNaP~}@ys@nu@cPx}@bMxo@gMvWhJpm@d_@jx@fB`y@tz@~Epi@|j@uNrz@bNdQyEzz@lH~Wqj@|cAeLfDWp`@fi@jSfHfTcY|YwKbh@vLz_@{MlMnPff@sMzXpFrkAeSjr@wMRaXoSk`@da@aDjnA`Nti@rXxKi@vHiSnV{z@rXtYnaAgBdTdb@nj@xWnNcEp_@wk@nQw^mWqhAiEmYhLeHxTc`@iJcRy`@kaA{Miw@|fBsD|k@wTpl@lCh}@kk@f^vAbZ}Mv{@W|[t]pa@`BtUoOtV`Sxd@q@~TymB|o@aTvy@~E|i@{a@|UeCtb@yJvKpGlj@kPh\\k@x|@q[nu@sUjuAw_@|@qQjMu^r}AsJfG@vR~t@ff@zYtk@`J}E|o@|HkEtWvV~KtN~V~@jcAv^zV|VwE|MrP~YqOnZq_AlOePpN|Ap^f^dr@xBzPfZpj@g]n`@lKn]kZdVGhHa|@tXcEtZcVdZbCrYyRq`AgdC{JsiAkUeXYmk@xSsCbf@zf@tB_i@hY_Qbb@fCbv@ud@hn@m@b^qv@fUrCbYgH_GeVy]e[kv@_XmCom@jk@k|A|Li@`rAa}@Rgs@n[pR|s@tD`Cda@cJvT|[~W`i@wKjXyp@vPjLhj@b@pNsZpm@vWpPqZlRlA~VoMfK{j@zYkM|nArCtf@aX~d@oFbwBt_@d~@of@aZuq@oReLyPoz@k^wr@mA{jAyPkZg@qp@cNiJrTa`@xJqEdmA~OhmAcInwAjf@jeA~IrViZz]igA|g@cT~`@`qCxYhGjJ~Sbq@`f@pH~SpSOdTry@bM|AlHlNhI~m@mAldAl]jp@rJtl@b`@dDfM|PrO_@iVbe@w_Ad^}a@~rAdRyAfLfMxnAyThXcYjm@rKtkAiNb_@nEp^|Z`^UvFtVdd@jWxc@rcAjWzVpUnKbtAzBpSvPq_@lk@k]pJwH|Lq@nO`S~U}Q|c@lOxRc\\xk@{l@vE_{@ek@{e@lC_g@kRkh@`CiNhj@zAjj@}WbZeFbVnk@~FlFveA`S|X~Bxa@tUrWqBdO|^nGtHba@v^lA|sAlz@jm@vHzd@rS~\\v^zFl[hgAfg@xg@fJ`zA{[|Dco@oJg{Crr@opEraBicCb^kSzX`@z`@`TnYlq@mFpmHfmAxoAzvBtu@ncBprAlf@[p}@ui@df@enAlOieAv_Ak~AhwA{Q~w@lI`x@~mA~Cj^gZ~vByTpk@g@rt@ag@djCtXtj@bp@`E");
 
+        function decodeBoundaryPath(encodedPath) {
+            let index = 0;
+            let latitude = 0;
+            let longitude = 0;
+            const coordinates = [];
+
+            function decodeNextValue() {
+                let result = 0;
+                let shift = 0;
+                let byte;
+
+                do {
+                    byte = encodedPath.charCodeAt(index++) - 63;
+                    result |= (byte & 0x1f) << shift;
+                    shift += 5;
+                } while (byte >= 0x20);
+
+                return (result & 1) ? ~(result >> 1) : (result >> 1);
+            }
+
+            while (index < encodedPath.length) {
+                latitude += decodeNextValue();
+                longitude += decodeNextValue();
+                coordinates.push([longitude / 1e5, latitude / 1e5]);
+            }
+
+            return coordinates;
+        }
+
+        function createRegionBoundary(spec) {
+            const coordinates = spec.type === 'Polygon'
+                ? spec.paths.map(decodeBoundaryPath)
+                : spec.paths.map(polygon => polygon.map(decodeBoundaryPath));
+
+            return {
+                type: 'Feature',
+                properties: {
+                    name: spec.name,
+                    colorKey: spec.color,
+                    boundaryDate: '2026-04-01'
+                },
+                geometry: {
+                    type: spec.type,
+                    coordinates
+                }
+            };
+        }
+
+        const currentRegionBoundarySpecs = [
+            {"name":"대전광역시","color":"yellow","type":"Polygon","paths":["g~n|Eu{sgWxj@mOz`@mi@fWw~@nu@_zALk`A|MtBf_@bv@~Vb@`IpJtg@eE~IjQA}Jpm@wQvf@{q@tk@mOvGoy@il@gCxYu]bM{b@nu@ak@fXnC~e@aN}B{]nUg`@pd@`Tv_AgIzAcTka@wa@qn@kSoEgUqa@~Be^}PaUwScLeg@s[sEeHgYsi@d\\y`@wQoJxEmsAuOsX|BaKlOyw@tIwg@aRuC}r@_MuGtV{iA`Ye`@lToCt}@dX`]_H`SqS|RrBfL|OnQIpOinAzw@}Wp_@mf@xZfOxc@eeA_F{PjLiH`D{`@ne@kY~^gy@qi@woA_QwC{QfSyQoc@uRmE}Nww@sTzJ}Yk@_Qiy@qUcEgR{`A}D{HoUCoCoPkh@b@aD`R{^pJiPkNc[bAmGrUwLKut@mRaSzC}e@oq@gT_IioBzx@`D{Yy_@me@ag@h\\gSc[cXbEqi@c`@}oApMmZkq@oOtGm\\qJ}Nce@g@_a@qcBua@ij@xHidAuAw|@_sAtA_w@tK}d@uNcRgq@j_@ic@nm@cc@jHaQuFeEfKfKps@mB`\\aWl_@xQb\\cLvVvvBhb@}K|DyQxg@u{ClrAyk@yQyp@o|@_\\cEiM~IdCdwAyR|o@szB}\\^x]t]j~@ng@dZjz@tClg@dbAkAn|@qe@lk@uBhR~@dj@zHmAb@pK}FAdGv}BcMlRsWbDiv@_@kd@{Pyk@uC}}AndBmHni@r{@n|@RrcAd]nFzo@kLtRaS~OP~n@zs@|p@gPvq@bb@pTls@rf@lLjLpOf^cDtw@jvAuIv_@nUxZy\\fg@{@`h@lRbOyCba@nSlPTtWvTr@jGxh@nlBfV`jBq@t^mLbe@hT|TJnYvh@bi@yGbb@cb@hWrMtB|PfYbPlFfPbl@gDdRnKvF`f@|_@}B~e@~PpaA}D`S}I`b@dEZ|k@hb@l_@"]},
+            {"name":"제주특별자치도","color":"orange","type":"MultiPolygon","paths":[["qcijEcm|`W~KqLsKgp@yMtOlMbm@"],["yeijEcm_aWlH_EqGoP[nV"],["{`njEgm_aW|TqCrGkNbp@tE`JuVbVmF`|@`X|z@_VxOv^nNrGl]{JzVtBfUum@xm@}Fjh@qt@db@{HpQmOf^{{@zHfB~f@ms@d_@klAiEak@he@{u@lFsZdg@uOpMq\\tmAkz@{CmQzYoQDsk@fY}FnAtNfc@rB`_@_t@aIam@wYcGbIgJcIud@jT}AlKcRuJsf@{e@~EyHxMcj@mHml@gWoKjKkf@il@{Hug@wYqR`FgRsYoBwF}IwTkbAvIaf@lQoIxI~OqKabAjIs`@cE_b@lFm`@zUu\\k@yPlKcHwPsk@jHqG{L_TtCwQw`@}r@yk@imBbPms@t_@i\\lZcv@gAkR}QcCo@e]o\\qy@TuWzO_]fj@yI`V}g@pXwPxDwb@aFaRmSrAoBs^cTs\\tBso@jJ_GqN}gAwj@_`A}U{FnOwpA_Pce@dOsPrD__@wVkPtn@}uAm]`GdDpTw\\uAnOkFdUid@hC~IiJ}]mTxS}QcSOmaBdDmQr`@wVzHmf@{ZaiAD{i@_QkKof@K~EiEsUqQvC{Sob@koAyl@eEmOaPyMmx@fJgVcDwWmb@lLDmT|NfBfIoMhPtQ_P_ZsDqa@|Vyf@_WaHbF_\\_Di~A_Rql@yPckB{KqB]gr@_OoGnZqa@uPox@_S_QyGzDcF_Wie@mp@iCqVcd@yJiOeb@ie@c_@o@iOd\\{`A{HsMhFqc@wF{XlNw]qHqVyMs@uGaRiCiWhJcB|BwVqRw`AedAu|@qCgX_a@gG_Obe@gRpAi`@ai@rGwEgQed@_x@y[eA{Lwn@{g@su@~K_Jy^_f@eBio@st@cXiEso@atCmm@rCyZpQaVa`@q\\e@{MiSe`@PyDoMsl@w[wNxL_UTiBwf@tWeJ~S`Pn\\_v@el@af@kd@xk@]b\\wRbHi\\_Ic@xR_L}Ac@{OwUz@yRsGc@mLiP}KaRr@kGgVz`@}g@yF}f@qL}FsUvUwDz[wR|LcPaAgUlOuc@}AlVnBDjk@|ZfAyFtUcQ}RyMUdf@ll@sAfEyHkKgMNwJ~m@`SBuk@nZrIrSkI~L{OpFk\\mKfI}MoG{TxHea@iIeJsR|EqBnVwQzDeN}MiZb@qFuIch@zK}Tlf@Cbq@uTu[aMnMuCeXePoIkEhW{XnChEva@eWp]cGtsB{GfKvCt]fKvLfQr@U~`@mDnHoT_GcBre@cRbIP|a@yI~OcShDFfLy[xe@_W|Sc\\q@oVhQqZ{AqPntAbY|b@kEhj@nP|IhA`Q_V|O_k@~uA|Ff]oDhy@fHpXd^dFlFdKrBtNiObm@~Kbv@~IpCnA{K~EfHii@|x@dWdnAtNnB~GdNtDvoBdK~MmHf\\`OhO~@zX{Q`OLzLpD~R`l@hLfCvXkHnErJ`MiRxSuCzW_WjAk[~xA|a@pV`GlQtT_H`Gv[pP`HnGoItVhG{Qdb@hG`}AdKdGBzc@rHdI}FbA{F~`@~]x}@fb@nRwLzy@vL~LlJwDdCxn@_SfTf_@~W|Klo@g@jJuPmJv@pe@eZ_DeRva@ze@t\\|b@pl@uEx_AbTvRy@t]mHbo@yQhW@t[xRjp@lTrLjOcD~KnVqBthArIdVva@jJaGvq@fPtN`FsLfSdR}G|a@nZbuA}Frq@fR`XxRxEuBdo@~D~KvU`ImCfTzLja@gAzUea@`Vt@fb@|]r^CnNhc@zy@mBbhAfHxTxThEpQzaAlSvNzFzT_M`y@~Hxc@}Ltj@pT|_@vd@kMnm@pYj`@dh@@nRpS`Y}SBg@pGpSvJsHfUfNnTeCxZjk@xY_JvBeA`Q|Itq@tPfIlq@oMt@vZlv@|FzBjZe@mb@ub@oJdg@oRrV|w@nTnSjSzHtV}CrBju@rb@DaA`[f_@dZeQ`SvPtNj@d]xSjCpc@lw@vJoKhR`F`Utm@bT`G~TlW}A~RbPf|@jY~j@xN~IhS{Erl@xKeIxO|Jpl@hTdOhXdBc@vOlN~M"],["sk|jEgukaWd^}Gv@iq@g_@yDgK`LkCjV|Nr["],["wfmnEumpaWlMaZ{NcSoQ`T|RbY"],["eqlnEgkraW_F_PoDlEnKpI"],["yimiEktsaWjPs\\l_@mNmf@}_AqVlE{a@vo@xDbQfi@tc@"],["i|mnEm}saWhIyLkFmH}AfV"],["ygciEs_taWz_@eL}@{VuY{Cul@|KpBtJzd@hP"],["urinEsgwaWjFgMyDgFuMtPbLxB"],["mdhnEcnwaW`Kgb@po@{|@mJw\\y_@hEaMnj@uK}JxHeMEaImF|A_Rvb@yJd}@vNdFvHoEqCaOzK}KdDtg@"],["g{enE_p{aWhPgOtEkd@hFhDdUs_@zdAs]Dso@{BsKgKlBgOnMBtPgb@nAmRoWcI_tA}TkDcSp_@}Ke_@eN~c@v^blA_Q|{@vMrYwGnb@|V~J"],["cw|mEqp{aWtD{S}H|LfC|E"],["qguiEwl|aWbYaGgFmS}JrE}EzT"],["kwcnEav|aW_DyV_EvN~I`G"],["glmnEuw~aWfSyRM}S{PfG}@n_@"],["o`_nE}z~aWlPwOpKhEfH_Ry_@uFmEbd@"],["gvqnEk~`bWxM}XvAwq@hOs\\aIqXqZvf@L`b@eLvTnOhb@"],["ys|mE}bcbWlJkIu[c@b@dGbOhB"],["khlnEwxcbWtGWhDgXgHmZyRbl@`NhG"],["izhnE__jbW`IyDgVgZkEtMpRjQ"],["efhnEcclbWdFuLsWiD_JdGl[xI"],["iunnE{qlbWlImE{AqKqF~Q"],["myviEspdcWfK{PkGsTcUxPfQtT"],["wqxiEshncWfJ_Z_IaJgHrY~FlJ"],["kgyiEmwtcWlKwF{Dec@oSbX|LxQ"],["}aykEetgdW|KmM_@cOy^xFzRvU"],["cpikEchreWkDaS{SpKfYnF"],["uqikE_yreW|J{El@_PkLzV"],["m{nkEqbxeW`o@_VtMjFzV{oAeHkT|Q_Te@eVwv@c]ynAv]eFeGjEq]}Pk@wMhc@pVvr@kKvDwYoZyh@jj@|@h[hOdW|SoAxB{HtUbFrV~^|h@rK"]]},
+            {"name":"진주시","color":"purple","type":"Polygon","paths":["c`}uEoaqkW`L}CdX}c@hmAdEhKcXhaAeaAhW{fA~aAcqB|SyKp[tRtPXrPuVpIq{@aR}i@aAs_@|BqOpQyFvCq_@aT{MyKif@`MqVLqy@lHyOjg@qc@xQ|BzFhVbRoSrn@aOtdBxJjY_ZtHg`@mC_t@oJwP_RlHgE{TiRwAwHmTpOeu@{A_j@iWc`@eRfGcVgOdS{_A}Cuw@lb@ie@xQ{cA`ZiZjc@aAf`@jKnViIab@wj@xFebAg|@}wAfA_`@gM{b@hNyrAzWug@ly@eW}@y^n]yV{A_RxQaU`a@j]n`@?|Und@sEtz@~Uz[lIkAdGeVhr@{Yo@me@vvAkz@sHmg@pSkb@qPaZioA_s@oo@uvAuKpF{DtxBaiA|R{v@}T|Gqf@{X{UcT~N}XqJgm@ibArFedBiRwHDmb@uWmk@{[{GcErIqA{]uHyFbJav@kI{N`Gm_@c\\kb@|@exBzc@ccA}HeYfIc_@qXei@Iuf@x_@ec@gAec@aSkZvEs{@aYkDuT}ZoBo[{ThDgT__@a^vTa`@gUe~@nDgz@wVif@xB{oAaVci@bUiTn[sa@tRqO~XrOvnC}h@zl@m\\bDqU|SHhcAmMzH}a@wKep@fYsB`ZwRp^sk@{\\m_@ha@lJjm@ob@`iAbGfMiFpnAbUjfA}@prA_Kv_@w]bVsW`j@bLvVaMfPtKfg@~y@n\\qPpi@c|@eEeHvY}l@rOaBjTeW|ZsNjIeX_Gyf@n`@qMz@g]eR_v@b[oh@{Ga_@c\\eO~AmtAjwAid@|AoMbXqh@z_@pRrx@n`@xj@dGr[t]|Uje@pwAaIds@oTzb@mHbfCbDza@|NlCzDpWyEndAr[|Ilq@fi@`MyJdc@{@fi@|i@vM|YqXhi@|ZlxBxXhMhJdk@dj@jV`Xfe@gAp{@t_@pKd[qL~SzDjRjMjCjz@``BnHdo@h\\``@|{ByTxK_Mra@iNtIyErb@jHvn@yQdUfeAzy@psA~CfTlKzGrVg]xk@dEfo@lcA~N"]},
+            {"name":"칠곡군","color":"blue","type":"Polygon","paths":["yaf{E}s~mWvrBibBfdA`MtGza@~c@|Vh^uEfu@we@pEob@{EuNdJga@`d@_JtYgc@lSfQjBvNzs@vDhiBsRxIoSr]}Hr]aaAnK}x@dc@U|LiTrVhMpx@em@gH}iApZm]h_@V|Ye^f@e^dSac@e@}kBlwBid@dq@aCrrDjaA{Fm[_]w^{d@sSkm@wH}sAmz@w^mAuHca@}^oGpBeOuUsW_Cya@aS}XmFweAok@iGdF{U|WaZ{Akj@hNij@`IoBh^Q~f@jRze@mC~z@fk@zl@yEb\\yk@mOyR|Q}c@_S}Un@qOvH}Lj]qJp_@mk@qSwPctA{BoUoKmW{Vyc@scAed@iWuFwVc^Tq^}Zc_@oEukAhNkm@sKiXbYynAxTgLgMeRxA|a@_sAv_Ae^jVce@uO^gM}Pc`@eDsJul@m]kp@lAmdAiI_n@mHmNaM}AgTsy@qSNqH_Tcq@af@kJ_TyYiG_a@aqC}g@bT{]hgAsVhZkeA_JowAkf@}hBxHsx@}NkYze@bNhJf@pp@xPjZlAzjAj^vr@dPfy@bSlMvYlt@u_Ajd@iuBi`@_e@nFuf@`Xyn@eGkJzIjN~PkEvp@~G~`@gTpVzKpTcMb]zDlr@sSfi@rXxfAw\\|dA}u@zOcErXfSoDve@lIha@ri@~_@fWhTaDbQlYzc@iH`eAnqAz\\sClXkZ~Qnd@i\\htAgV`SqNpkBkU`[yUvGj@jKtOjDbMpV}Bdn@cl@`M_HzNw@za@jJy@neBbbBnV}MhUl[tIhVkF~`@zYbb@dFtYcdArxA{r@`VwLjl@ox@na@mA~w@~c@paB{I`r@aTtYfS`Fzh@tk@"]},
+            {"name":"구미시","color":"green","type":"Polygon","paths":["sqj|Ew|`mWtj@wZvV\\_FqZhJy}@yByt@|Tym@bUeArY}YjJqiAyCsnAt\\e\\fRkmAzf@wYgFam@z`@qu@fImJ|e@rPhYgCtj@gZtEdSjYfIvCeFcBsy@pNSiKmlArTec@vMyu@pWdC|v@kNnXdQnYmArPqm@}DcZjHcz@nVmW~ZfSps@lJnF~RbPdG`PgF|Zfj@vy@waBzzBdtBn|@zMby@ijB`UiE`TuYxGgc@p@aPoc@i_BlA_x@nx@oa@vLkl@zr@aVbcAitAaEw]cZyb@`Dek@q]ch@oV|MoeBcbBkJx@vIwq@bl@aM|Ben@cMqVuOkDk@kKxUwGjUa[pNqkBfVaSb\\{tAyQ}c@mXjZ{\\rCaeAoqA{c@hHcQmYiT`D_`@gWia@si@we@mIgSnDbEsX|u@{Ov\\}dAsXyfArSgi@{Dmr@bMc]{KqTfTqV_H_a@jEwp@{JqPaV_G}ZnMiK~j@aWnMmRmAqPpZqm@wWqNrZij@c@yPkLiXxp@ai@vK}[_XbJwTaCea@}s@uDo[qRSfs@arA`}@}Lh@kk@j|AlCnm@jv@~Wx]b[~FfVcYfHgUsCc^pv@in@l@av@td@eb@gCiY~PuB~h@cf@yf@ySpCXlk@jUdXzJriAp`AfdCsYxReZcCuZbVuXbEiH`|@eVFo]jZo`@mKqj@f]{PgZer@yBq^g^}NyAqj@rpA_ZrOiBzg@aa@nq@gXrEwKv\\_XfQyYsJg\\zv@w_@m@o]tJaMng@op@tc@gd@bBm`@~hAej@lTzNd}@iAng@rb@hVzBz_@rk@bz@`]dLv@zb@aMnTka@n@oa@tQoZlr@fQbOk_@zsAk\\sFgb@fZmJ`\\xDbxAr[xYh_@cBtH~\\feBn}AnZhHt_@kKzV|GrLyDfyAjQ@jOcRzQ_AzY~Khd@ve@vc@bChn@iNh{@tSt\\{Eh_@hEzN{Nhg@lPfZdK|bAdl@tj@sD~RxWdf@z]xRhjAxQ"]},
+            {"name":"청양군","color":"red","type":"Polygon","paths":["uop}E_zcdWrgAkYdMyYdCqf@dKeD|z@b]~l@on@nR~O|_@cSfZtGra@{Dxd@ezAtXuSnWb@vO{_@h]tXrd@o\\jq@sz@_So}@fZsZbt@_ApIaXcPoPNqKrVn@zd@gYxRapAyWs}Bd_@wh@UkL}XcT{P@}X}a@wcAiSiNcL[yaAo[kT_Yci@~H}y@eQa|@dLqI|dA`n@uYnf@bCn[dc@aObi@?`Bo~@tOj@f\\~WjIkJoA_d@`x@}`@rR{b@hf@oD`e@l\\v]gUfQ{k@oP}bDic@kn@|XeEfJs\\wHkh@fIcKpNrGlMwG~a@qoAwZoeBqg@u_Amd@{_@}Oy|Aga@cy@{UsRoe@gHuiAzB_~@}S}iBa}CuxAuhAm{AtnAkh@eu@ix@ld@uZyKhEjl@kGdc@cKnCuU{Kcj@rCbBv_@{\\yJiArTmYtTePzwAiVls@sDjr@vHze@}NtUlRdZvUlhAvi@`_ArAzdAgEbRa`AjT}Qds@oPnQy]|J{Il^i`@VcRlL}MaGou@pEo]eJsa@rr@aRdKyo@ac@q^gCwLmTcl@r_@yi@yFof@a]{N}]ct@kAoTpkAie@vsAqL`KvE`rAcUt}@dHp^`GcLjWvEhQpZdo@tMdLvWb`@zSl[c@byAhe@yBjw@gL|V|G`b@pRnGoq@jzBPvMjN|LgLjn@pr@`Zho@sCj{AvqAfAth@nz@nPpR|Rja@kD|qA~r@ir@d{@gIthApStd@eAzn@pn@h{@nv@jqB"]},
+            {"name":"파주시","color":"blue","type":"Polygon","paths":["ct}eF{cadWna@yz@KmN|UcOruBlp@|rAdE`t@bQ~O_FfHkRpfBug@zxAoSd^pLv|AeTteAiq@l_AjJdrAdk@pcAy{Aop@ip@bDa`@aUyl@{YctBsDvCUg_A|Jap@}I}m@vHm[oCm]gQaF~Oml@c^L{gAmhAs^{t@{UeNuWbByGpKuLw[vJeOb^sBri@anAi`@ow@hJaRiJmb@|J{MyI{_@}PsJuLmi@Dwf@{KoLnMyMjDsd@lQ{Ox@_WvRcKCgn@xi@uIjDoTyi@{a@qRg`Aku@~F}Z{OiSg`@eLTyHwaCu`@iM}UtSm}@s_@mR|E_UyTyb@dQwj@s\\oJrd@bVp]e`@`o@aGv]pC|aAudAkIiXwf@gZnRid@}Gek@zl@wPUaMis@em@gIeNtEiOoKgBgfAbUeKgBsb@{L}Taa@jKuR}EmRiSa[sDo}@ah@oh@~K{cA{VyV~Kyr@{NaQhJeoA_q@sg@`_@aTai@rLaV}^kJqQaSkbAl@a`@efAa|@eQqd@wy@yi@{Ocf@a_@Ia~@}Pi]ys@eGwMwZc]fHc[`zAok@fv@l@rf@uHhVnGdmAnb@lp@h{@nx@`b@dgAbCt_@gYxvAosAjgDjeA`U|l@cD~t@qT`YhKxJrb@qHjw@wTbj@qcBrhBg@d\\dNhf@jXlVjdBpTtCrXbYjZrMhn@}V|RoPyDyXnVwEtLdI|KgRbd@_iBpd@yYaNqId[tqAnwA}Wzf@xAzMhIjIbK}TzKxN{h@n{@fTncAlm@pn@nHt[~i@bTcInHwFnl@hVls@mWbPzAx[uL~Nq[|BfDvf@n_@lJ~Pzw@nw@pYuDpd@v[x]uLld@hl@mKpVpQnSbApImPzj@xYn\\iI~c@nTdV]jXcYcG{eArQqRhHvXx]t[xs@mHnw@h_@pCvKzK_ZlV`KdBkRqQgD?iShRdEfJuS|Nzg@cDpTfUwRhZjOw@an@{UuSxa@qu@rgBvkAvb@z@lKdTeJn_@bOnd@qAhXjTbI"]},
+            {"name":"강릉시","color":"blue","type":"Polygon","paths":["co{eFkjxoWvvAyZx`@ucAbr@m^d`AnB~dAmH`c@`Qx\\uT|Rgh@{Yw]xB{}@cS{Rh@ePam@{TeMcT@oLf`@iZbc@akAhEqaAvSw[{e@ef@|Ai~@zPw\\oEeu@tYs|@rImEbH`Ihx@elAb`@wMlLqo@x_@}g@bAwTxx@{MreB}Gb\\ed@lSsIr{@aGzX}UbaA_NbSePtc@aHbNvCjMnbArPzIpBz]tp@d[fYtx@h[~FbPkGz`At]fn@{l@hsBeCf@jhAjVr`@tMpJt}@xGfNvWdOn@_Fbk@_Wpc@vFhTmChiA~aDl]t@n`A|c@q@dHs]fp@oOnZgnAz~@s_AdIi]oKuP{Fw{@wSmY|EwThMfDzDeFq@wa@wv@}~A~_@s|AaJkf@s@}vAb]s~@xd@we@bDo]nIqHf]mCvg@bk@ny@avAjQ_RnR|Ao|@gyBlFei@qRwo@yc@iGgW}Zy~@cG_v@u`@qy@yCkl@~NwUeTs`@sKqQhJkYeBiP_h@{~@o\\dGeXoZok@~AkMdUoM`Kqh@|N{J`m@{Btz@}f@~P|EfiAyGyAki@~\\aTtFkt@|u@_}@pEgf@yYqZTsz@g\\u[}Od@eAmItKgMnUrBvz@e`AfCap@sDgh@u^yXkV_m@`LmzApNaa@gLsVob@{ZcNe}@lNcr@{FoOuj@}IuWtHye@yBaOsKay@_@ilAmv@{V`IaNfT_O}BgAsb@eWsQmZex@ov@b}@k^hQeHtc@iZDjPi_AiSli@Wja@evAvp@wPHqv@k]uAgRt]`HieAeg@ye@`Ocn@aUyR`Im]vk@g_@pVsFt_@o_CjaD}d@bNorAhhB{a@`Vu_AbPjC|V_eClrDeXzY{LuHkLpNh@|KugB|dC{gB`pBuvCvzDk`@rTmMc@bF{Na`@hP}lCtgDm`@lD_I~\\aoArmA{OcUu[zF_g@cLmMzCoU~\\}G_FlFwH_PxHiGjf@w`AdwAba@pl@~Cpz@mQfbAl]tg@tBztAaPxs@nO|h@~`@vNfDdr@zTjYqRp_@vDvUgIz^d_@r]p@peAht@zsB]`i@vXrl@HzMe]vLiFr_@xDvdAoTzSqB`U`KrSh`@zSrb@p~@zi@tEbPfQxHbzBx\\|YzAt^rU~UpbAvS`X{Dhn@~Xt_AxD"]},
+            {"name":"원주시","color":"purple","type":"Polygon","paths":["crbbFa~tjWbsEa~@fkAyn@vi@ah@pd@yxA|h@sj@cJob@hIwg@uPyd@lC}p@we@}fAbFwx@cIyoA}c@sKeJ}LtCqJvVeA|Eo^gf@aFcPiu@tTsbBv[_r@df@k[gKaO_~Asg@iKoi@h]}w@wgAqx@oh@rCwe@gVed@pUsnAnBuiAvb@qN`UyVnJo|AqkBj@gj@ig@uNuS{dAdAoTij@c}@kI{f@dI{KmEy`@zXcp@qDm\\jQ{s@j\\ka@fOqd@|\\n@rl@uNl_@}\\jRwb@p^qHjBiR~PwPva@`d@bg@fTlWqJhd@Z|Zwe@_H{f@rH_a@c[y}@mAgvBkd@}w@`@uj@qd@guAmjAedAgS_a@wf@zUuk@u]t]ii@dAap@fc@wKdRcj@|ZcUnLihAa^_p@yc@`BqU{SaYhJu`BebDoMcHqFk^ez@u\\ax@bDeYmGwRka@kd@bAmUpNaDrg@kQrf@qf@zd@nXfa@fIpeA|HnEh_@we@dElBpd@htAjSh`CqV|oBhNhRQlg@w`@fIcKvXecA|Pqo@oFaJrYb@jgBqS~vAkTnVuCxTX|{Ae_A|kAusAlm@i`@oX}c@wIwT|Mgf@}Bi_Awt@_IsjCet@sYor@dGs^rSmUr@{d@}a@yYyk@iJy|@uIqTaEzAuYtQgLj_@kwAnu@gp@nbAsBj_@ge@bBeYlSrL`w@oB||@a^rpA|V~tAsH|E_Ejm@un@zO~AbeAkOd\\jJlZqHpi@|r@nlAg`@lr@nDp]ws@vf@wiA|ZsDjMwg@k@ib@za@cLk@yc@_a@cX{C_h@naAb`@~c@bVbIzBxPvYkEhc@`w@ps@|Jha@`Ytg@p`BqEl\\zKvt@vaAfHfYn_@|d@rNtZ?b[jOn]kJxg@pEvq@si@dhBtZLx|@z\\``@oa@~Pes@_PgMjLk|Brm@{Hv]{fArwAzF`q@|TlTtVvx@vf@kLh\\fy@|tB~h@nXD~ObYbs@lB|j@|g@b]rCbl@eKvIlp@sA`i@zP~UhSqIpWvJr`@kBru@pKpYoFxCmI|j@oDp[pF|d@yNdMjCfmAyf@zNfGfSeDhAle@rZtk@vQyInb@zOpe@kK~YvE`_CqUli@~[nV`]`XpFnuAxF|QgVfZsCzjAxj@"]},
+        ];
+
+        currentDaeguBoundary.properties.colorKey = 'red';
+        const currentRegionBoundaries = [
+            currentDaeguBoundary,
+            ...currentRegionBoundarySpecs.map(createRegionBoundary)
+        ];
+
         function updateChromeContrast() {
             const wrapper = document.getElementById('mobile-wrapper');
             if (!wrapper) return;
@@ -1211,6 +1314,37 @@
             // 지도에서는 지도 종류를, 목록/통계에서는 기기의 색상 모드를 기준으로 대비를 맞춘다.
             const useLightInk = activeTabIndex === 0 ? isSatellite : isDeviceDarkMode();
             wrapper.dataset.chromeInk = useLightInk ? 'light' : 'dark';
+        }
+
+        function syncBottomNavIndicator() {
+            const navButtons = document.querySelectorAll('#bottom-nav button');
+            const indicator = document.getElementById('nav-indicator');
+            const activeButton = navButtons[activeTabIndex];
+
+            if (!indicator || !activeButton) return;
+            indicator.style.width = `${activeButton.offsetWidth}px`;
+            indicator.style.transform = `translateX(${activeButton.offsetLeft - 4}px)`;
+        }
+
+        function setBottomNavCompact(compact) {
+            const bottomNav = document.getElementById('bottom-nav');
+            if (!bottomNav || bottomNav.classList.contains('is-compact') === compact) return;
+
+            bottomNav.classList.toggle('is-compact', compact);
+            requestAnimationFrame(syncBottomNavIndicator);
+            window.setTimeout(syncBottomNavIndicator, 320);
+        }
+
+        function syncBottomNavForActiveScreen() {
+            if (activeTabIndex === 0) {
+                setBottomNavCompact(false);
+                return;
+            }
+
+            const activeScreen = activeTabIndex === 1
+                ? document.getElementById('list-screen')
+                : document.getElementById('stats-screen');
+            setBottomNavCompact(Boolean(activeScreen && activeScreen.scrollTop > 28));
         }
 
         // 탭 전환 로직
@@ -1235,14 +1369,8 @@
                 }
             });
 
-            // 바텀 네비게이션 인디케이터 조정
+            // 바텀 네비게이션 선택 상태 조정
             const navButtons = document.querySelectorAll('#bottom-nav button');
-            const indicator = document.getElementById('nav-indicator');
-
-            if(navButtons[index] && indicator) {
-                indicator.style.width = `${navButtons[index].offsetWidth}px`;
-                indicator.style.transform = `translateX(${navButtons[index].offsetLeft - 4}px)`;
-            }
 
             navButtons.forEach((btn, i) => {
                 const isActive = i === index;
@@ -1266,6 +1394,9 @@
             } else if (index === 2) {
                 renderStats(); // 통계 탭을 누르면 통계 데이터 렌더링
             }
+
+            syncBottomNavForActiveScreen();
+            requestAnimationFrame(syncBottomNavIndicator);
         }
 
         // 지도 초기화
@@ -1303,74 +1434,25 @@
         function loadRegionBoundaries() {
             if (!map || typeof naver === 'undefined' || !naver.maps) return;
 
-            const provinceUrl = 'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_provinces_geo_simple.json';
-            const municipalityUrl = 'https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_municipalities_geo_simple.json';
-
-            // 2026년 최신 경계에서 추출한 대구광역시 전체 외곽선(군위군 포함)을 먼저 표시한다.
             map.data.addGeoJson({
                 type: 'FeatureCollection',
-                features: [currentDaeguBoundary]
+                features: currentRegionBoundaries
             });
 
-            Promise.all([
-                fetch(provinceUrl).then(response => {
-                    if (!response.ok) throw new Error(`시도 경계 요청 실패: ${response.status}`);
-                    return response.json();
-                }),
-                fetch(municipalityUrl).then(response => {
-                    if (!response.ok) throw new Error(`시군구 경계 요청 실패: ${response.status}`);
-                    return response.json();
-                })
-            ])
-                .then(([provinceGeojson, municipalityGeojson]) => {
-                    map.data.addGeoJson({
-                        ...provinceGeojson,
-                        features: provinceGeojson.features.filter(feature => feature.properties?.name !== '대구광역시')
-                    });
-                    map.data.addGeoJson({
-                        ...municipalityGeojson,
-                        features: municipalityGeojson.features.filter(feature => feature.properties?.name !== '군위군')
-                    });
+            map.data.setStyle(function(feature) {
+                const colorKey = feature.getProperty('colorKey');
+                const color = colorThemes[colorKey]?.markerBg;
 
-                    applyMapStyle();
-                })
-                .catch(e => console.warn('행정구역 경계 오류:', e));
-
-            applyMapStyle();
-
-            // 통합 스타일 적용 함수
-            function applyMapStyle() {
-                map.data.setStyle(function(feature) {
-                    const name = feature.getProperty('name') || '';
-                    let color = null;
-
-                    // 군위군은 대구광역시 경계에 합쳐 하나의 폴리곤으로 표시한다.
-                    if (name === '대구광역시') color = colorThemes.red.markerBg;
-                    else if (name === '대전광역시') color = colorThemes.yellow.markerBg;
-                    else if (name === '제주특별자치도') color = colorThemes.orange.markerBg;
-                    else if (name === '진주시') color = colorThemes.purple.markerBg;
-                    else if (name === '칠곡군') color = colorThemes.blue.markerBg;
-                    else if (name === '구미시') color = colorThemes.green.markerBg;
-                    else if (name === '청양군') color = colorThemes.red.markerBg;
-                    else if (name === '파주시') color = colorThemes.blue.markerBg;
-                    else if (name === '강릉시') color = colorThemes.blue.markerBg;
-                    else if (name === '원주시') color = colorThemes.purple.markerBg;
-
-                    if (color) {
-                        return {
-                            fillColor: color,
-                            fillOpacity: 0.15, // 반투명 색칠
-                            strokeColor: color,
-                            strokeWeight: 2,
-                            strokeOpacity: 0.7,
-                            clickable: false // 폴리곤 클릭 시 지도 클릭 이벤트 방해 방지
-                        };
-                    } else {
-                        // 여행하지 않은 다른 모든 지역의 폴리곤은 투명하게(숨김) 처리
-                        return { visible: false };
-                    }
-                });
-            }
+                if (!color) return { visible: false };
+                return {
+                    fillColor: color,
+                    fillOpacity: 0.15,
+                    strokeColor: color,
+                    strokeWeight: 2,
+                    strokeOpacity: 0.7,
+                    clickable: false
+                };
+            });
         }
 
         function getTripLogoMarkup(trip, imageClass = 'w-full h-full object-cover rounded-full') {
@@ -1722,6 +1804,22 @@
                     </section>
                 </div>
             `;
+        }
+
+        [document.getElementById('list-screen'), document.getElementById('stats-screen')]
+            .forEach(screen => {
+                if (!screen) return;
+                screen.addEventListener('scroll', () => {
+                    if (!screen.classList.contains('hidden')) {
+                        setBottomNavCompact(screen.scrollTop > 28);
+                    }
+                }, { passive: true });
+            });
+
+        window.addEventListener('resize', syncBottomNavIndicator);
+        const bottomNavGlass = document.querySelector('#bottom-nav .bottom-nav-glass');
+        if (bottomNavGlass) {
+            bottomNavGlass.addEventListener('transitionend', syncBottomNavIndicator);
         }
 
         // 초기 실행
