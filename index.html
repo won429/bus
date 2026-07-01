@@ -41,7 +41,7 @@
     <script>
         window.addEventListener('error', function(e) {
             if (e.message === 'Script error.' || (e.message && e.message.includes('Script error'))) {
-                console.warn('외부 스크립트(네이버 지도 API 등) 도메인 제한으로 인한 경고입니다. (정상 작동 중)');
+                console.warn('외부 스크립트(카카오 지도 API 등) 도메인 제한으로 인한 경고입니다. (정상 작동 중)');
                 e.preventDefault();
             }
         });
@@ -54,8 +54,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- 네이버 지도 API -->
-    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=9nl297jo77"></script>
+    <!-- 카카오 지도 API: YOUR_KAKAO_JAVASCRIPT_KEY를 카카오 JavaScript 키로 교체하세요. -->
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=0be88f46eb39dabeacc3414f5af0bb5f"></script>
 
     <style>
         :root {
@@ -866,13 +866,13 @@
                 <p class="text-sm break-keep leading-relaxed">
                     <span class="theme-accent-blue font-bold">지도 로딩 중...</span><br><br>
                     만약 지도가 계속 보이지 않는다면,<br>
-                    이곳(미리보기) 주소가 네이버 클라우드에<br>
+                    카카오 JavaScript 키 또는 현재 도메인이<br>
                     등록되지 않아 차단된 것입니다.<br>
-                    <strong class="text-white mt-2 block">깃허브에 올리면 정상적으로 나타납니다! ✨</strong>
+                    <strong class="text-white mt-2 block">키와 도메인 설정을 확인해 주세요. ✨</strong>
                 </p>
             </div>
 
-            <!-- 네이버 지도 컨테이너 -->
+            <!-- 카카오 지도 컨테이너 -->
             <div id="map" class="absolute inset-0 z-10 w-full h-full"></div>
             
             <!-- 상단 헤더 오버레이 (새로운 캡슐 디자인) -->
@@ -1011,6 +1011,7 @@
         // 전역 변수
         let map = null;
         let markers = [];
+        let regionPolygons = [];
         let activeMarkerIndex = -1;
         let isMarkerVisible = false; // 마커 표시 상태
         let isSatellite = false; // 위성 지도 상태
@@ -1379,7 +1380,7 @@
             }
 
             if (index === 0 && map) {
-                window.dispatchEvent(new Event('resize'));
+                requestAnimationFrame(() => map.relayout());
             }
             
             if (index === 1) {
@@ -1394,57 +1395,65 @@
 
         // 지도 초기화
         function initMap() {
-            if (typeof naver === 'undefined' || typeof naver.maps === 'undefined' || typeof naver.maps.LatLng === 'undefined') {
-                console.warn("네이버 지도 API를 불러올 수 없습니다. (미리보기 환경 등 도메인 미등록 상태)");
+            if (typeof kakao === 'undefined' || typeof kakao.maps === 'undefined' || typeof kakao.maps.LatLng === 'undefined') {
+                console.warn("카카오 지도 API를 불러올 수 없습니다. JavaScript 키와 등록 도메인을 확인해 주세요.");
                 return;
             }
 
-            const centerLocation = new naver.maps.LatLng(36.3504, 127.3845);
+            const centerLocation = new kakao.maps.LatLng(36.3504, 127.3845);
             
             const mapOptions = {
                 center: centerLocation,
-                zoom: 7,
-                scaleControl: false,
-                logoControl: true,
-                logoControlOptions: { position: naver.maps.Position.BOTTOM_LEFT },
-                mapDataControl: false,
-                zoomControl: false,
+                level: 13
             };
 
-            map = new naver.maps.Map('map', mapOptions);
+            map = new kakao.maps.Map(document.getElementById('map'), mapOptions);
             
-            naver.maps.Event.addListener(map, 'click', function() {
+            kakao.maps.event.addListener(map, 'click', function() {
                 closeBottomSheet();
             });
 
-            createMarkers();
-
             // --- 땅 모양(행정구역 경계선) 색칠 ---
             loadRegionBoundaries();
+            createMarkers();
         }
 
-        // --- 실제 행정구역 GeoJSON 데이터를 불러와서 그립니다 ---
+        // --- 행정구역 GeoJSON 좌표를 카카오 폴리곤으로 변환해 그립니다 ---
         function loadRegionBoundaries() {
-            if (!map || typeof naver === 'undefined' || !naver.maps) return;
+            if (!map || typeof kakao === 'undefined' || !kakao.maps) return;
 
-            map.data.addGeoJson({
-                type: 'FeatureCollection',
-                features: currentRegionBoundaries
-            });
+            regionPolygons.forEach(polygon => polygon.setMap(null));
+            regionPolygons = [];
 
-            map.data.setStyle(function(feature) {
-                const colorKey = feature.getProperty('colorKey');
-                const color = colorThemes[colorKey]?.markerBg;
+            currentRegionBoundaries.forEach(feature => {
+                const color = colorThemes[feature.properties.colorKey]?.markerBg;
+                if (!color) return;
 
-                if (!color) return { visible: false };
-                return {
-                    fillColor: color,
-                    fillOpacity: 0.15,
-                    strokeColor: color,
-                    strokeWeight: 2,
-                    strokeOpacity: 0.7,
-                    clickable: false
-                };
+                const polygons = feature.geometry.type === 'Polygon'
+                    ? [feature.geometry.coordinates]
+                    : feature.geometry.coordinates;
+
+                polygons.forEach(coordinates => {
+                    const paths = coordinates
+                        .filter(ring => new Set(ring.map(([lng, lat]) => `${lng},${lat}`)).size >= 3)
+                        .map(ring => ring.map(([lng, lat]) => new kakao.maps.LatLng(lat, lng)));
+
+                    if (!paths.length) return;
+
+                    const polygon = new kakao.maps.Polygon({
+                        map,
+                        path: paths.length === 1 ? paths[0] : paths,
+                        fillColor: color,
+                        fillOpacity: 0.15,
+                        strokeColor: color,
+                        strokeWeight: 2,
+                        strokeOpacity: 0.7,
+                        strokeStyle: 'solid',
+                        zIndex: 1
+                    });
+
+                    regionPolygons.push(polygon);
+                });
             });
         }
 
@@ -1458,10 +1467,10 @@
 
         // 마커 생성
         function createMarkers() {
-            if (!map || typeof naver === 'undefined' || !naver.maps) return;
+            if (!map || typeof kakao === 'undefined' || !kakao.maps) return;
 
             travelData.forEach((trip, index) => {
-                const position = new naver.maps.LatLng(trip.lat, trip.lng);
+                const position = new kakao.maps.LatLng(trip.lat, trip.lng);
                 const theme = colorThemes[trip.color] || colorThemes.blue;
 
                 const markerHtml = `
@@ -1474,21 +1483,25 @@
                     </div>
                 `;
 
-                const marker = new naver.maps.Marker({
+                const markerContainer = document.createElement('div');
+                markerContainer.innerHTML = markerHtml.trim();
+                const markerElement = markerContainer.firstElementChild;
+
+                const marker = new kakao.maps.CustomOverlay({
                     position: position,
                     map: map,
-                    icon: {
-                        content: markerHtml,
-                        size: new naver.maps.Size(40, 48),
-                        anchor: new naver.maps.Point(20, 48)
-                    },
+                    content: markerElement,
+                    xAnchor: 0.5,
+                    yAnchor: 1,
                     zIndex: 10,
-                    visible: isMarkerVisible
+                    clickable: true
                 });
+                marker.setVisible(isMarkerVisible);
 
                 markers.push(marker);
 
-                naver.maps.Event.addListener(marker, 'click', function(e) {
+                markerElement.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     if (navigator.vibrate) navigator.vibrate(5);
                     focusMarker(index);
                 });
@@ -1521,8 +1534,9 @@
                 marker.setZIndex(100);
             }
 
-            if (map && typeof map.morph === 'function' && marker) {
-                map.morph(marker.getPosition(), 10, { duration: 300 });
+            if (map && marker) {
+                map.setLevel(8);
+                map.panTo(marker.getPosition());
             }
 
             const theme = colorThemes[trip.color] || colorThemes.blue;
@@ -1563,7 +1577,7 @@
             
             markers.forEach(marker => {
                 if (marker) {
-                    marker.setVisible(isMarkerVisible); // 네이버 지도 API의 마커 숨김 기능
+                    marker.setVisible(isMarkerVisible);
                 }
             });
 
@@ -1592,8 +1606,8 @@
             }
 
             // 지도 타입 변경 (HYBRID: 위성 사진 + 도로/지명 표시)
-            if (map && typeof naver !== 'undefined' && naver.maps) {
-                map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.HYBRID : naver.maps.MapTypeId.NORMAL);
+            if (map && typeof kakao !== 'undefined' && kakao.maps) {
+                map.setMapTypeId(isSatellite ? kakao.maps.MapTypeId.HYBRID : kakao.maps.MapTypeId.ROADMAP);
             }
             updateChromeContrast();
         }
@@ -1601,8 +1615,9 @@
         function zoomToAll() {
             if (navigator.vibrate) navigator.vibrate(5);
             closeBottomSheet();
-            if (map && typeof map.morph === 'function' && typeof naver !== 'undefined' && naver.maps) {
-                map.morph(new naver.maps.LatLng(36.3504, 127.3845), 7, { duration: 400 });
+            if (map && typeof kakao !== 'undefined' && kakao.maps) {
+                map.setLevel(13);
+                map.setCenter(new kakao.maps.LatLng(36.3504, 127.3845));
             }
         }
 
